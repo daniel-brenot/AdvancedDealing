@@ -8,6 +8,7 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 ## Features
 
 ### Implemented
+
 * Cash delivery to selected dead drops or via transaction
 * More customers per dealer
 * Add item slots to your dealers
@@ -18,6 +19,7 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 
 
 ### Planned
+
 * Change dealer signing fee
 * Product pickup at dead drops
 * Customizable quality bonus
@@ -28,21 +30,24 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 
 # Bugs & Issues
 
-If you've found any bugs or issues using this mod, use the [Issues section](https://github.com/manzune/AdvancedDealing/issues) on the [GitHub repository](https://github.com/manzune/AdvancedDealing).
+If you're running into any bugs or issues using this mod, use the [Issues section](https://github.com/manzune/AdvancedDealing/issues) on the [GitHub repository](https://github.com/manzune/AdvancedDealing).
 
 # Set Up
 
 ### Installation
 1. Install [MelonLoader﻿](https://melonwiki.xyz) Version 0.7 or higher
 2. Download the latest release of this mod
-3. Unzip the archive and place the DLL file in the games Mods folder
+3. Unzip the archive and place the DLL files in the games **Mods** folder
 4. Launch the game and enjoy
 
-#### Which .dll file to choose?
+Game branch will be choosen automatically!
+
+#### Which .dll files are included?
+
  - For **Il2Cpp** (Default): ``AdvancedDealing.Il2Cpp.dll``
  - For **Mono** (Alternate): ``AdvancedDealing.Mono.dll``
 
 ### Configuration
 
-Config files for general settings will be generated after the first launch after mod installation and can be found inside the UserData folder.
+Config files for general settings will be generated after the first launch after installation and can be found inside the **UserData** folder.
 Savegame related settings can be applied ingame by using the messaging app on you phone.
