@@ -1,0 +1,25 @@
+﻿<Project>
+	<PropertyGroup>
+		<!-- Settings -->
+		<AutomateLocalDeployment>true</AutomateLocalDeployment>
+		<SendToRemote>false</SendToRemote>
+
+		<!-- Paths -->
+		<Il2CppAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies</Il2CppAssemblyPath>
+		<MonoAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono\Schedule I_Data\Managed</MonoAssemblyPath>
+		
+		<ModIl2CppAssemblyPath>D:\Dokumente\Modding\Mods\ASSEMBLIES\ScheduleI\Il2Cpp</ModIl2CppAssemblyPath>
+		<ModMonoAssemblyPath>D:\Dokumente\Modding\Mods\ASSEMBLIES\ScheduleI\Mono</ModMonoAssemblyPath>
+		
+		<MelonIl2CppAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I\MelonLoader\net6</MelonIl2CppAssemblyPath>
+		<MelonMonoAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono\MelonLoader\net35</MelonMonoAssemblyPath>
+
+		<NexusDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Nexus\Mods</NexusDeploymentPath>
+		<ThunderstoreDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Thunderstore\Mods</ThunderstoreDeploymentPath>
+		
+		<Il2CppGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I\Mods</Il2CppGamePath>
+		<MonoGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono\Mods</MonoGamePath>
+
+		<RemoteDeploymentPath>\\MH-SURFACEBOOK2\Users\marce\OneDrive\Dokumente\Modding</RemoteDeploymentPath>
+	</PropertyGroup>
+</Project>

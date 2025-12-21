@@ -1,0 +1,25 @@
+﻿<Project>
+	<PropertyGroup>
+		<!-- Settings -->
+		<AutomateLocalDeployment>false</AutomateLocalDeployment>
+		<SendToRemote>false</SendToRemote>
+
+		<!-- Paths -->
+		<Il2CppAssemblyPath></Il2CppAssemblyPath>
+		<MonoAssemblyPath></MonoAssemblyPath>
+
+		<ModIl2CppAssemblyPath></ModIl2CppAssemblyPath>
+		<ModMonoAssemblyPath></ModMonoAssemblyPath>
+
+		<MelonIl2CppAssemblyPath></MelonIl2CppAssemblyPath>
+		<MelonMonoAssemblyPath></MelonMonoAssemblyPath>
+
+		<NexusDeploymentPath></NexusDeploymentPath>
+		<ThunderstoreDeploymentPath></ThunderstoreDeploymentPath>
+
+		<Il2CppGamePath></Il2CppGamePath>
+		<MonoGamePath></MonoGamePath>
+
+		<RemoteDeploymentPath></RemoteDeploymentPath>
+	</PropertyGroup>
+</Project>
