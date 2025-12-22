@@ -20,10 +20,12 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Il2Cpp'">
+		<AssemblyName>AdvancedDealing_Il2Cpp</AssemblyName>
 		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Mono'">
+		<AssemblyName>AdvancedDealing_Mono</AssemblyName>
 		<TargetFramework>netstandard2.1</TargetFramework>
 	</PropertyGroup>
 
@@ -128,17 +130,17 @@
 	<!-- Automated local deployment -->
 	<Target Name="PostBuildIl2Cpp" AfterTargets="Build" Condition="'$(AutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'Il2Cpp'">
 		<Message Text="[Il2Cpp] Deploying to local Il2Cpp mods folder" Importance="high" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(NexusDeploymentPath)\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(Il2CppGamePath)\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(RemoteDeploymentPath)\AdvancedDealing.Il2Cpp.dll" Condition="'$(SendToRemote)' == 'true'" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(NexusDeploymentPath)\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(Il2CppGamePath)\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Il2Cpp.dll" Condition="'$(SendToRemote)' == 'true'" />
 	</Target>
 
 	<Target Name="PostBuildMono" AfterTargets="Build" Condition="'$(AutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'Mono'">
 		<Message Text="[Mono] Deploying to local Mono mods folder" Importance="high" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(NexusDeploymentPath)\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(MonoGamePath)\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(RemoteDeploymentPath)\AdvancedDealing.Mono.dll" Condition="'$(SendToRemote)' == 'true'" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(NexusDeploymentPath)\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(MonoGamePath)\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Mono.dll" Condition="'$(SendToRemote)' == 'true'" />
 	</Target>
 </Project>

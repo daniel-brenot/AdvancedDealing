@@ -27,9 +27,11 @@ namespace AdvancedDealing.Economy
 
         public DealerData DealerData { get; private set; }
 
-        public readonly Schedule Schedule;
+        public readonly ScheduleManager Schedule;
 
         public readonly ConversationManager Conversation;
+
+        public Dealer ManagedDealer => _dealer;
 
         // public ConversationManager Conversation { get; private set; }
 
@@ -58,7 +60,7 @@ namespace AdvancedDealing.Economy
                 SaveManager.Instance.SaveData.Dealers.Add(dealerData);
             }
 
-            Schedule schedule = new(dealer);
+            ScheduleManager schedule = new(dealer);
             schedule.AddAction(new NPCSignal_DeliverCash(dealer));
 
             ConversationManager conversation = new(dealer);
@@ -75,18 +77,6 @@ namespace AdvancedDealing.Economy
 
             DealerManager manager = GetManager(dealer);
             manager.DealerData = dealerData;
-        }
-
-        public static DealerData GetData(Dealer dealer)
-        {
-            if (!DealerExists(dealer))
-            {
-                return null;
-            }
-
-            DealerManager manager = GetManager(dealer);
-
-            return manager.DealerData;
         }
 
         public static DealerManager GetManager(Dealer dealer)
@@ -298,6 +288,11 @@ namespace AdvancedDealing.Economy
             }
         }
 
+        public void SendMessage(string text, bool notify = true, bool network = true)
+        {
+            SendMessage(_dealer, text, notify, network);
+        }
+
         public static void SendMessage(Dealer dealer, string text, bool notify = true, bool network = true)
         {
             Message msg = new(text, Message.ESenderType.Other);
@@ -320,8 +315,7 @@ namespace AdvancedDealing.Economy
 
         private static void OnDealerRecruited(Dealer dealer)
         {
-            if (!SaveManager.Instance.SavegameLoaded) return;
-
+            Utils.Logger.Debug("Recruited");
             AddDealer(dealer);
         }
     }

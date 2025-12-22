@@ -31,15 +31,13 @@ namespace AdvancedDealing.Persistence
 
         protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
 
+        public static bool IsActive => (Instance._isRunning && SaveManager.Instance.SavegameLoaded);
+
+        public static bool NoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance._isHost));
+
         public static SyncManager Instance { get; private set; }
 
-        public static bool IsActive =>
-            (Instance._isRunning && SaveManager.Instance.SavegameLoaded);
-
-        public static bool NoSyncOrActiveAndHost =>
-            (!IsActive || (IsActive && Instance._isHost));
-
-        private SyncManager()
+        public SyncManager()
         {
             if (Instance == null)
             {

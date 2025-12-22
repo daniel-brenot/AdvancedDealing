@@ -14,11 +14,11 @@
 		<MelonIl2CppAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I\MelonLoader\net6</MelonIl2CppAssemblyPath>
 		<MelonMonoAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono\MelonLoader\net35</MelonMonoAssemblyPath>
 
-		<NexusDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Nexus\Mods</NexusDeploymentPath>
-		<ThunderstoreDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Thunderstore\Mods</ThunderstoreDeploymentPath>
+		<NexusDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Nexus</NexusDeploymentPath>
+		<ThunderstoreDeploymentPath>D:\Dokumente\Modding\Mods\EXPORT\AdvancedDealing\Thunderstore</ThunderstoreDeploymentPath>
 		
-		<Il2CppGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I\Mods</Il2CppGamePath>
-		<MonoGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono\Mods</MonoGamePath>
+		<Il2CppGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I</Il2CppGamePath>
+		<MonoGamePath>C:\Program Files (x86)\Steam\steamapps\common\Schedule I Mono</MonoGamePath>
 
 		<RemoteDeploymentPath>\\MH-SURFACEBOOK2\Users\marce\OneDrive\Dokumente\Modding</RemoteDeploymentPath>
 	</PropertyGroup>

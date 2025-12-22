@@ -20,17 +20,17 @@ using ScheduleOne.UI.Phone.Messages;
 
 namespace AdvancedDealing.UI
 {
-    public static class DealerManagementAppModification
+    public class DealerManagementAppModification
     {
-        private static readonly List<GameObject> _deadDropEntries = [];
+        public static readonly List<GameObject> DeadDropEntries = [];
+
+        public static readonly List<GameObject> CustomerEntries = [];
 
         public static GameObject CustomersScrollView { get; private set; }
 
         public static GameObject DeadDropSelector { get; private set; }
 
         public static GameObject DeadDropSelectorButton { get; private set; }
-
-        public static bool CustomerEntriesCreated { get; private set; }
 
         public static void Create(DealerManagementApp app)
         {
@@ -49,7 +49,7 @@ namespace AdvancedDealing.UI
                 CreateDeadDropSelectorButton(app);
             }
 
-            if (!CustomerEntriesCreated)
+            if (CustomerEntries.Count == 0)
             {
                 CreateCustomerEntries(app);
             }
@@ -57,12 +57,12 @@ namespace AdvancedDealing.UI
 
         public static void Clear()
         {
-            _deadDropEntries.Clear();
+            DeadDropEntries.Clear();
+            CustomerEntries.Clear();
 
             CustomersScrollView = null;
             DeadDropSelector = null;
             DeadDropSelectorButton = null;
-            CustomerEntriesCreated = false;
 
             Utils.Logger.Debug("DealerManagementAppModification", "DealerManagementAppModification cleared");
         }
@@ -87,6 +87,7 @@ namespace AdvancedDealing.UI
                 if (i < currentCount)
                 {
                     entries[i] = currentEntries[i];
+                    CustomerEntries.Add(currentEntries[i].gameObject);
                 }
                 else
                 {
@@ -97,6 +98,7 @@ namespace AdvancedDealing.UI
                     newEntry.gameObject.SetActive(false);
 
                     entries[i] = newEntry;
+                    CustomerEntries.Add(newEntry.gameObject);
                 }
             }
 
@@ -172,31 +174,22 @@ namespace AdvancedDealing.UI
             Utils.Logger.Debug("DealerManagementAppModification", "Customers made scrollable");
         }
 
-        public static void ShowAssignButton(DealerManagementApp app)
+        public static void ShowAssignButton(DealerManagementApp app, DealerManager dealerManager)
         {
-            Dealer selectedDealer = app.SelectedDealer;
-            DealerData dealerData = DealerManager.GetData(selectedDealer);
-
-            if (selectedDealer == null || dealerData == null || selectedDealer.AssignedCustomers.Count >= dealerData.MaxCustomers) return;
+            if (dealerManager.ManagedDealer.AssignedCustomers.Count >= dealerManager.DealerData.MaxCustomers) return;
 
             GameObject assignCustomerButton = app.AssignCustomerButton.gameObject;
             assignCustomerButton.SetActive(true);
         }
 
-        public static void UpdateCustomerTitle(DealerManagementApp app)
+        public static void UpdateCustomerTitle(DealerManagementApp app, DealerManager dealerManager)
         {
             GameObject customerTitle = app.transform.Find("Container/Background/Content/CustomerTitle")?.gameObject;
-            Dealer selectedDealer = app.SelectedDealer;
 
-            if (customerTitle == null || selectedDealer == null) return;
-
-            DealerData dealerData = DealerManager.GetData(selectedDealer);
-
-            int maxCustomers = dealerData.MaxCustomers;
-            int customerCount = selectedDealer.AssignedCustomers.Count;
+            if (customerTitle == null) return;
 
             Text text = customerTitle.GetComponent<Text>();
-            text.text = $"Assigned Customers ({customerCount}/{maxCustomers})";
+            text.text = $"Assigned Customers ({dealerManager.ManagedDealer.AssignedCustomers.Count}/{dealerManager.DealerData.MaxCustomers})";
         }
 
         public static void CreateDeadDropSelector(DealerManagementApp app)
@@ -293,10 +286,10 @@ namespace AdvancedDealing.UI
                     deadDropSelector.SetActive(false);
                 }
 
-                _deadDropEntries.Add(deadDropEntry);
+                DeadDropEntries.Add(deadDropEntry);
             }
 
-            Object.Destroy(oldContent.gameObject);
+            UnityEngine.Object.Destroy(oldContent.gameObject);
 
             DeadDropSelector = deadDropSelector;
 
@@ -369,7 +362,7 @@ namespace AdvancedDealing.UI
 
             foreach (DeadDrop deadDrop in deadDrops)
             {
-                GameObject deadDropEntry = _deadDropEntries.Find(x =>
+                GameObject deadDropEntry = DeadDropEntries.Find(x =>
                 {
                     GameObject entryName = x.transform.Find("Name").gameObject;
                     Text entryNameText = entryName.GetComponent<Text>();

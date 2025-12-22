@@ -2,11 +2,7 @@
 {
     public static class ModInfo
     {
-#if IL2CPP
-        public const string NAME = "AdvancedDealing.Il2Cpp";
-#elif MONO
-        public const string NAME = "AdvancedDealing.Mono";
-#endif
+        public const string NAME = "AdvancedDealing";
 
         public const string VERSION = "1.0.0";
 

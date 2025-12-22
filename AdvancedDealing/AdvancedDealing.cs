@@ -1,7 +1,8 @@
 ﻿using AdvancedDealing;
+using AdvancedDealing.Persistence;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), ModInfo.NAME, ModInfo.VERSION, ModInfo.AUTHOR, ModInfo.DOWNLOAD_LINK)]
+[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.NAME}", ModInfo.VERSION, ModInfo.AUTHOR, ModInfo.DOWNLOAD_LINK)]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: MelonColor(255, 170, 0, 255)]
 #if IL2CPP
@@ -16,31 +17,48 @@ namespace AdvancedDealing
     {
         private bool _isInitialized;
 
-        public readonly Persistence.SaveManager loader = new();
+        public SaveManager SaveManager { get; private set; }
+
+        public SyncManager SyncManager { get; private set; }
 
         public override void OnInitializeMelon()
         {
-            ModConfig.Create();
+            ModConfig.Initialize();
 
             Utils.Logger.Msg($"{ModInfo.NAME} {ModInfo.VERSION} initialized");
         }
 
-        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+        public override void OnEarlyInitializeMelon()
         {
-            if (_isInitialized || sceneName != "Menu") return;
-
-            _isInitialized = true;
+#if IL2CPP
+            if (!MelonUtils.IsGameIl2Cpp())
+#elif MONO
+            if (MelonUtils.IsGameIl2Cpp())
+#endif
+            {
+                Unregister("Prevent initializing mod for wrong domain version", false);
+            }
         }
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
             if (sceneName == "Main")
             {
-                loader.LoadSavegame();
+                SaveManager.LoadSavegame();
             }
-            else if (sceneName == "Menu" && loader.SavegameLoaded)
+            else if (sceneName == "Menu")
             {
-                loader.ClearSavegame();
+                if (!_isInitialized)
+                {
+                    SaveManager = new();
+                    SyncManager = new();
+                    _isInitialized = true;
+                }
+
+                if (SaveManager.SavegameLoaded)
+                {
+                    SaveManager.ClearSavegame();
+                }
             }
         }
     }

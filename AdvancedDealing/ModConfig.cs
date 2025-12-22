@@ -34,7 +34,7 @@ namespace AdvancedDealing
             set => _category.GetEntry<bool>("SkipMovement").Value = value;
         }
 
-        public static void Create()
+        public static void Initialize()
         {
             if (_isCreated) return;
 

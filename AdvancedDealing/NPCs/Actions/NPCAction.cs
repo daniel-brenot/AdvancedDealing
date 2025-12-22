@@ -23,11 +23,11 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected NPC npc;
 
-        protected Schedule schedule;
+        protected ScheduleManager s1Schedule;
 
-        protected NPCScheduleManager scheduleManager;
+        protected NPCScheduleManager schedule;
 
-        public Action onEnded;
+        public NPCAction onEnded;
 
         protected int consecutivePathingFailures;
 
@@ -56,11 +56,11 @@ namespace AdvancedDealing.NPCs.Actions
         {
         }
 
-        public virtual void SetReferences(NPC npc, Schedule schedule, NPCScheduleManager scheduleManager, int StartTime = 0)
+        public virtual void SetReferences(NPC npc, ScheduleManager schedule, NPCScheduleManager originalSchedule, int StartTime = 0)
         {
             this.npc = npc;
-            this.schedule = schedule;
-            this.scheduleManager = scheduleManager;
+            this.s1Schedule = schedule;
+            this.schedule = originalSchedule;
 
             if (StartTime != 0)
             {
@@ -70,32 +70,32 @@ namespace AdvancedDealing.NPCs.Actions
 
         public virtual void Start()
         {
-            scheduleManager.DisableSchedule();
+            schedule.DisableSchedule();
 
-            NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(MinPassed);
-            NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(MinPassed);
+            NetworkSingleton<TimeManager>.Instance.onMinutePass -= new NPCAction(MinPassed);
+            NetworkSingleton<TimeManager>.Instance.onMinutePass += new NPCAction(MinPassed);
 
             Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {npc.name} started.");
 
             IsActive = true;
-            schedule.ActiveAction = this;
+            s1Schedule.ActiveAction = this;
             HasStarted = true;
         }
 
         public void Destroy()
         {
-            if (schedule.PendingActions.Contains(this))
+            if (s1Schedule.PendingActions.Contains(this))
             {
-                schedule.PendingActions.Remove(this);
+                s1Schedule.PendingActions.Remove(this);
             }
 
             if (HasStarted)
             {
                 IsActive = false;
 
-                if (schedule.ActiveAction == this)
+                if (s1Schedule.ActiveAction == this)
                 {
-                    schedule.ActiveAction = null;
+                    s1Schedule.ActiveAction = null;
                 }
 
                 HasStarted = false;
@@ -103,18 +103,18 @@ namespace AdvancedDealing.NPCs.Actions
 
             if (NetworkSingleton<TimeManager>.InstanceExists)
             {
-                NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(MinPassed);
+                NetworkSingleton<TimeManager>.Instance.onMinutePass -= new NPCAction(MinPassed);
             }
         }
 
         public virtual void End()
         {
-            scheduleManager.EnableSchedule();
+            schedule.EnableSchedule();
 
             Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {npc.name} ended.");
 
             IsActive = false;
-            schedule.ActiveAction = null;
+            s1Schedule.ActiveAction = null;
             HasStarted = false;
 
             onEnded?.Invoke();
@@ -122,31 +122,31 @@ namespace AdvancedDealing.NPCs.Actions
 
         public virtual void Interrupt()
         {
-            scheduleManager.EnableSchedule();
+            schedule.EnableSchedule();
 
             Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {npc.name} interrupted.");
 
             IsActive = false;
-            schedule.ActiveAction = null;
+            s1Schedule.ActiveAction = null;
 
-            if (!schedule.PendingActions.Contains(this))
+            if (!s1Schedule.PendingActions.Contains(this))
             {
-                schedule.PendingActions.Add(this);
+                s1Schedule.PendingActions.Add(this);
             }
         }
 
         public virtual void Resume()
         {
-            scheduleManager.DisableSchedule();
+            schedule.DisableSchedule();
 
             Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {npc.name} resumed.");
 
             IsActive = true;
-            schedule.ActiveAction = this;
+            s1Schedule.ActiveAction = this;
 
-            if (schedule.PendingActions.Contains(this))
+            if (s1Schedule.PendingActions.Contains(this))
             {
-                schedule.PendingActions.Remove(this);
+                s1Schedule.PendingActions.Remove(this);
             }
         }
 

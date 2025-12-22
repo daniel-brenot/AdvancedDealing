@@ -1,7 +1,6 @@
-﻿using System;
+﻿using AdvancedDealing.Messaging.Messages;
+using System;
 using System.Collections.Generic;
-using AdvancedDealing.Economy;
-using AdvancedDealing.Persistence.Datas;
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
@@ -17,101 +16,70 @@ namespace AdvancedDealing.Messaging
     {
         private static readonly List<ConversationManager> _cache = [];
 
+        private readonly List<MessageBase> _messageList = [];
+
+        private readonly List<MessageBase> _sendableMessages = [];
+
         public readonly NPC npc;
 
-        private MSGConversation Conversation =>
-            npc.MSGConversation;
-
-        public bool SendableMessagesCreated { get; private set; }
+        private readonly MSGConversation _conversation;
 
         public ConversationManager(NPC npc)
         {
             this.npc = npc;
+            _conversation = npc.MSGConversation;
 
-            Utils.Logger.Debug("ConversationManager", $"Conversation for {npc.name} created");
+            Utils.Logger.Debug("ConversationManager", $"Conversation created: {npc.GUID}");
 
             _cache.Add(this);
         }
 
         public void CreateSendableMessages()
         {
-            if (SendableMessagesCreated) return;
-
-            SendableMessage deliverCashMsg = Conversation.CreateSendableMessage("Deliver cash");
+            foreach (MessageBase msg in _messageList)
+            {
+                if (!_sendableMessages.Contains(msg))
+                {
+                    SendableMessage sMsg = _conversation.CreateSendableMessage(msg.Text);
 #if IL2CPP
-            deliverCashMsg.ShouldShowCheck = (SendableMessage.BoolCheck)ShouldShowDeliverCash;
+                    sMsg.ShouldShowCheck = (SendableMessage.BoolCheck)msg.ShouldShowCheck;
 #elif MONO
-            deliverCashMsg.ShouldShowCheck = ShouldShowDeliverCash;
+                    sMsg.ShouldShowCheck = msg.ShouldShowCheck;
 #endif
-            deliverCashMsg.disableDefaultSendBehaviour = true;
-            deliverCashMsg.onSelected = new Action(OnDeliverCashSelected);
-
-            SendableMessage stopCashDeliveryMsg = Conversation.CreateSendableMessage("Stop cash delivery");
-#if IL2CPP
-            stopCashDeliveryMsg.ShouldShowCheck = (SendableMessage.BoolCheck)ShouldShowDeliverCash;
-#elif MONO
-            stopCashDeliveryMsg.ShouldShowCheck = ShouldShowDeliverCash;
-#endif
-            stopCashDeliveryMsg.disableDefaultSendBehaviour = true;
-            stopCashDeliveryMsg.onSelected = new Action(OnStopCashDeliverySelected);
+                    sMsg.disableDefaultSendBehaviour = msg.DisableDefaultSendBehaviour;
+                    sMsg.onSelected = new Action(msg.OnSelected);
+                    sMsg.onSent = new Action(msg.OnSent);
+                }
+            }
 
             npc.ConversationCanBeHidden = false;
 
-            Conversation.EnsureUIExists();
-            Conversation.SetEntryVisibility(true);
-
-            SendableMessagesCreated = true;
+            _conversation.EnsureUIExists();
+            _conversation.SetEntryVisibility(true);
         }
 
-        private bool ShouldShowDeliverCash(SendableMessage msg)
+        public void AddMessage(MessageBase message)
         {
-            DealerManager dealerManager = DealerManager.GetManager(npc.GUID.ToString());
-            bool check = dealerManager.DealerData.DeliverCash;
-            if (msg.Text == "Deliver cash")
-            {
-                return !check;
-            }
-            else if (msg.Text == "Stop cash delivery")
-            {
-                return check;
-            }
-            return false;
+            Type type = message.GetType();
+
+            if (_messageList.Exists(a => a.GetType() == type)) return;
+
+            message.SetReferences(npc, this, _conversation);
+            _messageList.Add(message);
         }
 
-        private void OnDeliverCashSelected()
+        public static ConversationManager GetManager(string npcGuid)
         {
-            DealerManager dealerManager = DealerManager.GetManager(npc.GUID.ToString());
-            dealerManager.DealerData.DeliverCash = true;
-
-            float threshold = 1500f;
-            Message msg = new($"I will deliver cash if i got ${threshold} in my pockets.", Message.ESenderType.Other);
-            Conversation.SendMessage(msg, false, true);
-        }
-
-        private void OnStopCashDeliverySelected()
-        {
-            DealerManager dealerManager = DealerManager.GetManager(npc.GUID.ToString());
-            dealerManager.DealerData.DeliverCash = false;
-
-            Message msg = new($"I will not deliver cash anymore.", Message.ESenderType.Other);
-            Conversation.SendMessage(msg, false, true);
-        }
-
-        public static ConversationManager GetConversation(string nPCName)
-        {
-            ConversationManager manager = _cache.Find(x => x.npc.name.Contains(nPCName));
+            ConversationManager manager = _cache.Find(x => x.npc.GUID.ToString().Contains(npcGuid));
 
             if (manager == null)
             {
-                Utils.Logger.Debug("ConversationManager", $"Could not find conversation for: {nPCName}");
+                Utils.Logger.Debug("ConversationManager", $"Could not find conversation for: {npcGuid}");
                 return null;
             }
 
             return manager;
         }
-
-        public static List<ConversationManager> GetAllConversations() =>
-            _cache;
 
         public static void ClearAll()
         {
@@ -120,9 +88,9 @@ namespace AdvancedDealing.Messaging
             Utils.Logger.Debug("ConversationManager", "Conversations deinitialized");
         }
 
-        public static bool ConversationExists(string nPCName)
+        public static bool ScheduleExists(string npcName)
         {
-            ConversationManager instance = _cache.Find(x => x.npc.name.Contains(nPCName));
+            ConversationManager instance = _cache.Find(x => x.npc.name.Contains(npcName));
 
             return instance != null;
         }
