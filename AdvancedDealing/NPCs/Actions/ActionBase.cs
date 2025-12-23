@@ -15,7 +15,7 @@ namespace AdvancedDealing.NPCs.Actions
 {
     public abstract class ActionBase
     {
-        public const int k_MaxConsecutivePathingFailures = 5;
+        public const int MaxConsecutivePathingFailures = 5;
 
         public int Priority;
 
@@ -154,7 +154,7 @@ namespace AdvancedDealing.NPCs.Actions
 
         public void SetDestination(Vector3 pos, bool teleportIfFail = true)
         {
-            if (teleportIfFail && ConsecutivePathingFailures >= k_MaxConsecutivePathingFailures && !Movement.CanGetTo(pos))
+            if (teleportIfFail && ConsecutivePathingFailures >= MaxConsecutivePathingFailures && !Movement.CanGetTo(pos))
             {
                 Utils.Logger.Debug("ScheduleManager", $"Too many pathing failures for {NPC.name}. Warping to {pos}.");
 

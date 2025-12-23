@@ -12,23 +12,23 @@ namespace AdvancedDealing.Economy
 {
     public class DeadDropManager
     {
-        private readonly DeadDrop m_deadDrop;
+        private readonly DeadDrop _deadDrop;
 
-        private static readonly List<DeadDropManager> s_cache = [];
+        private static readonly List<DeadDropManager> cache = [];
 
         public DeadDropManager(DeadDrop deadDrop)
         {
-            m_deadDrop = deadDrop;
+            _deadDrop = deadDrop;
         }
 
         public static DeadDropManager GetManager(DeadDrop deadDrop)
         {
-            return s_cache.Find(x => x.m_deadDrop == deadDrop);
+            return cache.Find(x => x._deadDrop == deadDrop);
         }
 
         public static DeadDropManager GetManager(string deadDropGuid)
         {
-            return s_cache.Find(x => x.m_deadDrop.GUID.ToString().Contains(deadDropGuid));
+            return cache.Find(x => x._deadDrop.GUID.ToString().Contains(deadDropGuid));
         }
 
         public static void AddDeadDrop(DeadDrop deadDrop)
@@ -36,14 +36,14 @@ namespace AdvancedDealing.Economy
             if (DeadDropExists(deadDrop)) return;
 
             DeadDropManager manager = new(deadDrop);
-            s_cache.Add(manager);
+            cache.Add(manager);
 
             Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.GUID}");
         }
 
         public static DeadDrop GetDeadDrop(string deadDropGuid)
         {
-            DeadDropManager manager = s_cache.Find(x => x.m_deadDrop.GUID.ToString().Contains(deadDropGuid));
+            DeadDropManager manager = cache.Find(x => x._deadDrop.GUID.ToString().Contains(deadDropGuid));
             if (manager == null)
             {
                 Utils.Logger.Debug("DeadDropManager", $"Could not find dead drop: {deadDropGuid}");
@@ -51,15 +51,15 @@ namespace AdvancedDealing.Economy
                 return null;
             }
 
-            return manager.m_deadDrop;
+            return manager._deadDrop;
         }
 
         public static List<DeadDrop> GetAllDeadDrops()
         {
             List<DeadDrop> deadDrops = [];
-            foreach (DeadDropManager manager in s_cache)
+            foreach (DeadDropManager manager in cache)
             {
-                deadDrops.Add(manager.m_deadDrop);
+                deadDrops.Add(manager._deadDrop);
             }
 
             return deadDrops;
@@ -67,7 +67,7 @@ namespace AdvancedDealing.Economy
 
         public static bool DeadDropExists(DeadDrop deadDrop)
         {
-            return s_cache.Any(x => x.m_deadDrop == deadDrop);
+            return cache.Any(x => x._deadDrop == deadDrop);
         }
 
         public static List<DeadDrop> GetAllByDistance(Transform origin)
@@ -90,7 +90,7 @@ namespace AdvancedDealing.Economy
 
         public static void Load()
         {
-            s_cache.Clear();
+            cache.Clear();
 
             foreach (DeadDrop deadDrop in DeadDrop.DeadDrops)
             {

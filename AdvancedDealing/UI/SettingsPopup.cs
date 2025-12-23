@@ -22,11 +22,11 @@ namespace AdvancedDealing.UI
 {
     public class SettingsPopup
     {
-        private DealerManager m_dealerManager;
+        private DealerManager _dealerManager;
 
-        private readonly List<GameObject> m_inputFields = [];
+        private readonly List<GameObject> _inputFields = [];
 
-        private GameObject m_inputFieldTemplate;
+        private GameObject _inputFieldTemplate;
 
         public GameObject Container;
 
@@ -59,12 +59,12 @@ namespace AdvancedDealing.UI
             CreateUI();
 
             IsOpen = true;
-            m_dealerManager = dealerManager;
+            _dealerManager = dealerManager;
 
             Container.SetActive(true);
-            TitleLabel.text = $"Adjust Settings ({m_dealerManager.ManagedDealer.name})";
+            TitleLabel.text = $"Adjust Settings ({_dealerManager.ManagedDealer.name})";
 
-            foreach (GameObject field in m_inputFields)
+            foreach (GameObject field in _inputFields)
             {
                 field.GetComponent<InputField>().text = GetDataValue(field.name);
             }
@@ -82,7 +82,7 @@ namespace AdvancedDealing.UI
 
             bool updated = false;
 
-            foreach (GameObject field in m_inputFields)
+            foreach (GameObject field in _inputFields)
             {
                 InputField input = field.GetComponent<InputField>();
                 string oldValue = GetDataValue(field.name);
@@ -92,11 +92,11 @@ namespace AdvancedDealing.UI
                 {
                     if (input.contentType == InputField.ContentType.IntegerNumber)
                     {
-                        typeof(DealerData).GetField(field.name).SetValue(m_dealerManager.DealerData, int.Parse(value));
+                        typeof(DealerData).GetField(field.name).SetValue(_dealerManager.DealerData, int.Parse(value));
                     }
                     else if (input.contentType == InputField.ContentType.DecimalNumber)
                     {
-                        typeof(DealerData).GetField(field.name).SetValue(m_dealerManager.DealerData, float.Parse(value));
+                        typeof(DealerData).GetField(field.name).SetValue(_dealerManager.DealerData, float.Parse(value));
                     }
 
                     updated = true;
@@ -105,9 +105,9 @@ namespace AdvancedDealing.UI
 
             if (updated)
             {
-                DealerManager.Update(m_dealerManager.ManagedDealer, true);
-                m_dealerManager.SendPlayerMessage("Maaaan.. please change your behavior!");
-                m_dealerManager.SendMessage($"Hmkay .. i'm sorry", false, true, 5f);
+                DealerManager.Update(_dealerManager.ManagedDealer, true);
+                DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, "Maaaan.. please change your behavior!");
+                DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Hmkay .. i'm sorry", false, true, 2f);
             }
 
             Close();
@@ -163,14 +163,14 @@ namespace AdvancedDealing.UI
             CreateInputField(InputField.ContentType.DecimalNumber, "Cut", "Cut %", 0, 1);
             CreateInputField(InputField.ContentType.DecimalNumber, "SpeedMultiplier", "Speed Multiplier", 0, 0);
 
-            Utils.Logger.Debug("Settings popup UI created");
+            Utils.Logger.Debug("SettingsPopup", "Settings popup UI created");
 
             UICreated = true;
         }
 
         public void CreateInputField(InputField.ContentType type, string key, string description, float rangeMin = 0, float rangeMax = 0)
         {
-            if (m_inputFieldTemplate == null)
+            if (_inputFieldTemplate == null)
             {
                 GameObject template = Object.Instantiate(PlayerSingleton<MessagesApp>.Instance.CounterofferInterface.transform.Find("Shade/Content/Selection/SearchInput").gameObject);
                 template.SetActive(false);
@@ -205,19 +205,17 @@ namespace AdvancedDealing.UI
                 text.color = Color.black;
                 text.fontSize = 20;
 
-                m_inputFieldTemplate = template;
+                _inputFieldTemplate = template;
             }
 
-            Utils.Logger.Debug("Create input field");
-
-            GameObject field = Object.Instantiate(m_inputFieldTemplate, Content);
+            GameObject field = Object.Instantiate(_inputFieldTemplate, Content);
             field.SetActive(true);
             field.name = key;
             
             float offset = 0f;
-            if (m_inputFields.Count > 0)
+            if (_inputFields.Count > 0)
             {
-                offset = 80f * m_inputFields.Count;
+                offset = 80f * _inputFields.Count;
             }
             
             RectTransform transform2 = field.GetComponent<RectTransform>();
@@ -245,17 +243,19 @@ namespace AdvancedDealing.UI
                 }
             }
 
-            m_inputFields.Add(field);
+            Utils.Logger.Debug("SettingsPopup", $"Input field created: {key}");
+
+            _inputFields.Add(field);
         }
 
         private string GetDataValue(string key)
         {
-            if (m_dealerManager == null)
+            if (_dealerManager == null)
             {
                 return null;
             }
 
-            return typeof(DealerData).GetField(key).GetValue(m_dealerManager.DealerData).ToString();
+            return typeof(DealerData).GetField(key).GetValue(_dealerManager.DealerData).ToString();
         }
     }
 }

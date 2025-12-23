@@ -10,7 +10,7 @@ namespace AdvancedDealing.Messaging.Messages
 {
     public class DisableDeliverCash(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager m_dealerManager = dealerManager;
+        private readonly DealerManager _dealerManager = dealerManager;
 
         public override string Text => "Stop delivering cash";
 
@@ -18,8 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            DealerManager dealerManager = DealerManager.GetManager(NPC.GUID.ToString());
-            if (dealerManager.DealerData.DeliverCash)
+            if (_dealerManager.ManagedDealer.IsRecruited && _dealerManager.DealerData.DeliverCash)
             {
                 return true;
             }
@@ -28,9 +27,9 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            m_dealerManager.DealerData.DeliverCash = false;
-            m_dealerManager.SendPlayerMessage("The dead drops are not safe atm... I will meet you to take the cash!");
-            m_dealerManager.SendMessage($"Okay", false, true, 3f);
+            _dealerManager.DealerData.DeliverCash = false;
+            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, "The dead drops are not safe atm... I will meet you to take the cash!");
+            DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Okay", false, true, 2f);
         }
     }
 }

@@ -6,60 +6,60 @@ namespace AdvancedDealing
 {
     public static class ModConfig
     {
-        private static MelonPreferences_Category s_category;
+        private static MelonPreferences_Category category;
 
-        private static bool s_isCreated;
+        private static bool isCreated;
 
         public static bool Debug
         {
-            get => s_category.GetEntry<bool>("Debug").Value;
-            set => s_category.GetEntry<bool>("Debug").Value = value;
+            get => category.GetEntry<bool>("Debug").Value;
+            set => category.GetEntry<bool>("Debug").Value = value;
         }
 
         public static bool RealisticMode
         {
-            get => s_category.GetEntry<bool>("RealisticMode").Value;
-            set => s_category.GetEntry<bool>("RealisticMode").Value = value;
+            get => category.GetEntry<bool>("RealisticMode").Value;
+            set => category.GetEntry<bool>("RealisticMode").Value = value;
         }
 
         public static bool SettingsPerDealer
         {
-            get => s_category.GetEntry<bool>("SettingsPerDealer").Value;
-            set => s_category.GetEntry<bool>("SettingsPerDealer").Value = value;
+            get => category.GetEntry<bool>("SettingsPerDealer").Value;
+            set => category.GetEntry<bool>("SettingsPerDealer").Value = value;
         }
 
         public static bool SkipMovement
         {
-            get => s_category.GetEntry<bool>("SkipMovement").Value;
-            set => s_category.GetEntry<bool>("SkipMovement").Value = value;
+            get => category.GetEntry<bool>("SkipMovement").Value;
+            set => category.GetEntry<bool>("SkipMovement").Value = value;
         }
 
         public static void Initialize()
         {
-            if (s_isCreated) return;
+            if (isCreated) return;
 
-            s_category = MelonPreferences.CreateCategory($"{ModInfo.k_Name}_01_General", $"{ModInfo.k_Name} - General Settings", false, true);
-            string path = Path.Combine(MelonEnvironment.UserDataDirectory, $"{ModInfo.k_Name}.cfg");
+            category = MelonPreferences.CreateCategory($"{ModInfo.Name}_01_General", $"{ModInfo.Name} - General Settings", false, true);
+            string path = Path.Combine(MelonEnvironment.UserDataDirectory, $"{ModInfo.Name}.cfg");
 
-            s_category.SetFilePath(path, true);
+            category.SetFilePath(path, true);
             CreateEntries();
 
             if (!File.Exists(path))
             {
-                foreach (var entry in s_category.Entries)
+                foreach (var entry in category.Entries)
                 {
                     entry.ResetToDefault();
                 }
 
-                s_category.SaveToFile(false);
+                category.SaveToFile(false);
             }
 
-            s_isCreated = true;
+            isCreated = true;
         }
 
         private static void CreateEntries()
         {
-            s_category?.CreateEntry<bool>
+            category?.CreateEntry<bool>
             (
                 identifier: "Debug",
                 default_value: false,
@@ -67,7 +67,7 @@ namespace AdvancedDealing
                 description: "Enables debugging for this mod",
                 is_hidden: true
             );
-            s_category?.CreateEntry<bool>
+            category?.CreateEntry<bool>
             (
                 identifier: "RealisticMode",
                 default_value: false,
@@ -75,7 +75,7 @@ namespace AdvancedDealing
                 description: "Makes the mod less feel like a cheat",
                 is_hidden: false
             );
-            s_category?.CreateEntry<bool>
+            category?.CreateEntry<bool>
             (
                 identifier: "SettingsPerDealer",
                 default_value: false,
@@ -83,7 +83,7 @@ namespace AdvancedDealing
                 description: "Enable seperate modification for each dealer",
                 is_hidden: false
             );
-            s_category?.CreateEntry<bool>
+            category?.CreateEntry<bool>
             (
                 identifier: "SkipMovement",
                 default_value: false,

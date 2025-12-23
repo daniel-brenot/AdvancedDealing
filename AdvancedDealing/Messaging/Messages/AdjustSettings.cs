@@ -11,7 +11,7 @@ namespace AdvancedDealing.Messaging.Messages
 {
     public class AdjustSettings(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager m_dealerManager = dealerManager;
+        private readonly DealerManager _dealerManager = dealerManager;
 
         public override string Text => "Need to adjust settings";
 
@@ -19,16 +19,16 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (ModConfig.RealisticMode)
+            if (_dealerManager.ManagedDealer.IsRecruited && !ModConfig.RealisticMode)
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public override void OnSelected()
         {
-            MessagesAppModification.SettingsPopup.Open(m_dealerManager);
+            MessagesAppModification.SettingsPopup.Open(_dealerManager);
         }
     }
 }

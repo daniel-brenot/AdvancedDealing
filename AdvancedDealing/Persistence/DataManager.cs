@@ -18,7 +18,7 @@ namespace AdvancedDealing.Persistence
 
         public static string LastLoadedDataString { get; private set; }
 
-        public static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.k_Name}.json");
+        public static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.Name}.json");
 
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {

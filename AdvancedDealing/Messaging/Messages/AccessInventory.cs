@@ -1,4 +1,6 @@
 ﻿using AdvancedDealing.Economy;
+using System.Reflection;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
@@ -16,7 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 {
     public class AccessInventory(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager m_dealerManager = dealerManager;
+        private readonly DealerManager _dealerManager = dealerManager;
 
         public override string Text => "I need to access your inventory";
 
@@ -24,17 +26,21 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (ModConfig.RealisticMode)
+            if (_dealerManager.ManagedDealer.IsRecruited && !ModConfig.RealisticMode)
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public override void OnSelected()
         {
             Singleton<GameplayMenu>.Instance.SetIsOpen(false);
-            typeof(Dealer).GetMethod("TradeItems").Invoke(m_dealerManager.ManagedDealer, []);
+#if IL2CPP
+            _dealerManager.ManagedDealer.TradeItems();
+#elif MONO
+            typeof(Dealer).GetMethod("TradeItems", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(_dealerManager.ManagedDealer, []);
+#endif
         }
     }
 }

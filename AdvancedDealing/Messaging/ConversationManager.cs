@@ -14,17 +14,17 @@ namespace AdvancedDealing.Messaging
 {
     public class ConversationManager
     {
-        private static readonly List<ConversationManager> s_cache = [];
+        private static readonly List<ConversationManager> cache = [];
 
-        private readonly List<MessageBase> m_messageList = [];
+        private readonly List<MessageBase> _messageList = [];
 
-        private readonly List<MessageBase> m_sendableMessages = [];
+        private readonly List<MessageBase> _sendableMessages = [];
 
         public readonly NPC NPC;
 
         public readonly MSGConversation Conversation;
 
-        private bool m_uiPatched;
+        public bool UIPatched;
 
         public ConversationManager(NPC npc)
         {
@@ -33,14 +33,19 @@ namespace AdvancedDealing.Messaging
 
             Utils.Logger.Debug("ConversationManager", $"Conversation created: {npc.GUID}");
 
-            s_cache.Add(this);
+            cache.Add(this);
         }
 
         public void CreateSendableMessages()
         {
-            foreach (MessageBase msg in m_messageList)
+            foreach (MessageBase msg in _messageList)
             {
-                if (!m_sendableMessages.Contains(msg))
+#if IL2CPP
+                bool exists = Conversation.Sendables.Exists((Func<SendableMessage, bool>)(x => x.Text == msg.Text));
+#elif MONO
+                bool exists = Conversation.Sendables.Exists(x => x.Text == msg.Text);
+#endif
+                if (!_sendableMessages.Contains(msg) && !exists)
                 {
                     SendableMessage sMsg = Conversation.CreateSendableMessage(msg.Text);
 #if IL2CPP
@@ -52,18 +57,31 @@ namespace AdvancedDealing.Messaging
                     sMsg.onSelected = new Action(msg.OnSelected);
                     sMsg.onSent = new Action(msg.OnSent);
 
-                    m_sendableMessages.Add(msg);
+                    _sendableMessages.Add(msg);
                 }
             }
 
-            if (!m_uiPatched)
+            if (!UIPatched)
             {
                 NPC.ConversationCanBeHidden = false;
 
                 Conversation.EnsureUIExists();
                 Conversation.SetEntryVisibility(true);
 
-                m_uiPatched = true;
+                UIPatched = true;
+            }
+        }
+
+        public void Destroy()
+        {
+            if (UIPatched)
+            {
+                NPC.ConversationCanBeHidden = true;
+
+                Conversation.EnsureUIExists();
+                Conversation.SetEntryVisibility(false);
+
+                UIPatched = false;
             }
         }
 
@@ -71,15 +89,15 @@ namespace AdvancedDealing.Messaging
         {
             Type type = message.GetType();
 
-            if (m_messageList.Exists(a => a.GetType() == type)) return;
+            if (_messageList.Exists(a => a.GetType() == type)) return;
 
             message.SetReferences(NPC, this, Conversation);
-            m_messageList.Add(message);
+            _messageList.Add(message);
         }
 
         public static ConversationManager GetManager(string npcGuid)
         {
-            ConversationManager manager = s_cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
+            ConversationManager manager = cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
 
             if (manager == null)
             {
@@ -92,19 +110,19 @@ namespace AdvancedDealing.Messaging
 
         public static List<ConversationManager> GetAllManager()
         {
-            return s_cache;
+            return cache;
         }
 
         public static void ClearAll()
         {
-            s_cache.Clear();
+            cache.Clear();
 
             Utils.Logger.Debug("ConversationManager", "Conversations deinitialized");
         }
 
         public static bool ScheduleExists(string npcName)
         {
-            ConversationManager instance = s_cache.Find(x => x.NPC.name.Contains(npcName));
+            ConversationManager instance = cache.Find(x => x.NPC.name.Contains(npcName));
 
             return instance != null;
         }

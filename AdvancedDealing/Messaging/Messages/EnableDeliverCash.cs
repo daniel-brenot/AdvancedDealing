@@ -10,7 +10,7 @@ namespace AdvancedDealing.Messaging.Messages
 {
     public class EnableDeliverCash(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager m_dealerManager = dealerManager;
+        private readonly DealerManager _dealerManager = dealerManager;
 
         public override string Text => "Please deliver cash";
 
@@ -18,8 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            DealerManager dealerManager = DealerManager.GetManager(NPC.GUID.ToString());
-            if (!dealerManager.DealerData.DeliverCash)
+            if (_dealerManager.ManagedDealer.IsRecruited && !_dealerManager.DealerData.DeliverCash)
             {
                 return true;
             }
@@ -28,9 +27,9 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            m_dealerManager.DealerData.DeliverCash = true;
-            m_dealerManager.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${"1500"} at max.");
-            m_dealerManager.SendMessage($"Sure thing boss!", false, true, 3f);
+            _dealerManager.DealerData.DeliverCash = true;
+            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Yoo, could you deliver your cash to the dead drop? Keep ${"1500"} at max.");
+            DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Sure thing boss!", false, true, 2f);
         }
     }
 }

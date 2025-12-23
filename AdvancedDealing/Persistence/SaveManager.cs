@@ -128,7 +128,7 @@ namespace AdvancedDealing.Persistence
 
         private void OnSaveComplete()
         {
-            if (SyncManager.NoSyncOrActiveAndHost)
+            if (SyncManager.IsNoSyncOrActiveAndHost)
             {
                 DataManager.SaveToFile(SaveData);
             }

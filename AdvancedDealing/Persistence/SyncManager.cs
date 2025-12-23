@@ -1,6 +1,8 @@
 ﻿using AdvancedDealing.Persistence.Datas;
 using Newtonsoft.Json;
 using System;
+using AdvancedDealing.Economy;
+
 
 #if IL2CPP
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
@@ -21,19 +23,21 @@ namespace AdvancedDealing.Persistence
 {
     public class SyncManager
     {
-        private bool m_isRunning;
+        private bool _isRunning;
 
-        private bool m_isHost;
+        private bool _isHost;
 
-        private CSteamID m_lobbySteamID;
+        private CSteamID _lobbySteamID;
 
         protected Callback<LobbyChatMsg_t> LobbyChatMsgCallback;
 
         protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
 
-        public static bool IsActive => (Instance.m_isRunning && SaveManager.Instance.SavegameLoaded);
+        public static bool IsActive => (Instance._isRunning && SaveManager.Instance.SavegameLoaded);
 
-        public static bool NoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance.m_isHost));
+        public static bool IsNoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance._isHost));
+
+        public static bool IsActiveAndHost => (IsActive && Instance._isHost);
 
         public static SyncManager Instance { get; private set; }
 
@@ -52,30 +56,30 @@ namespace AdvancedDealing.Persistence
 
         private void Start()
         {
-            m_isHost = false;
-            m_lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
-            m_isRunning = true;
+            _isHost = false;
+            _lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
+            _isRunning = true;
 
             Utils.Logger.Msg("SyncManager", "Synchronization started");
         }
 
         private void Stop()
         {
-            m_isHost = false;
-            m_lobbySteamID = CSteamID.Nil;
-            m_isRunning = false;
+            _isHost = false;
+            _lobbySteamID = CSteamID.Nil;
+            _isRunning = false;
 
             Utils.Logger.Msg("SyncManager", "Synchronization stopped");
         }
 
         public void SetAsHost() =>
-            m_isHost = true;
+            _isHost = true;
 
         public void PushUpdate()
         {
             if (!IsActive) return;
 
-            if (m_isHost)
+            if (_isHost)
             {
                 SyncDataAsServer();
             }
@@ -87,24 +91,24 @@ namespace AdvancedDealing.Persistence
 
         private void SyncDataAsServer(string dataString = null)
         {
-            if (!IsActive || !m_isHost) return;
+            if (!IsActive || !_isHost) return;
 
-            string key = ModInfo.k_Name;
+            string key = ModInfo.Name;
             dataString ??= JsonConvert.SerializeObject(SaveManager.Instance.SaveData);
 
-            SteamMatchmaking.SetLobbyData(m_lobbySteamID, key, dataString);
+            SteamMatchmaking.SetLobbyData(_lobbySteamID, key, dataString);
 
             Utils.Logger.Debug("SyncManager", "Sent data update to clients");
         }
 
         private void SyncDataAsClient()
         {
-            if (!IsActive || m_isHost) return;
+            if (!IsActive || _isHost) return;
 
-            string key = ModInfo.k_Name;
+            string key = ModInfo.Name;
             string dataString = JsonConvert.SerializeObject(SaveManager.Instance.SaveData);
 
-            SteamMatchmaking.SetLobbyMemberData(m_lobbySteamID, key, dataString);
+            SteamMatchmaking.SetLobbyMemberData(_lobbySteamID, key, dataString);
 
             Utils.Logger.Debug("SyncManager", "Sent data update to server");
         }
@@ -117,19 +121,19 @@ namespace AdvancedDealing.Persistence
 
             if (res.m_ulSteamIDMember == res.m_ulSteamIDLobby)
             {
-                if (m_isHost) return;
+                if (_isHost) return;
 
                 Utils.Logger.Debug("SyncManager", "Receiving data update from server ...");
 
-                data = SteamMatchmaking.GetLobbyData(m_lobbySteamID, ModInfo.k_Name);
+                data = SteamMatchmaking.GetLobbyData(_lobbySteamID, ModInfo.Name);
             }
             else
             {
-                if (!m_isHost) return;
+                if (!_isHost) return;
 
                 Utils.Logger.Debug("SyncManager", "Receiving data update from client ...");
 
-                data = SteamMatchmaking.GetLobbyMemberData(m_lobbySteamID, (CSteamID)res.m_ulSteamIDMember, ModInfo.k_Name);
+                data = SteamMatchmaking.GetLobbyMemberData(_lobbySteamID, (CSteamID)res.m_ulSteamIDMember, ModInfo.Name);
             }
 
             if (data == null)
@@ -144,7 +148,7 @@ namespace AdvancedDealing.Persistence
             {
                 SaveManager.Instance.UpdateSaveData(JsonConvert.DeserializeObject<SaveData>(data));
 
-                if (m_isHost)
+                if (_isHost)
                 {
                     SyncDataAsServer(data);
                 }
@@ -155,7 +159,7 @@ namespace AdvancedDealing.Persistence
 
         public bool FetchDataFromLobby()
         {
-            string data = SteamMatchmaking.GetLobbyData(m_lobbySteamID, ModInfo.k_Name);
+            string data = SteamMatchmaking.GetLobbyData(_lobbySteamID, ModInfo.Name);
 
             if (data == null)
             {
@@ -170,14 +174,19 @@ namespace AdvancedDealing.Persistence
 
         public void SendDataUpdateRequest()
         {
-            string text = $"{ModInfo.k_Name}__data_request";
+            SendLobbyChatMsg("data_request");
+        }
+
+        public void SendLobbyChatMsg(string text)
+        {
+            text = $"{ModInfo.Name}__{text}";
 #if IL2CPP
             Il2CppStructArray<byte> bytes = Encoding.ASCII.GetBytes(text);
 #elif MONO
             byte[] bytes = Encoding.ASCII.GetBytes(text);
 #endif
 
-            SteamMatchmaking.SendLobbyChatMsg(m_lobbySteamID, bytes, bytes.Length);
+            SteamMatchmaking.SendLobbyChatMsg(_lobbySteamID, bytes, bytes.Length);
         }
 
         private void OnLobbyChatMsg(LobbyChatMsg_t res)
@@ -190,23 +199,27 @@ namespace AdvancedDealing.Persistence
             byte[] bytes = new byte[4096];
 #endif
 
-            SteamMatchmaking.GetLobbyChatEntry(m_lobbySteamID, (int)res.m_iChatID, out CSteamID userSteamID, bytes, bytes.Length, out _);
+            SteamMatchmaking.GetLobbyChatEntry(_lobbySteamID, (int)res.m_iChatID, out CSteamID userSteamID, bytes, bytes.Length, out _);
 
             string text = Encoding.ASCII.GetString(bytes);
             text = text.TrimEnd(new char[1]);
             string[] data = text.Split("__");
 
-            if (data[0] == ModInfo.k_Name)
+            if (data[0] == ModInfo.Name)
             {
                 Utils.Logger.Debug("SyncManager", $"Received msg: {data[1]}");
 
                 switch (data[1])
                 {
                     case "data_request":
-                        if (m_isHost)
+                        if (_isHost)
                         {
                             PushUpdate();
                         }
+                        break;
+                    case "dealer_fired":
+                        Dealer dealer = DealerManager.GetDealer(data[2]);
+                        DealerManager.Fire(dealer);
                         break;
                 }
             }
@@ -214,15 +227,15 @@ namespace AdvancedDealing.Persistence
 
         private void OnLobbyChange()
         {
-            if (Singleton<Lobby>.Instance.IsInLobby && m_isRunning && Singleton<Lobby>.Instance.LobbySteamID != m_lobbySteamID)
+            if (Singleton<Lobby>.Instance.IsInLobby && _isRunning && Singleton<Lobby>.Instance.LobbySteamID != _lobbySteamID)
             {
-                m_lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
+                _lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
             }
-            else if (Singleton<Lobby>.Instance.IsInLobby && !m_isRunning)
+            else if (Singleton<Lobby>.Instance.IsInLobby && !_isRunning)
             {
                 Start();
             }
-            else if (!Singleton<Lobby>.Instance.IsInLobby && m_isRunning)
+            else if (!Singleton<Lobby>.Instance.IsInLobby && _isRunning)
             {
                 Stop();
             }

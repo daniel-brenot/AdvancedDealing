@@ -23,15 +23,15 @@ namespace AdvancedDealing.NPCs.Actions
 {
     public class DeliverCashSignal(Dealer dealer) : SignalBase
     {
-        private readonly Dealer m_dealer = dealer;
+        private readonly Dealer _dealer = dealer;
 
-        private DeadDrop m_deadDrop;
+        private DeadDrop _deadDrop;
 
-        private object m_deliveryRoutine;
+        private object _deliveryRoutine;
 
-        private object m_instantDeliveryRoutine;
+        private object _instantDeliveryRoutine;
 
-        private bool m_deadDropIsFull = false;
+        private bool _deadDropIsFull = false;
 
         protected override string ActionName => "DeliverCash";
 
@@ -44,11 +44,11 @@ namespace AdvancedDealing.NPCs.Actions
 
         public override void Start()
         {
-            m_deadDrop = DealerManager.GetDeadDrop(m_dealer);
+            _deadDrop = DealerManager.GetDeadDrop(_dealer);
 
             base.Start();
 
-            if (m_deadDrop == null)
+            if (_deadDrop == null)
             {
                 BeginInstantDelivery();
             }
@@ -60,7 +60,7 @@ namespace AdvancedDealing.NPCs.Actions
                 }
                 else
                 {
-                    SetDestination(DeadDropManager.GetPosition(m_deadDrop));
+                    SetDestination(DeadDropManager.GetPosition(_deadDrop));
                 }
             }
         }
@@ -76,27 +76,27 @@ namespace AdvancedDealing.NPCs.Actions
         {
             base.MinPassed();
 
-            DealerManager dealerManager = DealerManager.GetManager(m_dealer);
+            DealerManager dealerManager = DealerManager.GetManager(_dealer);
 
-            if (!IsActive || m_instantDeliveryRoutine != null)
+            if (!IsActive || _instantDeliveryRoutine != null)
             {
                 return;
             }
 
-            if (m_dealer.Cash < dealerManager.DealerData.CashThreshold || m_deadDrop != DealerManager.GetDeadDrop(m_dealer) || !dealerManager.DealerData.DeliverCash || TimeManager.Instance.CurrentTime == 400)
+            if (_dealer.Cash < dealerManager.DealerData.CashThreshold || _deadDrop != DealerManager.GetDeadDrop(_dealer) || !dealerManager.DealerData.DeliverCash || TimeManager.Instance.CurrentTime == 400)
             {
                 End();
             }
             else
             {
-                if (m_deliveryRoutine != null || Movement.IsMoving)
+                if (_deliveryRoutine != null || Movement.IsMoving)
                 {
                     return;
                 }
 
                 if (IsAtDestination())
                 {
-                    if (!DeadDropManager.IsFull(m_deadDrop))
+                    if (!DeadDropManager.IsFull(_deadDrop))
                     {
                         BeginDelivery();
                     }
@@ -107,44 +107,44 @@ namespace AdvancedDealing.NPCs.Actions
                 }
                 else
                 {
-                    SetDestination(DeadDropManager.GetPosition(m_deadDrop));
+                    SetDestination(DeadDropManager.GetPosition(_deadDrop));
                 }
             }
         }
 
         private void BeginDelivery()
         {
-            m_deliveryRoutine ??= MelonCoroutines.Start(DeliveryRoutine());
+            _deliveryRoutine ??= MelonCoroutines.Start(DeliveryRoutine());
 
             IEnumerator DeliveryRoutine()
             {
-                DealerManager dealerManager = DealerManager.GetManager(m_dealer);
-                float cash = m_dealer.Cash;
+                DealerManager dealerManager = DealerManager.GetManager(_dealer);
+                float cash = _dealer.Cash;
 
-                Movement.FaceDirection(DeadDropManager.GetPosition(m_deadDrop));
+                Movement.FaceDirection(DeadDropManager.GetPosition(_deadDrop));
 
                 yield return new WaitForSeconds(2f);
 
-                m_dealer.SetAnimationTrigger("GrabItem");
-                m_deadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
-                DealerManager.SendMessage(m_dealer, $"I've put ${cash:F0} inside the dead drop at {m_deadDrop.name}.", dealerManager.DealerData.NotifyOnCashDelivery);
+                _dealer.SetAnimationTrigger("GrabItem");
+                _deadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
+                DealerManager.SendMessage(_dealer, $"I've put ${cash:F0} inside the dead drop at {_deadDrop.name}.", dealerManager.DealerData.NotifyOnCashDelivery);
 
                 if (dealerManager.DealerData.NotifyOnCashDelivery)
                 {
-                    DeaddropQuest quest = NetworkSingleton<QuestManager>.Instance.CreateDeaddropCollectionQuest(m_deadDrop.GUID.ToString());
+                    DeaddropQuest quest = NetworkSingleton<QuestManager>.Instance.CreateDeaddropCollectionQuest(_deadDrop.GUID.ToString());
 
                     if (quest != null)
                     {
-                        quest.Description = $"Collect cash at {m_deadDrop.DeadDropDescription}";
-                        quest.Entries[0].SetEntryTitle($"{m_dealer.name}'s cash delivery at {m_deadDrop.DeadDropName}");
+                        quest.Description = $"Collect cash at {_deadDrop.DeadDropDescription}";
+                        quest.Entries[0].SetEntryTitle($"{_dealer.name}'s cash delivery at {_deadDrop.DeadDropName}");
                     }
                 }
 
-                m_dealer.ChangeCash(-cash);
+                _dealer.ChangeCash(-cash);
 
-                Utils.Logger.Debug("ScheduleManager", $"Cash from dealer delivered successfully: {m_dealer.GUID}");
+                Utils.Logger.Debug("ScheduleManager", $"Cash from dealer delivered successfully: {_dealer.GUID}");
 
-                yield return new WaitUntil((Func<bool>)(() => m_dealer.Cash < dealerManager.DealerData.CashThreshold));
+                yield return new WaitUntil((Func<bool>)(() => _dealer.Cash < dealerManager.DealerData.CashThreshold));
 
                 End();
             }
@@ -152,18 +152,18 @@ namespace AdvancedDealing.NPCs.Actions
 
         private void BeginInstantDelivery()
         {
-            m_deliveryRoutine ??= MelonCoroutines.Start(InstantDeliveryRoutine());
+            _deliveryRoutine ??= MelonCoroutines.Start(InstantDeliveryRoutine());
 
             IEnumerator InstantDeliveryRoutine()
             {
-                DealerManager dealerManager = DealerManager.GetManager(m_dealer);
-                float cash = m_dealer.Cash;
+                DealerManager dealerManager = DealerManager.GetManager(_dealer);
+                float cash = _dealer.Cash;
 
                 NetworkSingleton<MoneyManager>.Instance.ChangeCashBalance(+cash, true, true);
-                DealerManager.SendMessage(m_dealer, $"Sent you ${cash:F0} from my earnings.", dealerManager.DealerData.NotifyOnCashDelivery);
-                m_dealer.ChangeCash(-cash);
+                DealerManager.SendMessage(_dealer, $"Sent you ${cash:F0} from my earnings.", dealerManager.DealerData.NotifyOnCashDelivery);
+                _dealer.ChangeCash(-cash);
 
-                yield return new WaitUntil((Func<bool>)(() => m_dealer.Cash < dealerManager.DealerData.CashThreshold));
+                yield return new WaitUntil((Func<bool>)(() => _dealer.Cash < dealerManager.DealerData.CashThreshold));
 
                 End();
             }
@@ -171,46 +171,46 @@ namespace AdvancedDealing.NPCs.Actions
 
         private bool IsAtDestination()
         {
-            if (m_deadDrop == null)
+            if (_deadDrop == null)
             {
                 return true;
             }
 
-            return Vector3.Distance(Movement.FootPosition, DeadDropManager.GetPosition(m_deadDrop)) < 2f;
+            return Vector3.Distance(Movement.FootPosition, DeadDropManager.GetPosition(_deadDrop)) < 2f;
         }
 
         private void StopRoutines()
         {
-            if (m_deliveryRoutine != null)
+            if (_deliveryRoutine != null)
             {
-                MelonCoroutines.Stop(m_deliveryRoutine);
-                m_deliveryRoutine = null;
+                MelonCoroutines.Stop(_deliveryRoutine);
+                _deliveryRoutine = null;
             }
 
-            if (m_instantDeliveryRoutine != null)
+            if (_instantDeliveryRoutine != null)
             {
-                MelonCoroutines.Stop(m_instantDeliveryRoutine);
-                m_instantDeliveryRoutine = null;
+                MelonCoroutines.Stop(_instantDeliveryRoutine);
+                _instantDeliveryRoutine = null;
             }
         }
 
         public override bool ShouldStart()
         {
-            DealerManager dealerManager = DealerManager.GetManager(m_dealer);
+            DealerManager dealerManager = DealerManager.GetManager(_dealer);
 
-            if (!m_dealer.IsRecruited || !dealerManager.DealerData.DeliverCash || m_dealer.ActiveContracts.Count > 0 || m_dealer.Cash < dealerManager.DealerData.CashThreshold || TimeManager.Instance.CurrentTime == 400)
+            if (!_dealer.IsRecruited || !dealerManager.DealerData.DeliverCash || _dealer.ActiveContracts.Count > 0 || _dealer.Cash < dealerManager.DealerData.CashThreshold || TimeManager.Instance.CurrentTime == 400)
             {
                 return false;
             }
 
-            DeadDrop deadDrop = DealerManager.GetDeadDrop(m_dealer);
+            DeadDrop deadDrop = DealerManager.GetDeadDrop(_dealer);
 
             if ((deadDrop != null) && DeadDropManager.IsFull(deadDrop))
             {
-                if (!m_deadDropIsFull)
+                if (!_deadDropIsFull)
                 {
-                    m_deadDropIsFull = true;
-                    DealerManager.SendMessage(m_dealer, $"Could not deliver cash to dead drop {deadDrop.name}. There is no space inside!", dealerManager.DealerData.NotifyOnCashDelivery);
+                    _deadDropIsFull = true;
+                    DealerManager.SendMessage(_dealer, $"Could not deliver cash to dead drop {deadDrop.name}. There is no space inside!", dealerManager.DealerData.NotifyOnCashDelivery);
                 }
                 return false;
             }

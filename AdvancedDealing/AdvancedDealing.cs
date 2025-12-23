@@ -2,7 +2,7 @@
 using AdvancedDealing.Persistence;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.k_Name}", ModInfo.k_Version, ModInfo.k_Author, ModInfo.k_DownLoadLink)]
+[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.Name}", ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: MelonColor(255, 170, 0, 255)]
 #if IL2CPP
@@ -25,7 +25,7 @@ namespace AdvancedDealing
         {
             ModConfig.Initialize();
 
-            Utils.Logger.Msg($"{ModInfo.k_Name} v{ModInfo.k_Version} initialized");
+            Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
         }
 
         public override void OnEarlyInitializeMelon()
