@@ -21,19 +21,19 @@ namespace AdvancedDealing.Persistence
 {
     public class SyncManager
     {
-        private bool _isRunning;
+        private bool m_isRunning;
 
-        private bool _isHost;
+        private bool m_isHost;
 
-        private CSteamID _lobbySteamID;
+        private CSteamID m_lobbySteamID;
 
         protected Callback<LobbyChatMsg_t> LobbyChatMsgCallback;
 
         protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
 
-        public static bool IsActive => (Instance._isRunning && SaveManager.Instance.SavegameLoaded);
+        public static bool IsActive => (Instance.m_isRunning && SaveManager.Instance.SavegameLoaded);
 
-        public static bool NoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance._isHost));
+        public static bool NoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance.m_isHost));
 
         public static SyncManager Instance { get; private set; }
 
@@ -52,30 +52,30 @@ namespace AdvancedDealing.Persistence
 
         private void Start()
         {
-            _isHost = false;
-            _lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
-            _isRunning = true;
+            m_isHost = false;
+            m_lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
+            m_isRunning = true;
 
             Utils.Logger.Msg("SyncManager", "Synchronization started");
         }
 
         private void Stop()
         {
-            _isHost = false;
-            _lobbySteamID = CSteamID.Nil;
-            _isRunning = false;
+            m_isHost = false;
+            m_lobbySteamID = CSteamID.Nil;
+            m_isRunning = false;
 
             Utils.Logger.Msg("SyncManager", "Synchronization stopped");
         }
 
         public void SetAsHost() =>
-            _isHost = true;
+            m_isHost = true;
 
         public void PushUpdate()
         {
             if (!IsActive) return;
 
-            if (_isHost)
+            if (m_isHost)
             {
                 SyncDataAsServer();
             }
@@ -87,24 +87,24 @@ namespace AdvancedDealing.Persistence
 
         private void SyncDataAsServer(string dataString = null)
         {
-            if (!IsActive || !_isHost) return;
+            if (!IsActive || !m_isHost) return;
 
-            string key = ModInfo.NAME;
+            string key = ModInfo.k_Name;
             dataString ??= JsonConvert.SerializeObject(SaveManager.Instance.SaveData);
 
-            SteamMatchmaking.SetLobbyData(_lobbySteamID, key, dataString);
+            SteamMatchmaking.SetLobbyData(m_lobbySteamID, key, dataString);
 
             Utils.Logger.Debug("SyncManager", "Sent data update to clients");
         }
 
         private void SyncDataAsClient()
         {
-            if (!IsActive || _isHost) return;
+            if (!IsActive || m_isHost) return;
 
-            string key = ModInfo.NAME;
+            string key = ModInfo.k_Name;
             string dataString = JsonConvert.SerializeObject(SaveManager.Instance.SaveData);
 
-            SteamMatchmaking.SetLobbyMemberData(_lobbySteamID, key, dataString);
+            SteamMatchmaking.SetLobbyMemberData(m_lobbySteamID, key, dataString);
 
             Utils.Logger.Debug("SyncManager", "Sent data update to server");
         }
@@ -117,19 +117,19 @@ namespace AdvancedDealing.Persistence
 
             if (res.m_ulSteamIDMember == res.m_ulSteamIDLobby)
             {
-                if (_isHost) return;
+                if (m_isHost) return;
 
                 Utils.Logger.Debug("SyncManager", "Receiving data update from server ...");
 
-                data = SteamMatchmaking.GetLobbyData(_lobbySteamID, ModInfo.NAME);
+                data = SteamMatchmaking.GetLobbyData(m_lobbySteamID, ModInfo.k_Name);
             }
             else
             {
-                if (!_isHost) return;
+                if (!m_isHost) return;
 
                 Utils.Logger.Debug("SyncManager", "Receiving data update from client ...");
 
-                data = SteamMatchmaking.GetLobbyMemberData(_lobbySteamID, (CSteamID)res.m_ulSteamIDMember, ModInfo.NAME);
+                data = SteamMatchmaking.GetLobbyMemberData(m_lobbySteamID, (CSteamID)res.m_ulSteamIDMember, ModInfo.k_Name);
             }
 
             if (data == null)
@@ -144,7 +144,7 @@ namespace AdvancedDealing.Persistence
             {
                 SaveManager.Instance.UpdateSaveData(JsonConvert.DeserializeObject<SaveData>(data));
 
-                if (_isHost)
+                if (m_isHost)
                 {
                     SyncDataAsServer(data);
                 }
@@ -155,7 +155,7 @@ namespace AdvancedDealing.Persistence
 
         public bool FetchDataFromLobby()
         {
-            string data = SteamMatchmaking.GetLobbyData(_lobbySteamID, ModInfo.NAME);
+            string data = SteamMatchmaking.GetLobbyData(m_lobbySteamID, ModInfo.k_Name);
 
             if (data == null)
             {
@@ -170,14 +170,14 @@ namespace AdvancedDealing.Persistence
 
         public void SendDataUpdateRequest()
         {
-            string text = $"{ModInfo.NAME}__data_request";
+            string text = $"{ModInfo.k_Name}__data_request";
 #if IL2CPP
             Il2CppStructArray<byte> bytes = Encoding.ASCII.GetBytes(text);
 #elif MONO
             byte[] bytes = Encoding.ASCII.GetBytes(text);
 #endif
 
-            SteamMatchmaking.SendLobbyChatMsg(_lobbySteamID, bytes, bytes.Length);
+            SteamMatchmaking.SendLobbyChatMsg(m_lobbySteamID, bytes, bytes.Length);
         }
 
         private void OnLobbyChatMsg(LobbyChatMsg_t res)
@@ -190,20 +190,20 @@ namespace AdvancedDealing.Persistence
             byte[] bytes = new byte[4096];
 #endif
 
-            SteamMatchmaking.GetLobbyChatEntry(_lobbySteamID, (int)res.m_iChatID, out CSteamID userSteamID, bytes, bytes.Length, out _);
+            SteamMatchmaking.GetLobbyChatEntry(m_lobbySteamID, (int)res.m_iChatID, out CSteamID userSteamID, bytes, bytes.Length, out _);
 
             string text = Encoding.ASCII.GetString(bytes);
             text = text.TrimEnd(new char[1]);
             string[] data = text.Split("__");
 
-            if (data[0] == ModInfo.NAME)
+            if (data[0] == ModInfo.k_Name)
             {
                 Utils.Logger.Debug("SyncManager", $"Received msg: {data[1]}");
 
                 switch (data[1])
                 {
                     case "data_request":
-                        if (_isHost)
+                        if (m_isHost)
                         {
                             PushUpdate();
                         }
@@ -214,15 +214,15 @@ namespace AdvancedDealing.Persistence
 
         private void OnLobbyChange()
         {
-            if (Singleton<Lobby>.Instance.IsInLobby && _isRunning && Singleton<Lobby>.Instance.LobbySteamID != _lobbySteamID)
+            if (Singleton<Lobby>.Instance.IsInLobby && m_isRunning && Singleton<Lobby>.Instance.LobbySteamID != m_lobbySteamID)
             {
-                _lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
+                m_lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
             }
-            else if (Singleton<Lobby>.Instance.IsInLobby && !_isRunning)
+            else if (Singleton<Lobby>.Instance.IsInLobby && !m_isRunning)
             {
                 Start();
             }
-            else if (!Singleton<Lobby>.Instance.IsInLobby && _isRunning)
+            else if (!Singleton<Lobby>.Instance.IsInLobby && m_isRunning)
             {
                 Stop();
             }

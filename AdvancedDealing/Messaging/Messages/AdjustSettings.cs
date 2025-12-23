@@ -1,7 +1,6 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.UI;
 
-
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
 #elif MONO
@@ -10,9 +9,9 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class Message_AdjustSettings(DealerManager dealerManager) : MessageBase
+    public class AdjustSettings(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerManager m_dealerManager = dealerManager;
 
         public override string Text => "Need to adjust settings";
 
@@ -29,7 +28,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            MessagesAppModification.SettingsPopup.Open(dealerManager);
+            MessagesAppModification.SettingsPopup.Open(m_dealerManager);
         }
     }
 }

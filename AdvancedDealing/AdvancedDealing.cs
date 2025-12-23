@@ -2,7 +2,7 @@
 using AdvancedDealing.Persistence;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.NAME}", ModInfo.VERSION, ModInfo.AUTHOR, ModInfo.DOWNLOAD_LINK)]
+[assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.k_Name}", ModInfo.k_Version, ModInfo.k_Author, ModInfo.k_DownLoadLink)]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: MelonColor(255, 170, 0, 255)]
 #if IL2CPP
@@ -15,7 +15,7 @@ namespace AdvancedDealing
 {
     public class AdvancedDealing : MelonMod
     {
-        private bool _isInitialized;
+        public bool IsInitialized { get; private set; }
 
         public SaveManager SaveManager { get; private set; }
 
@@ -25,7 +25,7 @@ namespace AdvancedDealing
         {
             ModConfig.Initialize();
 
-            Utils.Logger.Msg($"{ModInfo.NAME} v{ModInfo.VERSION} initialized");
+            Utils.Logger.Msg($"{ModInfo.k_Name} v{ModInfo.k_Version} initialized");
         }
 
         public override void OnEarlyInitializeMelon()
@@ -48,11 +48,11 @@ namespace AdvancedDealing
             }
             else if (sceneName == "Menu")
             {
-                if (!_isInitialized)
+                if (!IsInitialized)
                 {
                     SaveManager = new();
                     SyncManager = new();
-                    _isInitialized = true;
+                    IsInitialized = true;
                 }
 
                 if (SaveManager.SavegameLoaded)

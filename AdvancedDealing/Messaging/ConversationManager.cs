@@ -14,35 +14,35 @@ namespace AdvancedDealing.Messaging
 {
     public class ConversationManager
     {
-        private static readonly List<ConversationManager> _cache = [];
+        private static readonly List<ConversationManager> s_cache = [];
 
-        private readonly List<MessageBase> _messageList = [];
+        private readonly List<MessageBase> m_messageList = [];
 
-        private readonly List<MessageBase> _sendableMessages = [];
+        private readonly List<MessageBase> m_sendableMessages = [];
 
-        public readonly NPC npc;
+        public readonly NPC NPC;
 
-        public readonly MSGConversation conversation;
+        public readonly MSGConversation Conversation;
 
-        private bool _uiPatched;
+        private bool m_uiPatched;
 
         public ConversationManager(NPC npc)
         {
-            this.npc = npc;
-            conversation = npc.MSGConversation;
+            NPC = npc;
+            Conversation = npc.MSGConversation;
 
             Utils.Logger.Debug("ConversationManager", $"Conversation created: {npc.GUID}");
 
-            _cache.Add(this);
+            s_cache.Add(this);
         }
 
         public void CreateSendableMessages()
         {
-            foreach (MessageBase msg in _messageList)
+            foreach (MessageBase msg in m_messageList)
             {
-                if (!_sendableMessages.Contains(msg))
+                if (!m_sendableMessages.Contains(msg))
                 {
-                    SendableMessage sMsg = conversation.CreateSendableMessage(msg.Text);
+                    SendableMessage sMsg = Conversation.CreateSendableMessage(msg.Text);
 #if IL2CPP
                     sMsg.ShouldShowCheck = (SendableMessage.BoolCheck)msg.ShouldShowCheck;
 #elif MONO
@@ -52,18 +52,18 @@ namespace AdvancedDealing.Messaging
                     sMsg.onSelected = new Action(msg.OnSelected);
                     sMsg.onSent = new Action(msg.OnSent);
 
-                    _sendableMessages.Add(msg);
+                    m_sendableMessages.Add(msg);
                 }
             }
 
-            if (!_uiPatched)
+            if (!m_uiPatched)
             {
-                npc.ConversationCanBeHidden = false;
+                NPC.ConversationCanBeHidden = false;
 
-                conversation.EnsureUIExists();
-                conversation.SetEntryVisibility(true);
+                Conversation.EnsureUIExists();
+                Conversation.SetEntryVisibility(true);
 
-                _uiPatched = true;
+                m_uiPatched = true;
             }
         }
 
@@ -71,15 +71,15 @@ namespace AdvancedDealing.Messaging
         {
             Type type = message.GetType();
 
-            if (_messageList.Exists(a => a.GetType() == type)) return;
+            if (m_messageList.Exists(a => a.GetType() == type)) return;
 
-            message.SetReferences(npc, this, conversation);
-            _messageList.Add(message);
+            message.SetReferences(NPC, this, Conversation);
+            m_messageList.Add(message);
         }
 
         public static ConversationManager GetManager(string npcGuid)
         {
-            ConversationManager manager = _cache.Find(x => x.npc.GUID.ToString().Contains(npcGuid));
+            ConversationManager manager = s_cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
 
             if (manager == null)
             {
@@ -92,19 +92,19 @@ namespace AdvancedDealing.Messaging
 
         public static List<ConversationManager> GetAllManager()
         {
-            return _cache;
+            return s_cache;
         }
 
         public static void ClearAll()
         {
-            _cache.Clear();
+            s_cache.Clear();
 
             Utils.Logger.Debug("ConversationManager", "Conversations deinitialized");
         }
 
         public static bool ScheduleExists(string npcName)
         {
-            ConversationManager instance = _cache.Find(x => x.npc.name.Contains(npcName));
+            ConversationManager instance = s_cache.Find(x => x.NPC.name.Contains(npcName));
 
             return instance != null;
         }

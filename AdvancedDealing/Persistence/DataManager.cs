@@ -18,7 +18,7 @@ namespace AdvancedDealing.Persistence
 
         public static string LastLoadedDataString { get; private set; }
 
-        public static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.NAME}.json");
+        public static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.k_Name}.json");
 
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {
@@ -57,10 +57,7 @@ namespace AdvancedDealing.Persistence
 
         public static void SaveToFile(SaveData data)
         {
-            if (data == null)
-            {
-                data = LoadFromFile();
-            }
+            data ??= LoadFromFile();
 
             string text = JsonConvert.SerializeObject(data, JsonSerializerSettings);
             File.WriteAllText(FilePath, text);

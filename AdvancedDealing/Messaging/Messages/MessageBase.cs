@@ -12,19 +12,19 @@ namespace AdvancedDealing.Messaging.Messages
     {
         public virtual string Text => "Text";
 
-        protected NPC npc;
+        protected NPC NPC;
 
-        protected MSGConversation s1Conversation;
+        protected MSGConversation S1Conversation;
 
-        protected ConversationManager conversation;
+        protected ConversationManager Conversation;
 
         public virtual bool DisableDefaultSendBehaviour => false;
 
         public virtual void SetReferences(NPC npc, ConversationManager conversation, MSGConversation originalConversation)
         {
-            this.npc = npc;
-            this.conversation = conversation;
-            this.s1Conversation = originalConversation;
+            NPC = npc;
+            Conversation = conversation;
+            S1Conversation = originalConversation;
         }
 
         public virtual bool ShouldShowCheck(SendableMessage sMsg)

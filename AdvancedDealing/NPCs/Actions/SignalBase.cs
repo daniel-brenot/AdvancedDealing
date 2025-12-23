@@ -1,9 +1,8 @@
 ﻿namespace AdvancedDealing.NPCs.Actions
 {
-    public class NPCSignal : NPCAction
+    public class SignalBase : ActionBase
     {
-        protected override string ActionType =>
-            "NPCSignal";
+        protected override string ActionType => "Signal";
 
         public bool StartedThisCycle { get; protected set; }
 

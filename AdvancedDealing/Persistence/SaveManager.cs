@@ -104,6 +104,7 @@ namespace AdvancedDealing.Persistence
         public void ClearSavegame()
         {
             DealerManagementAppModification.Clear();
+            MessagesAppModification.Clear();
             ScheduleManager.ClearAll();
 
             SaveData = null;

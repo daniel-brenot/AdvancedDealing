@@ -14,9 +14,9 @@ using ScheduleOne.UI;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class Message_AccessInventory(DealerManager dealerManager) : MessageBase
+    public class AccessInventory(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerManager m_dealerManager = dealerManager;
 
         public override string Text => "I need to access your inventory";
 
@@ -34,7 +34,7 @@ namespace AdvancedDealing.Messaging.Messages
         public override void OnSelected()
         {
             Singleton<GameplayMenu>.Instance.SetIsOpen(false);
-            typeof(Dealer).GetMethod("TradeItems").Invoke(_dealerManager.ManagedDealer, []);
+            typeof(Dealer).GetMethod("TradeItems").Invoke(m_dealerManager.ManagedDealer, []);
         }
     }
 }

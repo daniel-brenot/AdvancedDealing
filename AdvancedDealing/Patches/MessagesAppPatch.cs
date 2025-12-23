@@ -1,10 +1,7 @@
 ﻿using AdvancedDealing.Messaging;
 using HarmonyLib;
-using System.Collections.Generic;
 using AdvancedDealing.Persistence;
 using AdvancedDealing.UI;
-
-
 
 #if IL2CPP
 using Il2CppScheduleOne.UI.Phone.Messages;

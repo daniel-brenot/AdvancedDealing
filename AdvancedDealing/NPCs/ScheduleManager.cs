@@ -20,30 +20,30 @@ namespace AdvancedDealing.NPCs
 {
     public class ScheduleManager
     {
-        private static readonly List<ScheduleManager> _cache = [];
+        private static readonly List<ScheduleManager> s_cache = [];
 
-        private readonly List<NPCAction> _actionList = [];
+        private readonly List<ActionBase> m_actionList = [];
 
-        public readonly NPC npc;
+        public readonly NPC NPC;
 
         public bool IsEnabled { get; protected set; }
 
-        public NPCAction ActiveAction { get; set; }
+        public ActionBase ActiveAction { get; set; }
 
-        public List<NPCAction> PendingActions { get; set; } = [];
+        public List<ActionBase> PendingActions { get; set; } = [];
 
-        private List<NPCAction> ActionsAwaitingStart { get; set; } = [];
+        private List<ActionBase> ActionsAwaitingStart { get; set; } = [];
 
-        private NPCScheduleManager _originalSchedule;
+        private readonly NPCScheduleManager m_originalSchedule;
 
         public ScheduleManager(NPC npc)
         {
-            this.npc = npc;
-            _originalSchedule = npc.GetComponentInChildren<NPCScheduleManager>();
+            NPC = npc;
+            m_originalSchedule = npc.GetComponentInChildren<NPCScheduleManager>();
 
             Utils.Logger.Debug("ScheduleManager", $"Schedule created: {npc.GUID}");
 
-            _cache.Add(this);
+            s_cache.Add(this);
         }
 
         public void Start()
@@ -67,9 +67,9 @@ namespace AdvancedDealing.NPCs
 
             MinPassed();
 
-            if (npc.Movement.IsMoving)
+            if (NPC.Movement.IsMoving)
             {
-                npc.Movement.Stop();
+                NPC.Movement.Stop();
             }
         }
 
@@ -88,23 +88,20 @@ namespace AdvancedDealing.NPCs
 
         protected void MinPassed()
         {
-            if ((!InstanceFinder.IsServer && !NetworkSingleton<ReplicationQueue>.Instance.ReplicationDoneForLocalPlayer) || !npc.IsSpawned)  return;
+            if ((!InstanceFinder.IsServer && !NetworkSingleton<ReplicationQueue>.Instance.ReplicationDoneForLocalPlayer) || !NPC.IsSpawned)  return;
 
             if (!IsEnabled)
             {
-                if (ActiveAction != null)
-                {
-                    ActiveAction.Interrupt();
-                }
+                ActiveAction?.Interrupt();
 
                 return;
             }
 
-            List<NPCAction> actionsToStart = GetActionsToStart();
+            List<ActionBase> actionsToStart = GetActionsToStart();
 
             if (actionsToStart.Count > 0)
             {
-                NPCAction nPCAction = actionsToStart[0];
+                ActionBase nPCAction = actionsToStart[0];
                 if (ActiveAction != nPCAction)
                 {
                     if (ActiveAction != null && nPCAction.Priority > ActiveAction.Priority)
@@ -114,14 +111,14 @@ namespace AdvancedDealing.NPCs
 
                     if (ActiveAction == null)
                     {
-                        if (_originalSchedule.ActiveAction == null || (_originalSchedule.ActiveAction != null && nPCAction.Priority > _originalSchedule.ActiveAction.Priority))
+                        if (m_originalSchedule.ActiveAction == null || (m_originalSchedule.ActiveAction != null && nPCAction.Priority > m_originalSchedule.ActiveAction.Priority))
                         {
                             StartAction(nPCAction);
                         }
                     }
                 }
 
-                foreach (NPCAction action in actionsToStart)
+                foreach (ActionBase action in actionsToStart)
                 {
                     if (!action.HasStarted && !ActionsAwaitingStart.Contains(action))
                     {
@@ -131,11 +128,11 @@ namespace AdvancedDealing.NPCs
             }
         }
 
-        private List<NPCAction> GetActionsToStart()
+        private List<ActionBase> GetActionsToStart()
         {
-            List<NPCAction> list = [];
+            List<ActionBase> list = [];
 
-            foreach (NPCAction action in _actionList)
+            foreach (ActionBase action in m_actionList)
             {
                 if (!(action == null) && action.ShouldStart())
                 {
@@ -147,7 +144,7 @@ namespace AdvancedDealing.NPCs
             return list;
         }
 
-        private void StartAction(NPCAction action)
+        private void StartAction(ActionBase action)
         {
             if (ActiveAction != null) return;
 
@@ -166,29 +163,29 @@ namespace AdvancedDealing.NPCs
             }
         }
 
-        public void AddAction(NPCAction action, int StartTime = 0)
+        public void AddAction(ActionBase action, int StartTime = 0)
         {
             Type type = action.GetType();
 
-            if (_actionList.Exists(a => a.GetType() == type)) return;
+            if (m_actionList.Exists(a => a.GetType() == type)) return;
 
-            action.SetReferences(npc, this, _originalSchedule, StartTime);
-            _actionList.Add(action);
+            action.SetReferences(NPC, this, m_originalSchedule, StartTime);
+            m_actionList.Add(action);
         }
 
-        public void RemoveAction(NPCAction action)
+        public void RemoveAction(ActionBase action)
         {
             Type type = action.GetType();
 
-            if (_actionList.Exists(a => a.GetType() == type))
+            if (m_actionList.Exists(a => a.GetType() == type))
             {
-                _actionList.Remove(action);
+                m_actionList.Remove(action);
             }
         }
 
         public static ScheduleManager GetManager(string npcGuid)
         {
-            ScheduleManager manager = _cache.Find(x => x.npc.GUID.ToString().Contains(npcGuid));
+            ScheduleManager manager = s_cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
 
             if (manager == null)
             {
@@ -201,23 +198,23 @@ namespace AdvancedDealing.NPCs
 
         public static void ClearAll()
         {
-            foreach (ScheduleManager schedule in _cache)
+            foreach (ScheduleManager schedule in s_cache)
             {
-                foreach (NPCAction action in schedule._actionList)
+                foreach (ActionBase action in schedule.m_actionList)
                 {
                     action.Destroy();
                 }
                 schedule.Destroy();
             }
 
-            _cache.Clear();
+            s_cache.Clear();
 
             Utils.Logger.Debug("ScheduleManager", "Schedules deinitialized");
         }
 
         public static bool ScheduleExists(string npcName)
         {
-            ScheduleManager instance = _cache.Find(x => x.npc.name.Contains(npcName));
+            ScheduleManager instance = s_cache.Find(x => x.NPC.name.Contains(npcName));
 
             return instance != null;
         }

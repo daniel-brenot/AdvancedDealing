@@ -26,7 +26,7 @@ namespace AdvancedDealing.Economy
 {
     public class DealerManager
     {
-        private readonly Dealer _dealer;
+        private readonly Dealer m_dealer;
 
         public DealerData DealerData { get; private set; }
 
@@ -34,11 +34,11 @@ namespace AdvancedDealing.Economy
 
         public readonly ConversationManager Conversation;
 
-        public Dealer ManagedDealer => _dealer;
+        public Dealer ManagedDealer => m_dealer;
 
         // public ConversationManager Conversation { get; private set; }
 
-        private static readonly List<DealerManager> _cache = [];
+        private static readonly List<DealerManager> s_cache = [];
 
         public static readonly List<string> ValidDealers =
         [
@@ -52,7 +52,7 @@ namespace AdvancedDealing.Economy
 
         private DealerManager(Dealer dealer)
         {
-            _dealer = dealer;
+            m_dealer = dealer;
 
             DealerData dealerData = SaveManager.Instance.SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.name));
 
@@ -64,13 +64,13 @@ namespace AdvancedDealing.Economy
             }
 
             ScheduleManager schedule = new(dealer);
-            schedule.AddAction(new NPCSignal_DeliverCash(dealer));
+            schedule.AddAction(new DeliverCashSignal(dealer));
 
             ConversationManager conversation = new(dealer);
-            conversation.AddMessage(new Message_EnableDeliverCash(this));
-            conversation.AddMessage(new Message_DisableDeliverCash(this));
-            conversation.AddMessage(new Message_AccessInventory(this));
-            conversation.AddMessage(new Message_AdjustSettings(this));
+            conversation.AddMessage(new EnableDeliverCash(this));
+            conversation.AddMessage(new DisableDeliverCash(this));
+            conversation.AddMessage(new AccessInventory(this));
+            conversation.AddMessage(new AdjustSettings(this));
 
             DealerData = dealerData;
             Schedule = schedule;
@@ -87,12 +87,12 @@ namespace AdvancedDealing.Economy
 
         public static DealerManager GetManager(Dealer dealer)
         {
-            return _cache.Find(x => x._dealer == dealer);
+            return s_cache.Find(x => x.m_dealer == dealer);
         }
 
         public static DealerManager GetManager(string dealerGuid)
         {
-            return _cache.Find(x => x._dealer.GUID.ToString().Contains(dealerGuid));
+            return s_cache.Find(x => x.m_dealer.GUID.ToString().Contains(dealerGuid));
         }
 
         public static void AddDealer(Dealer dealer)
@@ -100,9 +100,9 @@ namespace AdvancedDealing.Economy
             if (!dealer.IsRecruited || !IsValid(dealer) || DealerExists(dealer)) return;
 
             DealerManager manager = new(dealer);
-            _cache.Add(manager);
+            s_cache.Add(manager);
 
-            Update(manager._dealer, SyncManager.NoSyncOrActiveAndHost);
+            Update(manager.m_dealer, SyncManager.NoSyncOrActiveAndHost);
 
             Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.GUID}");
         }
@@ -118,16 +118,16 @@ namespace AdvancedDealing.Economy
                 return null;
             }
 
-            return manager._dealer;
+            return manager.m_dealer;
         }
 
         public static List<Dealer> GetAllDealers()
         {
             List<Dealer> dealers = [];
 
-            foreach (DealerManager manager in _cache)
+            foreach (DealerManager manager in s_cache)
             {
-                dealers.Add(manager._dealer);
+                dealers.Add(manager.m_dealer);
             }
 
             return dealers;
@@ -135,12 +135,12 @@ namespace AdvancedDealing.Economy
 
         public static bool DealerExists(string dealerGuid)
         {
-            return _cache.Any(x => x._dealer.GUID.ToString().Contains(dealerGuid));
+            return s_cache.Any(x => x.m_dealer.GUID.ToString().Contains(dealerGuid));
         }
 
         public static bool DealerExists(Dealer dealer)
         {
-            return _cache.Any(x => x._dealer == dealer);
+            return s_cache.Any(x => x.m_dealer == dealer);
         }
 
         private static bool IsValid(Dealer dealer)
@@ -296,7 +296,7 @@ namespace AdvancedDealing.Economy
 
         public void SendMessage(string text, bool notify = true, bool network = true, float delay = 0)
         {
-            SendMessage(_dealer, text, notify, network, delay);
+            SendMessage(m_dealer, text, notify, network, delay);
         }
 
         public static void SendMessage(Dealer dealer, string text, bool notify = true, bool network = true, float delay = 0)
@@ -318,7 +318,7 @@ namespace AdvancedDealing.Economy
 
         public void SendPlayerMessage(string text)
         {
-            SendPlayerMessage(_dealer, text);
+            SendPlayerMessage(m_dealer, text);
         }
 
         public static void SendPlayerMessage(Dealer dealer, string text)
@@ -329,7 +329,7 @@ namespace AdvancedDealing.Economy
 
         public static void Load()
         {
-            _cache.Clear();
+            s_cache.Clear();
 
             foreach (Dealer dealer in Dealer.AllPlayerDealers)
             {

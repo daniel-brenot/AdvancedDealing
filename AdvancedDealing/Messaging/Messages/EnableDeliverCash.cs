@@ -8,9 +8,9 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class Message_EnableDeliverCash(DealerManager dealerManager) : MessageBase
+    public class EnableDeliverCash(DealerManager dealerManager) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerManager m_dealerManager = dealerManager;
 
         public override string Text => "Please deliver cash";
 
@@ -18,7 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            DealerManager dealerManager = DealerManager.GetManager(npc.GUID.ToString());
+            DealerManager dealerManager = DealerManager.GetManager(NPC.GUID.ToString());
             if (!dealerManager.DealerData.DeliverCash)
             {
                 return true;
@@ -28,9 +28,9 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            _dealerManager.DealerData.DeliverCash = true;
-            _dealerManager.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${"1500"} at max.");
-            _dealerManager.SendMessage($"Sure thing boss!", false, true, 3f);
+            m_dealerManager.DealerData.DeliverCash = true;
+            m_dealerManager.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${"1500"} at max.");
+            m_dealerManager.SendMessage($"Sure thing boss!", false, true, 3f);
         }
     }
 }
