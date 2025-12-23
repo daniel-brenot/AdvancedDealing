@@ -14,7 +14,7 @@ namespace AdvancedDealing.Messaging.Messages
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
-        public override string Text => "Adjust Settings";
+        public override string Text => "Need to adjust settings";
 
         public override bool DisableDefaultSendBehaviour => true;
 

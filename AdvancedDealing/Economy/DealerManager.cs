@@ -7,20 +7,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AdvancedDealing.Messaging.Messages;
-using Il2CppScheduleOne.UI.Phone.Messages;
-
-
 
 #if IL2CPP
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
+using Il2CppScheduleOne.UI.Phone.Messages;
 #elif MONO
 using ScheduleOne.Economy;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.Messaging;
 using ScheduleOne.NPCs;
+using ScheduleOne.UI.Phone.Messages;
 #endif
 
 namespace AdvancedDealing.Economy

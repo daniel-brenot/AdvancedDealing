@@ -2,8 +2,14 @@
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
+using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.Economy;
+using Il2CppScheduleOne.UI;
 #elif MONO
 using ScheduleOne.Messaging;
+using ScheduleOne.DevUtilities;
+using ScheduleOne.Economy;
+using ScheduleOne.UI;
 #endif
 
 namespace AdvancedDealing.Messaging.Messages
@@ -27,7 +33,8 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            // _dealerManager.ManagedDealer.Inventory.
+            Singleton<GameplayMenu>.Instance.SetIsOpen(false);
+            typeof(Dealer).GetMethod("TradeItems").Invoke(_dealerManager.ManagedDealer, []);
         }
     }
 }

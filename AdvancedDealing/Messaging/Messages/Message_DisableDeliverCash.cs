@@ -12,7 +12,7 @@ namespace AdvancedDealing.Messaging.Messages
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
-        public override string Text => "Stop Cash Delivery";
+        public override string Text => "Stop delivering cash";
 
         public override bool DisableDefaultSendBehaviour => true;
 

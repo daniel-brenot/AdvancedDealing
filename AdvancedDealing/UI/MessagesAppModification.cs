@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Il2CppScheduleOne.DevUtilities;
 using System;
 using Object = UnityEngine.Object;
 
-
-
 #if IL2CPP
 using Il2CppScheduleOne.UI.Phone.Messages;
+using Il2CppScheduleOne.DevUtilities;
 #elif MONO
 using ScheduleOne.UI.Phone.Messages;
+using ScheduleOne.DevUtilities;
 #endif
 
 namespace AdvancedDealing.UI
@@ -76,14 +75,17 @@ namespace AdvancedDealing.UI
             applyButton.onClick.AddListener((UnityAction)SettingsPopup.Apply);
             applyButton.colors = new()
             {
-                m_NormalColor = new Color(0.2941f, 0.6863f, 0.8824f, 1f),
-                m_HighlightedColor = new Color(0.4532f, 0.7611f, 0.9151f, 1f),
-                m_PressedColor = new Color(0.5674f, 0.8306f, 0.9623f, 1f),
-                m_SelectedColor = new Color(0.9608f, 0.9608f, 0.9608f, 1),
-                m_DisabledColor = new Color(0.2941f, 0.6863f, 0.8824f, 1),
-                m_ColorMultiplier = 1f,
-                m_FadeDuration = 0f
+                normalColor = new Color(0.2941f, 0.6863f, 0.8824f, 1f),
+                highlightedColor = new Color(0.4532f, 0.7611f, 0.9151f, 1f),
+                pressedColor = new Color(0.5674f, 0.8306f, 0.9623f, 1f),
+                selectedColor = new Color(0.9608f, 0.9608f, 0.9608f, 1),
+                disabledColor = new Color(0.2941f, 0.6863f, 0.8824f, 1),
+                colorMultiplier = 1f,
+                fadeDuration = 0f,
             };
+
+            Image applyImage = apply.GetComponent<Image>();
+            applyImage.color = Color.white;
 
             SettingsPopup.ApplyButton = applyButton;
 
@@ -183,11 +185,11 @@ namespace AdvancedDealing.UI
             {
                 if (type == InputField.ContentType.IntegerNumber)
                 {
-                    inputField.onEndEdit.AddListener(new Action<string>(CheckIntRange));
+                    inputField.onEndEdit.AddListener((UnityAction<string>)(CheckIntRange));
                 }
                 else if (type == InputField.ContentType.DecimalNumber)
                 {
-                    inputField.onEndEdit.AddListener(new Action<string>(CheckFloatRange));
+                    inputField.onEndEdit.AddListener((UnityAction<string>)(CheckFloatRange));
                 }
             }           
 
