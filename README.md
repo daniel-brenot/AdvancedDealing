@@ -10,12 +10,13 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 ### Implemented
 
 * Cash delivery to selected dead drops or via transaction
+* Communication via messaging app
 * More customers per dealer
 * Add item slots to your dealers
-* Custom cut % for each dealer
-* Change speed multiplier for each dealer
-* Fully integrated with Mod Manager
-* Multiplayer compatibility
+* Custom cut %
+* Change speed multiplier
+* Fully compatible with Mod Manager
+* Multiplayer ready
 
 
 ### Planned
@@ -23,7 +24,6 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 * Change dealer signing fee
 * Product pickup at dead drops
 * Customizable quality bonus
-* Communication with dealer via messaging app
 * New deal related actions and behavior for dealers and customers
 
 <sub>Any ideas? Let me know!</sub>
