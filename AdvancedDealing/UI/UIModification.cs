@@ -13,6 +13,8 @@ namespace AdvancedDealing.UI
 
         public static SettingsPopup SettingsPopup { get; private set; }
 
+        public static SliderPopup SliderPopup { get; private set; }
+
         public static DeadDropSelector DeadDropSelector { get; private set; }
 
         public static CustomersScrollView CustomersScrollView { get; private set; }
@@ -22,6 +24,7 @@ namespace AdvancedDealing.UI
             if (IsLoaded) return;
 
             SettingsPopup ??= new();
+            SliderPopup ??= new();
             DeadDropSelector ??= new();
             CustomersScrollView ??= new();
 
@@ -32,6 +35,7 @@ namespace AdvancedDealing.UI
                 yield return new WaitUntil((Func<bool>)(() => !PersistentSingleton<LoadManager>.Instance.IsLoading && PersistentSingleton<LoadManager>.Instance.IsGameLoaded));
 
                 SettingsPopup.CreateUI();
+                SliderPopup.CreateUI();
                 DeadDropSelector.CreateUI();
                 CustomersScrollView.CreateUI();
 
@@ -44,6 +48,7 @@ namespace AdvancedDealing.UI
         public static void Clear()
         {
             SettingsPopup = null;
+            SliderPopup = null;
             DeadDropSelector = null;
             CustomersScrollView = null;
 

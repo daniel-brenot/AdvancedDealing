@@ -1,7 +1,9 @@
 ﻿using AdvancedDealing.Economy;
+using AdvancedDealing.UI;
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
+using System;
 #elif MONO
 using ScheduleOne.Messaging;
 #endif
@@ -27,8 +29,16 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
+            UIModification.SliderPopup.Open($"Cash Threshold ({_dealerManager.ManagedDealer.name})", null, _dealerManager.DealerData.CashThreshold, 0f, 9999f, 0, OnSend, null, "$");
+        }
+
+        private void OnSend()
+        {
+            float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 1);
+
             _dealerManager.DealerData.DeliverCash = true;
-            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Yoo, could you deliver your cash to the dead drop? Keep ${"1500"} at max.");
+            _dealerManager.DealerData.CashThreshold = value;
+            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
             DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Sure thing boss!", false, true, 2f);
         }
     }

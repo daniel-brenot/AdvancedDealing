@@ -28,18 +28,6 @@ namespace AdvancedDealing
             Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
         }
 
-        public override void OnEarlyInitializeMelon()
-        {
-#if IL2CPP
-            if (!MelonUtils.IsGameIl2Cpp())
-#elif MONO
-            if (MelonUtils.IsGameIl2Cpp())
-#endif
-            {
-                Unregister("Prevent initializing mod for wrong domain version", false);
-            }
-        }
-
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
             if (sceneName == "Main")

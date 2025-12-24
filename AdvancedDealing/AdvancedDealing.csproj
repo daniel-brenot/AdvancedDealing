@@ -119,18 +119,10 @@
 
 	<!-- Il2Cpp Mod Integration Deps -->
 	<ItemGroup Condition="'$(Configuration)' == 'Il2Cpp'">
-		<!-- Mod Manager & Phone App -->
-		<Reference Include="ModManager&amp;PhoneApp">
-			<HintPath>$(ModIl2CppAssemblyPath)\ModManager&amp;PhoneApp.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 
 	<!-- Mono Mod Integration Deps -->
 	<ItemGroup Condition="'$(Configuration)' == 'Mono'">
-		<!-- Mod Manager & Phone App -->
-		<Reference Include="ModManager&amp;PhoneApp">
-			<HintPath>$(ModMonoAssemblyPath)\ModManagerPhoneApp.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 
 	<!-- Automated local deployment -->

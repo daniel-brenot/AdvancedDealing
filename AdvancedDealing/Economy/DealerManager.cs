@@ -7,7 +7,7 @@ using AdvancedDealing.Persistence.Datas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using Il2CppScheduleOne.GameTime;
 
 
 #if IL2CPP
@@ -18,6 +18,7 @@ using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
 #elif MONO
+using System.Reflection;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.Economy;
 using ScheduleOne.ItemFramework;
@@ -74,6 +75,7 @@ namespace AdvancedDealing.Economy
             conversation.AddMessage(new EnableDeliverCash(this));
             conversation.AddMessage(new DisableDeliverCash(this));
             conversation.AddMessage(new AccessInventory(this));
+            conversation.AddMessage(new NegotiateCut(this));
             conversation.AddMessage(new AdjustSettings(this));
             conversation.AddMessage(new Fired(this));
 
@@ -392,11 +394,24 @@ namespace AdvancedDealing.Economy
 
             Dealer.onDealerRecruited -= new Action<Dealer>(OnDealerRecruited);
             Dealer.onDealerRecruited += new Action<Dealer>(OnDealerRecruited);
+            NetworkSingleton<TimeManager>.Instance.onDayPass -= new Action(OnDayPass);
+            NetworkSingleton<TimeManager>.Instance.onDayPass += new Action(OnDayPass);
         }
 
         private static void OnDealerRecruited(Dealer dealer)
         {
             AddDealer(dealer);
+        }
+
+        private static void OnDayPass()
+        {
+            foreach (DealerManager manager in cache)
+            {
+                if (manager.DealerData.DaysUntilNextNegotiation > 0)
+                {
+                    manager.DealerData.DaysUntilNextNegotiation--;
+                }
+            }
         }
     }
 }

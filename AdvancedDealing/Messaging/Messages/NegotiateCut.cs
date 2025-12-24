@@ -1,0 +1,88 @@
+﻿using AdvancedDealing.Economy;
+using AdvancedDealing.UI;
+using System;
+
+#if IL2CPP
+using Il2CppScheduleOne.Messaging;
+#elif MONO
+using ScheduleOne.Messaging;
+#endif
+
+namespace AdvancedDealing.Messaging.Messages
+{
+    public class NegotiateCut(DealerManager dealerManager) : MessageBase
+    {
+        private readonly DealerManager _dealerManager = dealerManager;
+
+        public override string Text => "Let's talk about your cut";
+
+        public override bool DisableDefaultSendBehaviour => true;
+
+        public override bool ShouldShowCheck(SendableMessage sMsg)
+        {
+            if (_dealerManager.ManagedDealer.IsRecruited && ModConfig.RealisticMode && _dealerManager.DealerData.DaysUntilNextNegotiation <= 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public override void OnSelected()
+        {
+            float current = (float)Math.Round(_dealerManager.DealerData.Cut, 2);
+
+            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.ManagedDealer.name})", $"Current: {current:n2}", current, 0f, 1f, 2, OnSend);
+        }
+
+        private void OnSend()
+        {
+            float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 2);
+
+            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Joo! We need to talk about your cut.. How about {value}%?");
+
+            if (value == _dealerManager.DealerData.Cut)
+            {
+                DealerManager.SendMessage(_dealerManager.ManagedDealer, "Bro that's the same amount i get atm!", false, true, 2f);
+
+                return;
+            }
+            else if (value > _dealerManager.DealerData.Cut)
+            {
+                DealerManager.SendMessage(_dealerManager.ManagedDealer, "Haha.. you idiot! Yeah sure", false, true, 2f);
+            }
+            else
+            {
+                bool accepted = CalculateResponse(_dealerManager.DealerData.Cut, value);
+
+                if (accepted)
+                {
+                    DealerManager.SendMessage(_dealerManager.ManagedDealer, "Okay i'm fine with that. We got a deal!", false, true, 2f);
+                }
+                else
+                {
+                    DealerManager.SendMessage(_dealerManager.ManagedDealer, "Naah.. no chance!", false, true, 2f);
+
+                    _dealerManager.DealerData.DaysUntilNextNegotiation = 2;
+
+                    DealerManager.Update(_dealerManager.ManagedDealer, true);
+
+                    return;
+                }
+            }
+
+            _dealerManager.DealerData.Cut = value;
+            _dealerManager.DealerData.DaysUntilNextNegotiation = 6;
+
+            DealerManager.Update(_dealerManager.ManagedDealer, true);
+        }
+
+        private static bool CalculateResponse(float oldCut, float newCut)
+        {
+            float baseChance = ModConfig.NegotiationSuccessModifier;
+            float difference = Math.Abs(oldCut - newCut);
+            float chance = (baseChance - (baseChance * (difference * 100) / 100)) / 100;
+
+            return UnityEngine.Random.value <= chance;
+        }
+    }
+}

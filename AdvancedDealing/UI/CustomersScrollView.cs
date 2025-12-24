@@ -44,13 +44,12 @@ namespace AdvancedDealing.UI
 
             GameObject viewport = new("Viewport");
             RectTransform transform2 = viewport.AddComponent<RectTransform>();
-            transform2.SetParent(Container.transform, false);
+            transform2.SetParent(transform, false);
             transform2.anchorMin = new Vector2(0f, 0f);
             transform2.anchorMax = new Vector2(1f, 0f);
             transform2.pivot = new Vector2(0.5f, 0f);
             transform2.anchoredPosition = Vector2.zero;
             transform2.sizeDelta = new Vector2(0, height);
-            transform2.SetParent(transform, false);
             viewport.AddComponent<Mask>().showMaskGraphic = false;
             viewport.AddComponent<Image>();
 

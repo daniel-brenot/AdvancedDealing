@@ -17,6 +17,8 @@
         // Stats
         public float Experience;
 
+        public int Level;
+
         public float Loyality;
 
         // Behavior
@@ -26,6 +28,8 @@
 
         public float CashThreshold;
 
+        public int DaysUntilNextNegotiation;
+
         public override void SetDefaults()
         {
             DeadDrop = null;
@@ -34,11 +38,13 @@
             ItemSlots = 5;
             Cut = 0.2f;
             SpeedMultiplier = 1f;
-            Experience = 0f;
+            Experience = 1f;
+            Level = 1;
             Loyality = 50f;
             DeliverCash = false;
             NotifyOnCashDelivery = true;
             CashThreshold = 1500f;
+            DaysUntilNextNegotiation = 0;
         }
     }
 }
