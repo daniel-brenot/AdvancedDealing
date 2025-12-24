@@ -14,6 +14,7 @@ I couldn't find a dealer mod that meets my expectations - so i created my own on
 * Allow more customers per dealer
 * Add item slots to your dealers
 * Negotiate cut %
+* Access dealer inventories from everywhere
 * Change speed multiplier
 * Fire your dealers
 * Fully compatible with Mod Manager
