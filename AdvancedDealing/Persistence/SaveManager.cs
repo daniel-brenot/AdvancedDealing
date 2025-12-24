@@ -68,6 +68,10 @@ namespace AdvancedDealing.Persistence
                     DealerManager.Load();
 
                     yield return new WaitForEndOfFrame();
+
+                    Utils.Logger.Msg("Savegame modifications successfully injected");
+
+                    UIModification.Load();
                 }
             }
             else
@@ -95,16 +99,17 @@ namespace AdvancedDealing.Persistence
                         SyncManager.Instance.SetAsHost();
                         SyncManager.Instance.PushUpdate();
                     }
+
+                    Utils.Logger.Msg("Savegame modifications successfully injected");
+
+                    UIModification.Load();
                 }
             }
-
-            Utils.Logger.Msg("Savegame modifications successfully injected");
         }
 
         public void ClearSavegame()
         {
-            DealerManagementAppModification.Clear();
-            MessagesAppModification.Clear();
+            UIModification.Clear();
             ScheduleManager.ClearAll();
 
             SaveData = null;

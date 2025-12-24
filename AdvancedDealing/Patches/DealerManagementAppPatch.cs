@@ -17,16 +17,6 @@ namespace AdvancedDealing.Patches
     [HarmonyPatch(typeof(DealerManagementApp))]
     public class DealerManagementAppPatch
     {
-        [HarmonyPrefix]
-        [HarmonyPatch("SetOpen")]
-        public static void SetOpenPrefix(DealerManagementApp __instance)
-        {
-            if (SaveManager.Instance.SavegameLoaded)
-            {
-                DealerManagementAppModification.Create(__instance);
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch("SetDisplayedDealer")]
         public static void SetDisplayedDealerPostfix(DealerManagementApp __instance, Dealer dealer)
@@ -43,12 +33,16 @@ namespace AdvancedDealing.Patches
                 if (guid != null)
                 {
                     DeadDrop deadDrop = DealerManager.GetDeadDrop(dealer);
-                    deadDropName = deadDrop.name;
+                    deadDropName = deadDrop.DeadDropName;
                 }
 
-                DealerManagementAppModification.SetDeadDropSelectorButtonValue(deadDropName);
-                DealerManagementAppModification.ShowAssignButton(__instance, dealerManager);
-                DealerManagementAppModification.UpdateCustomerTitle(__instance, dealerManager);
+                UIModification.DeadDropSelector.ButtonLabel.text = deadDropName;
+                UIModification.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.ManagedDealer.AssignedCustomers.Count}/{dealerManager.DealerData.MaxCustomers})";
+
+                if (!(dealerManager.ManagedDealer.AssignedCustomers.Count >= dealerManager.DealerData.MaxCustomers))
+                {
+                    UIModification.CustomersScrollView.AssignButton.SetActive(true);
+                }
             }
         }
     }

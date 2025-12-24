@@ -1,7 +1,6 @@
 ﻿using AdvancedDealing.Messaging;
 using HarmonyLib;
 using AdvancedDealing.Persistence;
-using AdvancedDealing.UI;
 
 #if IL2CPP
 using Il2CppScheduleOne.UI.Phone.Messages;
@@ -26,8 +25,6 @@ namespace AdvancedDealing.Patches
                 {
                     conversation.CreateSendableMessages();
                 }
-
-                MessagesAppModification.Create();
             }
         }
     }

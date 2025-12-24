@@ -1,5 +1,4 @@
 ﻿using AdvancedDealing.Economy;
-using AdvancedDealing.Messaging;
 using AdvancedDealing.Persistence.Datas;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,12 +8,10 @@ using UnityEngine.Events;
 #if IL2CPP
 using Il2CppScheduleOne;
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.UI.Phone.Messages;
 #elif MONO
 using ScheduleOne;
 using ScheduleOne.DevUtilities;
-using ScheduleOne.Messaging;
 using ScheduleOne.UI.Phone.Messages;
 #endif
 
@@ -50,14 +47,12 @@ namespace AdvancedDealing.UI
             if (!action.Used && IsOpen)
             {
                 action.Used = true;
-                Cancel();
+                Close();
             }
         }
 
         public void Open(DealerManager dealerManager)
         {
-            CreateUI();
-
             IsOpen = true;
             _dealerManager = dealerManager;
 
@@ -76,7 +71,7 @@ namespace AdvancedDealing.UI
             Container.SetActive(false);
         }
 
-        public void Apply()
+        private void OnApply()
         {
             if (!IsOpen) return;
 
@@ -113,7 +108,7 @@ namespace AdvancedDealing.UI
             Close();
         }
 
-        public void Cancel()
+        private void OnCancel()
         {
             Close();
         }
@@ -126,7 +121,9 @@ namespace AdvancedDealing.UI
 
             Container = Object.Instantiate(target, target.transform.parent);
             Container.name = "SettingsPopup";
-            Container.SetActive(false);
+            Container.SetActive(true);
+
+            CreateInputFieldTemplate();
 
             Content = Container.transform.Find("Shade/Content");
             Content.GetComponent<RectTransform>().sizeDelta = new Vector2(-160f, 100f);
@@ -137,7 +134,7 @@ namespace AdvancedDealing.UI
 
             Button[] buttons = Content.GetComponentsInChildren<Button>();
             buttons[0].onClick.RemoveAllListeners();
-            buttons[0].onClick.AddListener((UnityAction)Cancel);
+            buttons[0].onClick.AddListener((UnityAction)OnCancel);
 
             ApplyButton = buttons[2];
             ApplyButton.gameObject.name = "Apply";
@@ -153,7 +150,7 @@ namespace AdvancedDealing.UI
                 fadeDuration = 0f,
             };
             ApplyButton.onClick.RemoveAllListeners();
-            ApplyButton.onClick.AddListener((UnityAction)Apply);
+            ApplyButton.onClick.AddListener((UnityAction)OnApply);
             ApplyButton.GetComponent<Image>().color = Color.white;
 
             Object.Destroy(buttons[1].gameObject);
@@ -168,46 +165,46 @@ namespace AdvancedDealing.UI
             UICreated = true;
         }
 
-        public void CreateInputField(InputField.ContentType type, string key, string description, float rangeMin = 0, float rangeMax = 0)
+        private void CreateInputFieldTemplate()
         {
-            if (_inputFieldTemplate == null)
-            {
-                GameObject template = Object.Instantiate(PlayerSingleton<MessagesApp>.Instance.CounterofferInterface.transform.Find("Shade/Content/Selection/SearchInput").gameObject);
-                template.SetActive(false);
-                template.name = "InputFieldUITemplate";
-                template.GetComponent<InputField>().onEndEdit.RemoveAllListeners();
+            GameObject template = Object.Instantiate(PlayerSingleton<MessagesApp>.Instance.CounterofferInterface.transform.Find("Shade/Content/Selection/SearchInput").gameObject);
+            template.SetActive(false);
+            template.name = "InputFieldUITemplate";
+            template.GetComponent<InputField>().onEndEdit.RemoveAllListeners();
 
-                RectTransform transform = template.GetComponent<RectTransform>();
-                transform.offsetMax = new Vector2(-20f, -100f);
-                transform.offsetMin = new Vector2(20f, -160f);
+            RectTransform transform = template.GetComponent<RectTransform>();
+            transform.offsetMax = new Vector2(-20f, -100f);
+            transform.offsetMin = new Vector2(20f, -160f);
 
-                RectTransform image = transform.Find("Image").GetComponent<RectTransform>();
-                image.offsetMin = new Vector2(350f, image.offsetMin.y);
+            RectTransform image = transform.Find("Image").GetComponent<RectTransform>();
+            image.offsetMin = new Vector2(350f, image.offsetMin.y);
 
-                RectTransform textArea = transform.Find("Text Area").GetComponent<RectTransform>();
-                textArea.offsetMin = new Vector2(350f, textArea.offsetMin.y);
-                Text placeholder = textArea.Find("Placeholder").GetComponent<Text>();
-                placeholder.text = "Set value...";
+            RectTransform textArea = transform.Find("Text Area").GetComponent<RectTransform>();
+            textArea.offsetMin = new Vector2(350f, textArea.offsetMin.y);
+            Text placeholder = textArea.Find("Placeholder").GetComponent<Text>();
+            placeholder.text = "Set value...";
 
-                RectTransform title = new GameObject("Title").AddComponent<RectTransform>();
-                title.SetParent(transform);
-                title.SetAsFirstSibling();
-                title.sizeDelta = new Vector2(-358f, -13f);
-                title.offsetMax = new Vector2(-150f, -10f);
-                title.offsetMin = new Vector2(10f, 8f);
-                title.anchorMax = new Vector2(1f, 1f);
-                title.anchorMin = new Vector2(0f, 0f);
+            RectTransform title = new GameObject("Title").AddComponent<RectTransform>();
+            title.SetParent(transform);
+            title.SetAsFirstSibling();
+            title.sizeDelta = new Vector2(-358f, -13f);
+            title.offsetMax = new Vector2(-150f, -10f);
+            title.offsetMin = new Vector2(10f, 8f);
+            title.anchorMax = new Vector2(1f, 1f);
+            title.anchorMin = new Vector2(0f, 0f);
 
-                Text text = title.gameObject.AddComponent<Text>();
-                text.font = placeholder.font;
-                text.alignment = TextAnchor.MiddleLeft;
-                text.text = "Title";
-                text.color = Color.black;
-                text.fontSize = 20;
+            Text text = title.gameObject.AddComponent<Text>();
+            text.font = placeholder.font;
+            text.alignment = TextAnchor.MiddleLeft;
+            text.text = "Title";
+            text.color = Color.black;
+            text.fontSize = 20;
 
-                _inputFieldTemplate = template;
-            }
+            _inputFieldTemplate = template;
+        }
 
+        private void CreateInputField(InputField.ContentType type, string key, string description, float rangeMin = 0, float rangeMax = 0)
+        {
             GameObject field = Object.Instantiate(_inputFieldTemplate, Content);
             field.SetActive(true);
             field.name = key;
@@ -242,8 +239,6 @@ namespace AdvancedDealing.UI
                     }
                 }
             }
-
-            Utils.Logger.Debug("SettingsPopup", $"Input field created: {key}");
 
             _inputFields.Add(field);
         }
