@@ -46,7 +46,7 @@ namespace AdvancedDealing.UI
             IsOpen = true;
             _dealerManager = dealerManager;
 
-            foreach (DeadDrop deadDrop in DeadDropManager.GetAllByDistance(Player.Local.transform))
+            foreach (DeadDrop deadDrop in DeadDropManager.GetDeadDropsByDistance(Player.Local.transform))
             {
                 GameObject selectable = _selectables.Find(x => x.transform.Find("Name").GetComponent<Text>().text == deadDrop.DeadDropName);
                 selectable.transform.SetAsLastSibling();
@@ -63,8 +63,10 @@ namespace AdvancedDealing.UI
 
         private void OnSelected(string guid, string name)
         {
-            DealerManager.SetDeadDrop(_dealerManager.ManagedDealer, guid);
+            _dealerManager.DeadDrop = guid;
             ButtonLabel.text = name;
+
+            Utils.Logger.Debug("DeadDropSelector", $"Dead drop for {_dealerManager.Dealer.fullName} selected: {guid}");
 
             if (SyncManager.IsActive)
             {
@@ -119,11 +121,10 @@ namespace AdvancedDealing.UI
             layoutGroup.childScaleWidth = false;
 
             CreateSelectable(null, "None");
-            List<DeadDrop> deadDrops = DeadDropManager.GetAllDeadDrops();
 
-            for (int i = 0; i <= deadDrops.Count - 1; i++)
+            for (int i = 0; i <= DeadDrop.DeadDrops.Count - 1; i++)
             {
-                CreateSelectable(deadDrops[i].GUID.ToString(), deadDrops[i].DeadDropName);
+                CreateSelectable(DeadDrop.DeadDrops[i].GUID.ToString(), DeadDrop.DeadDrops[i].DeadDropName);
             }
 
             CreateButton();
@@ -155,8 +156,7 @@ namespace AdvancedDealing.UI
             
             void OpenSelector()
             {
-                Dealer dealer = PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer;
-                Open(DealerManager.GetManager(dealer));
+                Open(DealerManager.GetInstance(PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer));
             }
         }
 

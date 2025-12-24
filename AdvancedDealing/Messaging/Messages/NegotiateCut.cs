@@ -20,7 +20,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && ModConfig.RealisticMode && _dealerManager.DealerData.DaysUntilNextNegotiation <= 0)
+            if (_dealerManager.Dealer.IsRecruited && ModConfig.RealisticMode && _dealerManager.DaysUntilNextNegotiation <= 0)
             {
                 return true;
             }
@@ -29,51 +29,49 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            float current = (float)Math.Round(_dealerManager.DealerData.Cut, 2);
+            float current = (float)Math.Round(_dealerManager.Cut, 2);
 
-            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.ManagedDealer.name})", $"Current: {current:n2}", current, 0f, 1f, 2, OnSend);
+            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.Dealer.name})", $"Current: {current:n2}", current, 0f, 1f, 2, OnSend);
         }
 
         private void OnSend()
         {
             float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 2);
 
-            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Joo! We need to talk about your cut.. How about {value}%?");
+            _dealerManager.SendPlayerMessage($"Joo! We need to talk about your cut.. How about {value}%?");
 
-            if (value == _dealerManager.DealerData.Cut)
+            if (value == _dealerManager.Cut)
             {
-                DealerManager.SendMessage(_dealerManager.ManagedDealer, "Bro that's the same amount i get atm!", false, true, 2f);
+                _dealerManager.SendMessage("Bro that's the same amount i get atm!", false, true, 2f);
 
                 return;
             }
-            else if (value > _dealerManager.DealerData.Cut)
+            else if (value > _dealerManager.Cut)
             {
-                DealerManager.SendMessage(_dealerManager.ManagedDealer, "Haha.. you idiot! Yeah sure", false, true, 2f);
+                _dealerManager.SendMessage("Haha.. you idiot! Yeah sure", false, true, 2f);
             }
             else
             {
-                bool accepted = CalculateResponse(_dealerManager.DealerData.Cut, value);
+                bool accepted = CalculateResponse(_dealerManager.Cut, value);
 
                 if (accepted)
                 {
-                    DealerManager.SendMessage(_dealerManager.ManagedDealer, "Okay i'm fine with that. We got a deal!", false, true, 2f);
+                    _dealerManager.SendMessage("Okay i'm fine with that. We got a deal!", false, true, 2f);
                 }
                 else
                 {
-                    DealerManager.SendMessage(_dealerManager.ManagedDealer, "Naah.. no chance!", false, true, 2f);
+                    _dealerManager.SendMessage("Naah.. no chance!", false, true, 2f);
 
-                    _dealerManager.DealerData.DaysUntilNextNegotiation = 2;
-
-                    DealerManager.Update(_dealerManager.ManagedDealer, true);
+                    _dealerManager.DaysUntilNextNegotiation = 3;
 
                     return;
                 }
             }
 
-            _dealerManager.DealerData.Cut = value;
-            _dealerManager.DealerData.DaysUntilNextNegotiation = 6;
+            _dealerManager.Cut = value;
+            _dealerManager.DaysUntilNextNegotiation = 7;
 
-            DealerManager.Update(_dealerManager.ManagedDealer, true);
+            _dealerManager.HasChanged = true;
         }
 
         private static bool CalculateResponse(float oldCut, float newCut)

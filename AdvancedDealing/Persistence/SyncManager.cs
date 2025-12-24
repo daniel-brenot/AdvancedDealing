@@ -79,6 +79,8 @@ namespace AdvancedDealing.Persistence
         {
             if (!IsActive) return;
 
+            SaveManager.Instance.CollectData();
+
             if (_isHost)
             {
                 SyncDataAsServer();
@@ -211,15 +213,17 @@ namespace AdvancedDealing.Persistence
 
                 switch (data[1])
                 {
-                    case "data_request":
+                    case "data_request": // Client only message
                         if (_isHost)
                         {
                             PushUpdate();
                         }
                         break;
-                    case "dealer_fired":
-                        Dealer dealer = DealerManager.GetDealer(data[2]);
-                        DealerManager.Fire(dealer);
+                    case "dealer_fired": // Host only message
+                        if (!_isHost)
+                        {
+                            DealerManager.GetInstance(data[2])?.Fire();
+                        }
                         break;
                 }
             }

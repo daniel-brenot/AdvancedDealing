@@ -122,19 +122,55 @@ namespace AdvancedDealing.Persistence
         {
             foreach (DealerData dealerData in saveData.Dealers)
             {
-                Dealer dealer = DealerManager.GetDealer(dealerData.Identifier);
-
-                DealerManager.SetData(dealer, dealerData);
-                DealerManager.Update(dealer, false);
+                DealerManager manager = DealerManager.GetInstance(dealerData.Identifier);
+                manager.PatchData(dealerData);
+                manager.HasChanged = true;
             }
 
             SaveData = saveData;
+        }
+
+        public void CollectData()
+        {
+            foreach (Dealer dealer in Dealer.AllPlayerDealers)
+            {
+                if (DealerManager.DealerExists(dealer))
+                {
+                    DealerManager dealerManager = DealerManager.GetInstance(dealer);
+                    DealerData dealerData = SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.GUID.ToString()));
+
+                    if (dealerData != null)
+                    {
+                        SaveData.Dealers.Remove(dealerData);
+                    }
+
+                    SaveData.Dealers.Add(dealerManager.FetchData());
+                }
+            }
+        }
+
+        public void UpdateData(DealerData dealerData = null)
+        {
+            if (dealerData != null)
+            {
+                DealerData oldDealerData = SaveData.Dealers.Find(x => x.Identifier.Contains(dealerData.Identifier));
+
+                if (oldDealerData != null)
+                {
+                    SaveData.Dealers.Remove(oldDealerData);
+                }
+
+                SaveData.Dealers.Add(dealerData);
+
+                Utils.Logger.Debug("SaveManager", $"Dealer data updated: {dealerData.Identifier}");
+            }
         }
 
         private void OnSaveComplete()
         {
             if (SyncManager.IsNoSyncOrActiveAndHost)
             {
+                CollectData();
                 DataManager.SaveToFile(SaveData);
             }
         }

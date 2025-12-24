@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using AdvancedDealing.Persistence;
+
 
 #if IL2CPP
 using Il2CppScheduleOne;
@@ -57,7 +59,7 @@ namespace AdvancedDealing.UI
             _dealerManager = dealerManager;
 
             Container.SetActive(true);
-            TitleLabel.text = $"Adjust Settings ({_dealerManager.ManagedDealer.name})";
+            TitleLabel.text = $"Adjust Settings ({_dealerManager.Dealer.name})";
 
             foreach (GameObject field in _inputFields)
             {
@@ -87,11 +89,11 @@ namespace AdvancedDealing.UI
                 {
                     if (input.contentType == InputField.ContentType.IntegerNumber)
                     {
-                        typeof(DealerData).GetField(field.name).SetValue(_dealerManager.DealerData, int.Parse(value));
+                        typeof(DealerManager).GetField(field.name).SetValue(_dealerManager, int.Parse(value));
                     }
                     else if (input.contentType == InputField.ContentType.DecimalNumber)
                     {
-                        typeof(DealerData).GetField(field.name).SetValue(_dealerManager.DealerData, float.Parse(value));
+                        typeof(DealerManager).GetField(field.name).SetValue(_dealerManager, float.Parse(value));
                     }
 
                     updated = true;
@@ -100,9 +102,13 @@ namespace AdvancedDealing.UI
 
             if (updated)
             {
-                DealerManager.Update(_dealerManager.ManagedDealer, true);
-                DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, "Maaaan.. please change your behavior!");
-                DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Hmkay .. i'm sorry", false, true, 2f);
+                if (SyncManager.IsActive)
+                {
+                    SyncManager.Instance.PushUpdate();
+                }
+                _dealerManager.HasChanged = true;
+                _dealerManager.SendPlayerMessage("Maaaan.. please change your behavior!");
+                _dealerManager.SendMessage($"Hmkay .. i'm sorry", false, true, 2f);
             }
 
             Close();
@@ -250,7 +256,7 @@ namespace AdvancedDealing.UI
                 return null;
             }
 
-            return typeof(DealerData).GetField(key).GetValue(_dealerManager.DealerData).ToString();
+            return typeof(DealerManager).GetField(key).GetValue(_dealerManager).ToString();
         }
     }
 }

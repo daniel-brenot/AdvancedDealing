@@ -1,6 +1,5 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.Persistence;
-using AdvancedDealing.Persistence.Datas;
 using AdvancedDealing.UI;
 using HarmonyLib;
 
@@ -23,23 +22,23 @@ namespace AdvancedDealing.Patches
         {
             if (SaveManager.Instance.SavegameLoaded)
             {
-                DealerManager dealerManager = DealerManager.GetManager(dealer);
+                DealerManager dealerManager = DealerManager.GetInstance(dealer);
 
                 if (dealerManager == null) return;
 
                 string deadDropName = "None";
-                string guid = dealerManager.DealerData.DeadDrop;
+                string guid = dealerManager.DeadDrop;
 
                 if (guid != null)
                 {
-                    DeadDrop deadDrop = DealerManager.GetDeadDrop(dealer);
-                    deadDropName = deadDrop.DeadDropName;
+                    DeadDropManager deadDropManager = DeadDropManager.GetInstance(dealerManager.DeadDrop);
+                    deadDropName = deadDropManager.DeadDrop.DeadDropName;
                 }
 
                 UIModification.DeadDropSelector.ButtonLabel.text = deadDropName;
-                UIModification.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.ManagedDealer.AssignedCustomers.Count}/{dealerManager.DealerData.MaxCustomers})";
+                UIModification.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.Dealer.AssignedCustomers.Count}/{dealerManager.MaxCustomers})";
 
-                if (!(dealerManager.ManagedDealer.AssignedCustomers.Count >= dealerManager.DealerData.MaxCustomers))
+                if (!(dealerManager.Dealer.AssignedCustomers.Count >= dealerManager.MaxCustomers))
                 {
                     UIModification.CustomersScrollView.AssignButton.SetActive(true);
                 }

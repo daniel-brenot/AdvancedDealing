@@ -20,7 +20,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && !_dealerManager.DealerData.DeliverCash)
+            if (_dealerManager.Dealer.IsRecruited && !_dealerManager.DeliverCash)
             {
                 return true;
             }
@@ -29,17 +29,18 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIModification.SliderPopup.Open($"Cash Threshold ({_dealerManager.ManagedDealer.name})", null, _dealerManager.DealerData.CashThreshold, 0f, 9999f, 0, OnSend, null, "$");
+            UIModification.SliderPopup.Open($"Cash Threshold ({_dealerManager.Dealer.name})", null, _dealerManager.CashThreshold, 0f, 9999f, 0, OnSend, null, "$");
         }
 
         private void OnSend()
         {
             float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 0);
 
-            _dealerManager.DealerData.DeliverCash = true;
-            _dealerManager.DealerData.CashThreshold = value;
-            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, $"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
-            DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Sure thing boss!", false, true, 2f);
+            _dealerManager.DeliverCash = true;
+            _dealerManager.CashThreshold = value;
+
+            _dealerManager.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
+            _dealerManager.SendMessage($"Sure thing boss!", false, true, 2f);
         }
     }
 }

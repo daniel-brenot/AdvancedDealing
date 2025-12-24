@@ -12,90 +12,94 @@ namespace AdvancedDealing.Economy
 {
     public class DeadDropManager
     {
-        private readonly DeadDrop _deadDrop;
-
         private static readonly List<DeadDropManager> cache = [];
+
+        public readonly DeadDrop DeadDrop;
 
         public DeadDropManager(DeadDrop deadDrop)
         {
-            _deadDrop = deadDrop;
+            DeadDrop = deadDrop;
         }
 
-        public static DeadDropManager GetManager(DeadDrop deadDrop)
+        public static List<DeadDropManager> GetAllInstances()
         {
-            return cache.Find(x => x._deadDrop == deadDrop);
+            return cache;
         }
 
-        public static DeadDropManager GetManager(string deadDropGuid)
-        {
-            return cache.Find(x => x._deadDrop.GUID.ToString().Contains(deadDropGuid));
-        }
-
-        public static void AddDeadDrop(DeadDrop deadDrop)
-        {
-            if (DeadDropExists(deadDrop)) return;
-
-            DeadDropManager manager = new(deadDrop);
-            cache.Add(manager);
-
-            Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.DeadDropName}");
-        }
-
-        public static DeadDrop GetDeadDrop(string deadDropGuid)
-        {
-            DeadDropManager manager = cache.Find(x => x._deadDrop.GUID.ToString().Contains(deadDropGuid));
-            if (manager == null)
-            {
-                Utils.Logger.Debug("DeadDropManager", $"Could not find dead drop: {deadDropGuid}");
-
-                return null;
-            }
-
-            return manager._deadDrop;
-        }
-
-        public static List<DeadDrop> GetAllDeadDrops()
+        public static List<DeadDrop> GetDeadDropsByDistance(Transform origin)
         {
             List<DeadDrop> deadDrops = [];
+
             foreach (DeadDropManager manager in cache)
             {
-                deadDrops.Add(manager._deadDrop);
+                deadDrops.Add(manager.DeadDrop);
             }
 
-            return deadDrops;
-        }
-
-        public static bool DeadDropExists(DeadDrop deadDrop)
-        {
-            return cache.Any(x => x._deadDrop == deadDrop);
-        }
-
-        public static List<DeadDrop> GetAllByDistance(Transform origin)
-        {
-            List<DeadDrop> deadDrops = GetAllDeadDrops();
             deadDrops.Sort((x, y) => (x.transform.position - origin.position).sqrMagnitude.CompareTo((y.transform.position - origin.position).sqrMagnitude));
 
             return deadDrops;
         }
 
-        public static bool IsFull(DeadDrop deadDrop)
+        public static DeadDropManager GetInstance(DeadDrop deadDrop) => GetInstance(deadDrop.GUID.ToString());
+
+        public static DeadDropManager GetInstance(string guid)
         {
-            return (deadDrop.Storage.ItemCount >= deadDrop.Storage.SlotCount);
+            if (guid == null)
+            {
+                return null;
+            }
+
+            return cache.Find(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static Vector3 GetPosition(DeadDrop deadDrop)
+        public static void AddDeadDrop(DeadDrop deadDrop)
         {
-            return deadDrop.transform.position;
+            if (!DeadDropExists(deadDrop))
+            {
+                cache.Add(new(deadDrop));
+
+                Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.DeadDropName}");
+            }
+        }
+
+        public static bool DeadDropExists(DeadDrop deadDrop) => DeadDropExists(deadDrop.GUID.ToString());
+
+        public static bool DeadDropExists(string guid)
+        {
+            if (guid == null)
+            {
+                return false;
+            }
+
+            return cache.Any(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
         public static void Load()
         {
-            cache.Clear();
+            for (int i = cache.Count; i > 0; i--)
+            {
+                cache[i].Destroy();
+            }
 
             foreach (DeadDrop deadDrop in DeadDrop.DeadDrops)
             {
                 AddDeadDrop(deadDrop);
             }
+        }
+
+        public void Destroy()
+        {
+            cache.Remove(this);
+        }
+
+        public bool IsFull()
+        {
+            return DeadDrop.Storage.ItemCount >= DeadDrop.Storage.SlotCount;
+        }
+
+        public Vector3 GetPosition()
+        {
+            return DeadDrop.transform.position;
         }
     }
 }

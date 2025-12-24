@@ -24,7 +24,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && !ModConfig.RealisticMode)
+            if (_dealerManager.Dealer.IsRecruited && !ModConfig.RealisticMode)
             {
                 return true;
             }
@@ -35,9 +35,9 @@ namespace AdvancedDealing.Messaging.Messages
         {
             Singleton<GameplayMenu>.Instance.SetIsOpen(false);
 #if IL2CPP
-            _dealerManager.ManagedDealer.TradeItems();
+            _dealerManager.Dealer.TradeItems();
 #elif MONO
-            typeof(Dealer).GetMethod("TradeItems", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(_dealerManager.ManagedDealer, []);
+            typeof(Dealer).GetMethod("TradeItems", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(_dealerManager.Dealer, []);
 #endif
         }
     }

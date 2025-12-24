@@ -7,20 +7,18 @@ using AdvancedDealing.Persistence.Datas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.Economy;
-using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
 using Il2CppScheduleOne.GameTime;
 #elif MONO
-using System.Reflection;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.Economy;
-using ScheduleOne.ItemFramework;
 using ScheduleOne.Messaging;
 using ScheduleOne.NPCs;
 using ScheduleOne.UI.Phone.Messages;
@@ -31,35 +29,46 @@ namespace AdvancedDealing.Economy
 {
     public class DealerManager
     {
-        private readonly Dealer _dealer;
+        private static readonly List<DealerManager> cache = [];
 
-        public DealerData DealerData { get; private set; }
+        public readonly Dealer Dealer;
 
         public readonly ScheduleManager Schedule;
 
         public readonly ConversationManager Conversation;
 
-        public Dealer ManagedDealer => _dealer;
+        public string DeadDrop;
 
-        // public ConversationManager Conversation { get; private set; }
+        public bool IsFired;
 
-        private static readonly List<DealerManager> cache = [];
+        public int MaxCustomers;
 
-        public static readonly List<string> ValidDealers =
-        [
-            "Benji",
-            "Molly",
-            "Brad",
-            "Jane",
-            "Wei",
-            "Leo"
-        ];
+        public int ItemSlots;
 
-        private DealerManager(Dealer dealer)
+        public float Cut;
+
+        public float SpeedMultiplier;
+
+        public float Experience;
+
+        public int Level;
+
+        public float Loyality;
+
+        public bool DeliverCash;
+
+        public bool NotifyOnCashDelivery;
+
+        public float CashThreshold;
+
+        public int DaysUntilNextNegotiation;
+
+        public bool HasChanged;
+
+        public DealerManager(Dealer dealer)
         {
-            _dealer = dealer;
-
-            DealerData dealerData = SaveManager.Instance.SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.name));
+            Dealer = dealer;
+            DealerData dealerData = SaveManager.Instance.SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.GUID.ToString()));
 
             if (dealerData == null)
             {
@@ -68,324 +77,75 @@ namespace AdvancedDealing.Economy
                 SaveManager.Instance.SaveData.Dealers.Add(dealerData);
             }
 
-            ScheduleManager schedule = new(dealer);
-            schedule.AddAction(new DeliverCashSignal(dealer));
+            PatchData(dealerData);
 
-            ConversationManager conversation = new(dealer);
-            conversation.AddMessage(new EnableDeliverCash(this));
-            conversation.AddMessage(new DisableDeliverCash(this));
-            conversation.AddMessage(new AccessInventory(this));
-            conversation.AddMessage(new NegotiateCut(this));
-            conversation.AddMessage(new AdjustSettings(this));
-            conversation.AddMessage(new Fired(this));
+            UpdateDealer();
 
-            DealerData = dealerData;
-            Schedule = schedule;
-            Conversation = conversation;
+            NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(OnMinPassed);
+            NetworkSingleton<TimeManager>.Instance.onDayPass += new Action(OnDayPassed);
+
+            Schedule = new(dealer);
+            Schedule.AddAction(new DeliverCashSignal(this));
+
+            Conversation = new(dealer);
+            Conversation.AddMessage(new EnableDeliverCash(this));
+            Conversation.AddMessage(new DisableDeliverCash(this));
+            Conversation.AddMessage(new AccessInventory(this));
+            Conversation.AddMessage(new NegotiateCut(this));
+            Conversation.AddMessage(new AdjustSettings(this));
+            Conversation.AddMessage(new Fired(this));
         }
 
-        public static void SetData(Dealer dealer, DealerData dealerData)
+        public static List<DealerManager> GetAllInstances()
         {
-            if (!DealerExists(dealer)) return;
-
-            DealerManager manager = GetManager(dealer);
-            manager.DealerData = dealerData;
+            return cache;
         }
 
-        public static DealerManager GetManager(Dealer dealer)
+        public static DealerManager GetInstance(Dealer dealer) => GetInstance(dealer.GUID.ToString());
+
+        public static DealerManager GetInstance(string guid)
         {
-            return cache.Find(x => x._dealer == dealer);
-        }
-
-        public static DealerManager GetManager(string dealerGuid)
-        {
-            return cache.Find(x => x._dealer.GUID.ToString().Contains(dealerGuid));
-        }
-
-        public static void AddDealer(Dealer dealer)
-        {
-            if (!dealer.IsRecruited || !IsValid(dealer) || DealerExists(dealer)) return;
-
-            DealerManager manager = new(dealer);
-            cache.Add(manager);
-
-            Update(manager._dealer, SyncManager.IsNoSyncOrActiveAndHost);
-
-            Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.fullName}");
-        }
-
-        public static Dealer GetDealer(string dealerGuid)
-        {
-            DealerManager manager = GetManager(dealerGuid);
-
-            if (manager == null)
-            {
-                Utils.Logger.Debug("DealerManager", $"Could not find dealer: {dealerGuid}");
-
-                return null;
-            }
-
-            return manager._dealer;
-        }
-
-        public static List<Dealer> GetAllDealers()
-        {
-            List<Dealer> dealers = [];
-
-            foreach (DealerManager manager in cache)
-            {
-                dealers.Add(manager._dealer);
-            }
-
-            return dealers;
-        }
-
-        public static bool DealerExists(string dealerGuid)
-        {
-            return cache.Any(x => x._dealer.GUID.ToString().Contains(dealerGuid));
-        }
-
-        public static bool DealerExists(Dealer dealer)
-        {
-            return cache.Any(x => x._dealer == dealer);
-        }
-
-        public static void RemoveDealer(Dealer dealer)
-        {
-            if (!DealerExists(dealer)) return;
-
-            DealerManager manager = GetManager(dealer);
-            manager.Schedule.Destroy();
-            cache.Remove(manager);
-
-            Utils.Logger.Debug("DealerManager", $"Dealer removed: {dealer.fullName}");
-        }
-
-        private static bool IsValid(Dealer dealer)
-        {
-            return ValidDealers.Any(s => s.Contains(dealer.name));
-        }
-
-        public static void Update(Dealer dealer, bool shouldSync = true)
-        {
-            if (!DealerExists(dealer)) return;
-
-            DealerManager manager = GetManager(dealer);
-
-            // Maybe start schedule
-            if (SyncManager.IsNoSyncOrActiveAndHost && manager.Schedule != null && !manager.Schedule.IsEnabled)
-            {
-                manager.Schedule.Start();
-            }
-
-            SetItemSlots(dealer, manager.DealerData.ItemSlots);
-            SetCut(dealer, manager.DealerData.Cut);
-            SetSpeedMultiplier(dealer, manager.DealerData.SpeedMultiplier);
-
-            if (manager.DealerData.IsFired)
-            {
-                Fire(dealer);
-            }
-
-            if (shouldSync)
-            {
-                SyncManager.Instance.PushUpdate();
-            }
-        }
-
-        public static void SetCut(Dealer dealer, float cut)
-        {
-            float currentCut = dealer.Cut;
-
-            if (!DealerExists(dealer) || currentCut == cut) return;
-
-            try
-            {
-                dealer.Cut = cut;
-
-                DealerManager manager = GetManager(dealer);
-                manager.DealerData.Cut = cut;
-
-                Utils.Logger.Debug("DealerManager", $"Cut for {dealer.fullName} set: {cut}");
-            }
-            catch (Exception ex)
-            {
-                Utils.Logger.Error("DealerManager", $"Could not set cut for {dealer.fullName}", ex);
-            }
-        }
-
-        public static void SetSpeedMultiplier(Dealer dealer, float multiplier)
-        {
-            NPCSpeedController speedController = dealer.Movement.SpeedController;
-            float currentMultiplier = speedController.SpeedMultiplier;
-
-            if (!DealerExists(dealer) || currentMultiplier == multiplier) return;
-
-            try
-            {
-                speedController.SpeedMultiplier = multiplier;
-
-                DealerManager manager = GetManager(dealer);
-                manager.DealerData.SpeedMultiplier = multiplier;
-
-                Utils.Logger.Debug("DealerManager", $"Speed multiplier for {dealer.fullName} set: {multiplier}");
-            }
-            catch (Exception ex)
-            {
-                Utils.Logger.Error("DealerManager", $"Could not set speed multiplier for {dealer.fullName}", ex);
-            }
-        }
-
-        public static void SetItemSlots(Dealer dealer, int slots)
-        {
-            NPCInventory inventory = dealer.Inventory;
-            int currentSlots = inventory.ItemSlots.Count;
-
-            if (!DealerExists(dealer) || currentSlots == slots) return;
-
-            try
-            {
-                if (currentSlots < slots)
-                {
-                    int slotsToAdd = slots - currentSlots;
-
-                    for (int i = 0; i < slotsToAdd; i++)
-                    {
-                        inventory.ItemSlots.Add(new ItemSlot());
-                    }
-
-                    Utils.Logger.Debug("DealerManager", $"Added item slots to {dealer.fullName}: {slotsToAdd} ");
-                }
-                else
-                {
-                    int slotsToRemove = currentSlots - slots;
-
-                    inventory.ItemSlots.RemoveRange(currentSlots - slotsToRemove, slotsToRemove);
-
-                    Utils.Logger.Debug("DealerManager", $"Removed item slots from {dealer.fullName}: {slotsToRemove} ");
-                }
-
-                DealerManager manager = GetManager(dealer);
-                manager.DealerData.ItemSlots = slots;
-            }
-            catch (Exception ex)
-            {
-                Utils.Logger.Error("DealerManager", $"Could not set item slots for {dealer.fullName}", ex);
-            }
-        }
-
-        public static void SetDeadDrop(Dealer dealer, string guid)
-        {
-            if (!DealerExists(dealer)) return;
-
-            DealerManager manager = GetManager(dealer);
-            string currentDeadDrop = manager.DealerData.DeadDrop;
-
-            if (currentDeadDrop == guid) return;
-
-            if (guid != null)
-            {
-                DeadDrop deadDrop = DeadDropManager.GetDeadDrop(guid);
-                if (deadDrop == null)
-                {
-                    guid = null;
-                }
-            }
-
-            manager.DealerData.DeadDrop = guid;
-
-            Utils.Logger.Debug("DealerManager", $"Dead drop for {dealer.fullName} set: {guid}");
-        }
-
-        public static DeadDrop GetDeadDrop(Dealer dealer)
-        {
-            if (!DealerExists(dealer))
-            {
-                return null;
-            }
-
-            DealerManager manager = GetManager(dealer);
-            string guid = manager.DealerData.DeadDrop;
-
             if (guid == null)
             {
                 return null;
             }
-            else
+
+            return cache.Find(x => x.Dealer.GUID.ToString().Contains(guid));
+        }
+
+        public static void AddDealer(Dealer dealer)
+        {
+            if (dealer.IsRecruited && IsPlayerDealer(dealer) && !DealerExists(dealer))
             {
-                return DeadDropManager.GetDeadDrop(guid);
+                cache.Add(new(dealer));
+
+                Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.fullName}");
             }
         }
 
-        public static void Fire(Dealer dealer)
+        public static bool DealerExists(Dealer dealer) => DealerExists(dealer.GUID.ToString());
+
+        public static bool DealerExists(string guid)
         {
-            dealer.SetCash(0f);
-            
-            for (int i = dealer.AssignedCustomers.Count - 1; i >= 0; i--)
+            if (guid == null)
             {
-                dealer.RemoveCustomer(dealer.AssignedCustomers[i]);
+                return false;
             }
 
-            dealer.ActiveContracts.Clear();
-            dealer.Inventory.Clear();
-            dealer.HasChanged = true;
-
-#if IL2CPP
-            if (PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer == dealer)
-            {
-                PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer = null;
-            }
-
-            PlayerSingleton<DealerManagementApp>.Instance.dealers.Remove(dealer);
-            dealer.IsRecruited = false;
-#elif MONO
-            
-            if (PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer == dealer)
-            {
-                typeof(DealerManagementApp).GetProperty("SelectedDealer").SetValue(PlayerSingleton<DealerManagementApp>.Instance, null);
-            }
-            
-            List<Dealer> dealers = typeof(DealerManagementApp).GetField("dealers", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance) as List<Dealer>;            
-            dealers.Remove(dealer);
-            typeof(Dealer).GetProperty("IsRecruited").SetValue(dealer, false);
-#endif
-            if (SyncManager.IsActiveAndHost)
-            {
-                SyncManager.Instance.SendLobbyChatMsg($"dealer_fired__{dealer.GUID}");
-            }
-
-            RemoveDealer(dealer);
-            SendMessage(dealer, "Hmpf okay, get in touch if you need me", false, true, 0.5f);
-
-            Utils.Logger.Debug("DealerManager", $"Dealer fired: {dealer.fullName}");
+            return cache.Any(x => x.Dealer.GUID.ToString().Contains(guid));
         }
 
-        public static void SendMessage(Dealer dealer, string text, bool notify = true, bool network = true, float delay = 0)
+        public static bool IsPlayerDealer(Dealer dealer)
         {
-            if (delay != 0)
-            {
-                MessageChain msgChain = new();
-                msgChain.Messages.Add(text);
-                msgChain.id = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-
-                dealer.MSGConversation.SendMessageChain(msgChain, delay, notify, network);
-            }
-            else
-            {
-                Message msg = new(text, Message.ESenderType.Other);
-                dealer.MSGConversation.SendMessage(msg, notify, network);
-            }
-        }
-
-        public static void SendPlayerMessage(Dealer dealer, string text)
-        {
-            Message msg = new(text, Message.ESenderType.Player);
-            dealer.MSGConversation.SendMessage(msg);
+            return Dealer.AllPlayerDealers.Contains(dealer);
         }
 
         public static void Load()
         {
-            cache.Clear();
+            for (int i = cache.Count; i > 0; i--)
+            {
+                cache[i].Destroy();
+            }
 
             foreach (Dealer dealer in Dealer.AllPlayerDealers)
             {
@@ -394,8 +154,6 @@ namespace AdvancedDealing.Economy
 
             Dealer.onDealerRecruited -= new Action<Dealer>(OnDealerRecruited);
             Dealer.onDealerRecruited += new Action<Dealer>(OnDealerRecruited);
-            NetworkSingleton<TimeManager>.Instance.onDayPass -= new Action(OnDayPass);
-            NetworkSingleton<TimeManager>.Instance.onDayPass += new Action(OnDayPass);
         }
 
         private static void OnDealerRecruited(Dealer dealer)
@@ -403,14 +161,180 @@ namespace AdvancedDealing.Economy
             AddDealer(dealer);
         }
 
-        private static void OnDayPass()
+        public void Destroy()
         {
-            foreach (DealerManager manager in cache)
+            NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(OnMinPassed);
+            NetworkSingleton<TimeManager>.Instance.onDayPass -= new Action(OnDayPassed);
+
+            Schedule.Destroy();
+            Conversation.Destroy();
+
+            cache.Remove(this);
+        }
+
+        public DealerData FetchData()
+        {
+            DealerData data = new(Dealer.GUID.ToString());
+            FieldInfo[] fields = typeof(DealerData).GetFields();
+
+            for (int i = 0; i < fields.Length; i++)
             {
-                if (manager.DealerData.DaysUntilNextNegotiation > 0)
+                FieldInfo localField = GetType().GetField(fields[i].Name);
+                if (localField != null)
                 {
-                    manager.DealerData.DaysUntilNextNegotiation--;
+                    fields[i].SetValue(data, localField.GetValue(this));
                 }
+            }
+
+            return data;
+        }
+
+        public void PatchData(DealerData data)
+        {
+            FieldInfo[] fields = typeof(DealerData).GetFields();
+
+            for (int i = 0; i < fields.Length; i++)
+            {
+                FieldInfo localField = GetType().GetField(fields[i].Name);
+                localField?.SetValue(this, fields[i].GetValue(data));
+            }
+        }
+
+        public void SendMessage(string text, bool notify = true, bool network = true, float delay = 0)
+        {
+            if (delay != 0)
+            {
+                MessageChain msgChain = new();
+                msgChain.Messages.Add(text);
+                msgChain.id = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+
+                Dealer.MSGConversation.SendMessageChain(msgChain, delay, notify, network);
+            }
+            else
+            {
+                Message msg = new(text, Message.ESenderType.Other);
+                Dealer.MSGConversation.SendMessage(msg, notify, network);
+            }
+        }
+
+        public void SendPlayerMessage(string text)
+        {
+            Message msg = new(text, Message.ESenderType.Player);
+            Dealer.MSGConversation.SendMessage(msg);
+        }
+
+        public void Fire()
+        {
+            IsFired = true;
+
+            Dealer.SetCash(0f);
+
+            for (int i = Dealer.AssignedCustomers.Count - 1; i >= 0; i--)
+            {
+                Dealer.RemoveCustomer(Dealer.AssignedCustomers[i]);
+            }
+
+            Dealer.ActiveContracts.Clear();
+            Dealer.Inventory.Clear();
+            Dealer.HasChanged = true;
+
+#if IL2CPP
+            if (PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer == Dealer)
+            {
+                PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer = null;
+            }
+
+            PlayerSingleton<DealerManagementApp>.Instance.dealers.Remove(Dealer);
+            Dealer.IsRecruited = false;
+#elif MONO
+            if (PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer == Dealer)
+            {
+                typeof(DealerManagementApp).GetProperty("SelectedDealer").SetValue(PlayerSingleton<DealerManagementApp>.Instance, null);
+            }
+            
+            List<Dealer> dealers = typeof(DealerManagementApp).GetField("dealers", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance) as List<Dealer>;            
+            dealers.Remove(Dealer);
+            typeof(Dealer).GetProperty("IsRecruited").SetValue(Dealer, false);
+#endif
+
+            if (SyncManager.IsActiveAndHost)
+            {
+                SyncManager.Instance.SendLobbyChatMsg($"dealer_fired__{Dealer.GUID}");
+            }
+
+            SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
+            SaveManager.Instance.UpdateData(FetchData());
+            Destroy();
+
+            Utils.Logger.Debug("DealerManager", $"Dealer fired: {Dealer.fullName}");
+        }
+
+        private void UpdateDealer()
+        {
+            NPCInventory inventory = Dealer.Inventory;
+
+            if (inventory.ItemSlots.Count < ItemSlots)
+            {
+                int slotsToAdd = ItemSlots - inventory.ItemSlots.Count;
+
+                for (int i = 0; i < slotsToAdd; i++)
+                {
+                    inventory.ItemSlots.Add(new());
+                    inventory.SlotCount = ItemSlots;
+                }
+
+                Utils.Logger.Debug("DealerManager", $"Added item slots to {Dealer.fullName}: {slotsToAdd} ");
+            }
+            else if (inventory.ItemSlots.Count > ItemSlots)
+            {
+                int slotsToRemove = inventory.ItemSlots.Count - ItemSlots;
+
+                inventory.ItemSlots.RemoveRange(inventory.ItemSlots.Count - slotsToRemove, slotsToRemove);
+                inventory.SlotCount = ItemSlots;
+
+                Utils.Logger.Debug("DealerManager", $"Removed item slots from {Dealer.fullName}: {slotsToRemove} ");
+            }
+
+            if (Dealer.Cut != Cut)
+            {
+                Dealer.Cut = Cut;
+
+                Utils.Logger.Debug("DealerManager", $"Cut for {Dealer.fullName} set: {Cut}");
+            }
+
+            if (Dealer.Movement.SpeedController.SpeedMultiplier != SpeedMultiplier)
+            {
+                Dealer.Movement.SpeedController.SpeedMultiplier = SpeedMultiplier;
+
+                Utils.Logger.Debug("DealerManager", $"Speed multiplier for {Dealer.fullName} set: {SpeedMultiplier}");
+            }
+        }
+
+        private void OnMinPassed()
+        {
+            if (IsFired)
+            {
+                return;
+            }
+
+            if (SyncManager.IsNoSyncOrActiveAndHost && Schedule != null && !Schedule.IsEnabled)
+            {
+                Schedule.Start();
+            }
+
+            if (HasChanged)
+            {
+                HasChanged = false;
+
+                UpdateDealer();
+            }
+        }
+
+        private void OnDayPassed()
+        {
+            if (DaysUntilNextNegotiation > 0)
+            {
+                DaysUntilNextNegotiation--;
             }
         }
     }

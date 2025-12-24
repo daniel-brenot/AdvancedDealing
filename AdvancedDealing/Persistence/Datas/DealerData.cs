@@ -4,8 +4,6 @@
     {
         public string DeadDrop;
 
-        public bool IsFired;
-
         public int MaxCustomers;
 
         public int ItemSlots;
@@ -33,7 +31,6 @@
         public override void SetDefaults()
         {
             DeadDrop = null;
-            IsFired = false;
             MaxCustomers = 8;
             ItemSlots = 5;
             Cut = 0.2f;

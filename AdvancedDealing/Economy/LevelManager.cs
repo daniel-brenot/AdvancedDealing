@@ -2,23 +2,23 @@
 
 namespace AdvancedDealing.Economy
 {
-    public class LevelSystem
+    public class LevelManager
     {
         private readonly DealerManager _dealerManager;
 
         private static readonly List<DealerLevel> levels = [];
 
-        public LevelSystem(DealerManager dealerManager)
+        public LevelManager(DealerManager dealerManager)
         {
             _dealerManager = dealerManager;
         }
 
         public void AddXP(float amount)
         {
-            _dealerManager.DealerData.Experience += amount;
-            int calculatedLevel = CalculateLevel(_dealerManager.DealerData.Experience);
+            _dealerManager.Experience += amount;
+            int calculatedLevel = CalculateLevel(_dealerManager.Experience);
 
-            if (calculatedLevel > _dealerManager.DealerData.Level)
+            if (calculatedLevel > _dealerManager.Level)
             {
                 LevelUp(calculatedLevel);
             }
@@ -28,12 +28,12 @@ namespace AdvancedDealing.Economy
         {
             DealerLevel level = levels[newLevel - 1];
 
-            _dealerManager.DealerData.Level = newLevel;
-            _dealerManager.DealerData.MaxCustomers = level.MaxCustomers;
-            _dealerManager.DealerData.ItemSlots = level.ItemSlots;
-            _dealerManager.DealerData.SpeedMultiplier = level.SpeedMultiplier;
+            _dealerManager.Level = newLevel;
+            _dealerManager.MaxCustomers = level.MaxCustomers;
+            _dealerManager.ItemSlots = level.ItemSlots;
+            _dealerManager.SpeedMultiplier = level.SpeedMultiplier;
 
-            DealerManager.Update(_dealerManager.ManagedDealer, true);
+            _dealerManager.HasChanged = true;
 
             // NOTIFY PLAYER
         }

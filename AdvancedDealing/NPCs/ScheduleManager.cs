@@ -24,6 +24,8 @@ namespace AdvancedDealing.NPCs
 
         private readonly List<ActionBase> _actionList = [];
 
+        private readonly NPCScheduleManager _originalSchedule;
+
         public readonly NPC NPC;
 
         public bool IsEnabled { get; protected set; }
@@ -34,14 +36,12 @@ namespace AdvancedDealing.NPCs
 
         private List<ActionBase> ActionsAwaitingStart { get; set; } = [];
 
-        private readonly NPCScheduleManager _originalSchedule;
-
         public ScheduleManager(NPC npc)
         {
             NPC = npc;
             _originalSchedule = npc.GetComponentInChildren<NPCScheduleManager>();
 
-            Utils.Logger.Debug("ScheduleManager", $"Schedule created: {npc.GUID}");
+            Utils.Logger.Debug("ScheduleManager", $"Schedule created: {npc.fullName}");
 
             cache.Add(this);
         }

@@ -31,7 +31,7 @@ namespace AdvancedDealing.Messaging
             NPC = npc;
             Conversation = npc.MSGConversation;
 
-            Utils.Logger.Debug("ConversationManager", $"Conversation created: {npc.GUID}");
+            Utils.Logger.Debug("ConversationManager", $"Conversation created: {npc.fullName}");
 
             cache.Add(this);
         }

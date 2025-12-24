@@ -26,7 +26,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && SyncManager.IsNoSyncOrActiveAndHost)
+            if (_dealerManager.Dealer.IsRecruited && SyncManager.IsNoSyncOrActiveAndHost)
             {
                 return true;
             }
@@ -42,7 +42,7 @@ namespace AdvancedDealing.Messaging.Messages
         {
             if (response == ConfirmationPopup.EResponse.Confirm)
             {
-                DealerManager.Fire(_dealerManager.ManagedDealer);
+                _dealerManager.Fire();
             }
         }
     }

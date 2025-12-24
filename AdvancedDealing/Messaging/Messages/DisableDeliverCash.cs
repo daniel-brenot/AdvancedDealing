@@ -18,7 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && _dealerManager.DealerData.DeliverCash)
+            if (_dealerManager.Dealer.IsRecruited && _dealerManager.DeliverCash)
             {
                 return true;
             }
@@ -27,9 +27,10 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            _dealerManager.DealerData.DeliverCash = false;
-            DealerManager.SendPlayerMessage(_dealerManager.ManagedDealer, "The dead drops are not safe atm... I will meet you to take the cash!");
-            DealerManager.SendMessage(_dealerManager.ManagedDealer, $"Okay", false, true, 2f);
+            _dealerManager.DeliverCash = false;
+
+            _dealerManager.SendPlayerMessage("The dead drops are not safe atm... I will meet you to take the cash!");
+            _dealerManager.SendMessage($"Okay", false, true, 2f);
         }
     }
 }

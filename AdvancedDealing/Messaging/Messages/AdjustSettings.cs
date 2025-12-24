@@ -19,7 +19,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.ManagedDealer.IsRecruited && !ModConfig.RealisticMode)
+            if (_dealerManager.Dealer.IsRecruited && !ModConfig.RealisticMode)
             {
                 return true;
             }
