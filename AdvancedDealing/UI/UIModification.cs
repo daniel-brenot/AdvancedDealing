@@ -1,9 +1,15 @@
-﻿using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Persistence;
-using MelonLoader;
+﻿using MelonLoader;
 using System;
 using System.Collections;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.Persistence;
+#elif MONO
+using ScheduleOne.DevUtilities;
+using ScheduleOne.Persistence;
+#endif
 
 namespace AdvancedDealing.UI
 {

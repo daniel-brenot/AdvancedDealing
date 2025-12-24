@@ -7,8 +7,6 @@ using AdvancedDealing.Persistence.Datas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Il2CppScheduleOne.GameTime;
-
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
@@ -17,6 +15,7 @@ using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
+using Il2CppScheduleOne.GameTime;
 #elif MONO
 using System.Reflection;
 using ScheduleOne.DevUtilities;
@@ -25,6 +24,7 @@ using ScheduleOne.ItemFramework;
 using ScheduleOne.Messaging;
 using ScheduleOne.NPCs;
 using ScheduleOne.UI.Phone.Messages;
+using ScheduleOne.GameTime;
 #endif
 
 namespace AdvancedDealing.Economy
@@ -111,7 +111,7 @@ namespace AdvancedDealing.Economy
 
             Update(manager._dealer, SyncManager.IsNoSyncOrActiveAndHost);
 
-            Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.GUID}");
+            Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.fullName}");
         }
 
         public static Dealer GetDealer(string dealerGuid)
@@ -158,7 +158,7 @@ namespace AdvancedDealing.Economy
             manager.Schedule.Destroy();
             cache.Remove(manager);
 
-            Utils.Logger.Debug("DealerManager", $"Dealer removed: {dealer.GUID}");
+            Utils.Logger.Debug("DealerManager", $"Dealer removed: {dealer.fullName}");
         }
 
         private static bool IsValid(Dealer dealer)
@@ -206,11 +206,11 @@ namespace AdvancedDealing.Economy
                 DealerManager manager = GetManager(dealer);
                 manager.DealerData.Cut = cut;
 
-                Utils.Logger.Debug("DealerManager", $"Cut for {dealer.name} set: {cut}");
+                Utils.Logger.Debug("DealerManager", $"Cut for {dealer.fullName} set: {cut}");
             }
             catch (Exception ex)
             {
-                Utils.Logger.Error("DealerManager", $"Could not set cut for {dealer.name}", ex);
+                Utils.Logger.Error("DealerManager", $"Could not set cut for {dealer.fullName}", ex);
             }
         }
 
@@ -228,11 +228,11 @@ namespace AdvancedDealing.Economy
                 DealerManager manager = GetManager(dealer);
                 manager.DealerData.SpeedMultiplier = multiplier;
 
-                Utils.Logger.Debug("DealerManager", $"Speed multiplier for {dealer.name} set: {multiplier}");
+                Utils.Logger.Debug("DealerManager", $"Speed multiplier for {dealer.fullName} set: {multiplier}");
             }
             catch (Exception ex)
             {
-                Utils.Logger.Error("DealerManager", $"Could not set speed multiplier for {dealer.name}", ex);
+                Utils.Logger.Error("DealerManager", $"Could not set speed multiplier for {dealer.fullName}", ex);
             }
         }
 
@@ -254,7 +254,7 @@ namespace AdvancedDealing.Economy
                         inventory.ItemSlots.Add(new ItemSlot());
                     }
 
-                    Utils.Logger.Debug("DealerManager", $"Added item slots to {dealer.name}: {slotsToAdd} ");
+                    Utils.Logger.Debug("DealerManager", $"Added item slots to {dealer.fullName}: {slotsToAdd} ");
                 }
                 else
                 {
@@ -262,7 +262,7 @@ namespace AdvancedDealing.Economy
 
                     inventory.ItemSlots.RemoveRange(currentSlots - slotsToRemove, slotsToRemove);
 
-                    Utils.Logger.Debug("DealerManager", $"Removed item slots from {dealer.name}: {slotsToRemove} ");
+                    Utils.Logger.Debug("DealerManager", $"Removed item slots from {dealer.fullName}: {slotsToRemove} ");
                 }
 
                 DealerManager manager = GetManager(dealer);
@@ -270,7 +270,7 @@ namespace AdvancedDealing.Economy
             }
             catch (Exception ex)
             {
-                Utils.Logger.Error("DealerManager", $"Could not set item slots for {dealer.name}", ex);
+                Utils.Logger.Error("DealerManager", $"Could not set item slots for {dealer.fullName}", ex);
             }
         }
 
@@ -294,7 +294,7 @@ namespace AdvancedDealing.Economy
 
             manager.DealerData.DeadDrop = guid;
 
-            Utils.Logger.Debug("DealerManager", $"Dead drop for {dealer.name} set: {guid}");
+            Utils.Logger.Debug("DealerManager", $"Dead drop for {dealer.fullName} set: {guid}");
         }
 
         public static DeadDrop GetDeadDrop(Dealer dealer)
@@ -357,7 +357,7 @@ namespace AdvancedDealing.Economy
             RemoveDealer(dealer);
             SendMessage(dealer, "Hmpf okay, get in touch if you need me", false, true, 0.5f);
 
-            Utils.Logger.Debug("DealerManager", $"Dealer fired: {dealer.GUID}");
+            Utils.Logger.Debug("DealerManager", $"Dealer fired: {dealer.fullName}");
         }
 
         public static void SendMessage(Dealer dealer, string text, bool notify = true, bool network = true, float delay = 0)

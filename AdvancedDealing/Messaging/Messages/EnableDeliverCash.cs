@@ -1,9 +1,9 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.UI;
+using System;
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
-using System;
 #elif MONO
 using ScheduleOne.Messaging;
 #endif
@@ -34,7 +34,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         private void OnSend()
         {
-            float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 1);
+            float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 0);
 
             _dealerManager.DealerData.DeliverCash = true;
             _dealerManager.DealerData.CashThreshold = value;

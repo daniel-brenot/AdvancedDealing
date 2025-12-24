@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static Il2CppScheduleOne.DevUtilities.ValueTracker;
-
 
 #if IL2CPP
 using Il2CppScheduleOne;
@@ -140,8 +138,8 @@ namespace AdvancedDealing.UI
             buttons[0].onClick.AddListener((UnityAction)OnCancel);
 
             SendButton = buttons[2];
-            SendButton.gameObject.name = "Send Offer";
-            SendButton.GetComponentInChildren<Text>().text = "Send Offer";
+            SendButton.gameObject.name = "Send";
+            SendButton.GetComponentInChildren<Text>().text = "Send";
             SendButton.colors = new()
             {
                 normalColor = new Color(0.2941f, 0.6863f, 0.8824f, 1f),

@@ -2,7 +2,6 @@
 using System;
 using AdvancedDealing.Persistence;
 
-
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.Economy;
@@ -36,7 +35,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            PlayerSingleton<MessagesApp>.Instance.ConfirmationPopup.Open("Are you sure?", $"Calling off the cooperation with {_dealerManager.ManagedDealer.fullName} could make him really mad.\n\nHe maybe will become hostile.\n(In future updates)", S1Conversation, new Action<ConfirmationPopup.EResponse>(OnConfirmationResponse));
+            PlayerSingleton<MessagesApp>.Instance.ConfirmationPopup.Open("Are you sure?", $"Calling off the cooperation could make a dealer really mad.\n\nHe maybe will become hostile.\n(In future updates)", S1Conversation, new Action<ConfirmationPopup.EResponse>(OnConfirmationResponse));
         }
 
         private void OnConfirmationResponse(ConfirmationPopup.EResponse response)

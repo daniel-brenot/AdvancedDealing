@@ -71,8 +71,8 @@ namespace AdvancedDealing
             realisticModeCategory = MelonPreferences.CreateCategory($"{ModInfo.Name}_02_RealisticMode", $"{ModInfo.Name} - Realistic Mode Settings", false, true);
             string path = Path.Combine(MelonEnvironment.UserDataDirectory, $"{ModInfo.Name}.cfg");
 
-            generalCategory.SetFilePath(path, true);
-            realisticModeCategory.SetFilePath(path, true);
+            generalCategory.SetFilePath(path, true, false);
+            realisticModeCategory.SetFilePath(path, true, false);
 
             CreateEntries();
 

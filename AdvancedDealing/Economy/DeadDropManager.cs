@@ -38,7 +38,7 @@ namespace AdvancedDealing.Economy
             DeadDropManager manager = new(deadDrop);
             cache.Add(manager);
 
-            Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.GUID}");
+            Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.DeadDropName}");
         }
 
         public static DeadDrop GetDeadDrop(string deadDropGuid)
