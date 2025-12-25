@@ -27,27 +27,29 @@ namespace AdvancedDealing.UI
 
         public static void Load()
         {
-            if (IsLoaded) return;
-
-            SettingsPopup ??= new();
-            SliderPopup ??= new();
-            DeadDropSelector ??= new();
-            CustomersScrollView ??= new();
-
-            MelonCoroutines.Start(CreateUI());
-
-            IEnumerator CreateUI()
+            if (!IsLoaded)
             {
-                yield return new WaitUntil((Func<bool>)(() => !PersistentSingleton<LoadManager>.Instance.IsLoading && PersistentSingleton<LoadManager>.Instance.IsGameLoaded));
 
-                SettingsPopup.CreateUI();
-                SliderPopup.CreateUI();
-                DeadDropSelector.CreateUI();
-                CustomersScrollView.CreateUI();
+                SettingsPopup ??= new();
+                SliderPopup ??= new();
+                DeadDropSelector ??= new();
+                CustomersScrollView ??= new();
 
-                Utils.Logger.Msg("UI elements created");
+                MelonCoroutines.Start(CreateUI());
 
-                IsLoaded = true;
+                IEnumerator CreateUI()
+                {
+                    yield return new WaitUntil((Func<bool>)(() => !PersistentSingleton<LoadManager>.Instance.IsLoading && PersistentSingleton<LoadManager>.Instance.IsGameLoaded));
+
+                    SettingsPopup.CreateUI();
+                    SliderPopup.CreateUI();
+                    DeadDropSelector.CreateUI();
+                    CustomersScrollView.CreateUI();
+
+                    Utils.Logger.Msg("UI elements created");
+
+                    IsLoaded = true;
+                }
             }
         }
 

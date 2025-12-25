@@ -21,12 +21,6 @@ namespace AdvancedDealing.UI
 {
     public class SettingsPopup
     {
-        private DealerManager _dealerManager;
-
-        private readonly List<GameObject> _inputFields = [];
-
-        private GameObject _inputFieldTemplate;
-
         public GameObject Container;
 
         public Text TitleLabel;
@@ -34,6 +28,12 @@ namespace AdvancedDealing.UI
         public Button ApplyButton;
 
         public Transform Content;
+
+        private readonly List<GameObject> _inputFields = [];
+
+        private DealerManager _dealerManager;
+
+        private GameObject _inputFieldTemplate;
 
         public bool UICreated { get; private set; }
 

@@ -21,12 +21,6 @@ namespace AdvancedDealing.UI
 {
     public class DeadDropSelector
     {
-        private DealerManager _dealerManager;
-
-        private readonly List<GameObject> _selectables = [];
-
-        private GameObject _selectableTemplate;
-
         public GameObject Container;
 
         public Text TitleLabel;
@@ -36,6 +30,12 @@ namespace AdvancedDealing.UI
         public GameObject Button;
 
         public Text ButtonLabel;
+
+        private readonly List<GameObject> _selectables = [];
+
+        private DealerManager _dealerManager;
+
+        private GameObject _selectableTemplate;
 
         public bool UICreated { get; private set; }
 

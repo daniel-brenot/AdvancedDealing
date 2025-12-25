@@ -16,14 +16,6 @@ namespace AdvancedDealing.UI
 {
     public class SliderPopup
     {
-        private int _digits;
-
-        private float _stepSize;
-
-        private string _format;
-
-        private System.IFormatProvider _provider;
-
         public GameObject Container;
 
         public Text TitleLabel;
@@ -41,6 +33,14 @@ namespace AdvancedDealing.UI
         public System.Action<float> OnSend;
 
         public System.Action OnCancel;
+
+        private int _digits;
+
+        private float _stepSize;
+
+        private string _format;
+
+        private System.IFormatProvider _provider;
 
         public bool UICreated { get; private set; }
 

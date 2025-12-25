@@ -33,13 +33,13 @@ namespace AdvancedDealing.Persistence
 
         private bool _isHost;
 
+        public static SyncManager Instance { get; private set; }
+
         public static bool IsActive => (Instance._isRunning && SaveManager.Instance.SavegameLoaded);
 
         public static bool IsNoSyncOrActiveAndHost => (!IsActive || (IsActive && Instance._isHost));
 
         public static bool IsActiveAndHost => (IsActive && Instance._isHost);
-
-        public static SyncManager Instance { get; private set; }
 
         public SyncManager()
         {
