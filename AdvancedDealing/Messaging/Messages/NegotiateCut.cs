@@ -31,14 +31,12 @@ namespace AdvancedDealing.Messaging.Messages
         {
             float current = (float)Math.Round(_dealerManager.Cut, 2);
 
-            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.Dealer.name})", $"Current: {current:n2}", current, 0f, 1f, 2, OnSend);
+            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.Dealer.name})", $"Current: {current:n2}", current, 0f, 1f, 0.01f, 2, OnSend, null, "P0", null);
         }
 
-        private void OnSend()
+        private void OnSend(float value)
         {
-            float value = (float)Math.Round(UIModification.SliderPopup.Slider.value, 2);
-
-            _dealerManager.SendPlayerMessage($"Joo! We need to talk about your cut.. How about {value}%?");
+            _dealerManager.SendPlayerMessage($"Joo! We need to talk about your cut.. How about {value:P0}?");
 
             if (value == _dealerManager.Cut)
             {

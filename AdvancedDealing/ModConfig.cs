@@ -109,7 +109,7 @@ namespace AdvancedDealing
             (
                 identifier: "RealisticMode",
                 default_value: false,
-                display_name: "Realistic Mode (BETA - New Savegame Recommended)",
+                display_name: "Realistic Mode (WIP) - New savegame recommended",
                 description: "Makes the mod less feel like a cheat",
                 is_hidden: false
             );
@@ -117,7 +117,7 @@ namespace AdvancedDealing
             (
                 identifier: "SkipMovement",
                 default_value: false,
-                display_name: "Skip Movement (Instant Delivery & Pickup)",
+                display_name: "Skip Movement (Instant Delivery)",
                 description: "Skips all movement actions for dealers",
                 is_hidden: false
             );

@@ -16,11 +16,13 @@ namespace AdvancedDealing.UI
 {
     public class SliderPopup
     {
-        private string _valuePrefix;
-
-        private string _valueSuffix;
-
         private int _digits;
+
+        private float _stepSize;
+
+        private string _format;
+
+        private System.IFormatProvider _provider;
 
         public GameObject Container;
 
@@ -36,9 +38,9 @@ namespace AdvancedDealing.UI
 
         public Slider Slider;
 
-        private System.Action _onSend;
+        public System.Action<float> OnSend;
 
-        private System.Action _onCancel;
+        public System.Action OnCancel;
 
         public bool UICreated { get; private set; }
 
@@ -58,20 +60,21 @@ namespace AdvancedDealing.UI
             }
         }
 
-        public void Open(string title, string subtitle, float startValue, float minValue, float maxValue, int digits = 2, System.Action onSendCallback = null, System.Action onCancelCallback = null, string valuePrefix = null, string valueSuffix = null)
+        public void Open(string title, string subtitle, float startValue, float minValue, float maxValue, float stepSize = 0.05f, int digits = 2, System.Action<float> onSendCallback = null, System.Action onCancelCallback = null, string format = "", System.IFormatProvider provider = null)
         {
             IsOpen = true;
             Container.SetActive(true);
 
-            _onSend = onSendCallback;
-            _onCancel = onCancelCallback;
-            _valuePrefix = valuePrefix;
-            _valueSuffix = valueSuffix;
+            OnSend = onSendCallback;
+            OnCancel = onCancelCallback;
             _digits = digits;
+            _stepSize = stepSize;
+            _format = format;
+            _provider = provider;
 
             TitleLabel.text = title;
             SubtitleLabel.text = subtitle;
-            ValueLabel.text = $"{_valuePrefix}{System.Math.Round(startValue, _digits)}{_valueSuffix}";
+            ValueLabel.text = GetSteppedValue(startValue).ToString(_format, _provider);
             Slider.value = startValue;
             Slider.minValue = minValue;
             Slider.maxValue = maxValue;
@@ -83,23 +86,28 @@ namespace AdvancedDealing.UI
             Container.SetActive(false);
         }
 
-        private void OnSend()
+        private void Send()
         {
             if (!IsOpen) return;
             
-            _onSend?.Invoke();
+            OnSend?.Invoke(GetSteppedValue(Slider.value));
             Close();
         }
 
-        private void OnCancel()
+        private void Cancel()
         {
-            _onCancel?.Invoke();
+            OnCancel?.Invoke();
             Close();
         }
 
         private void OnValueChanged(float value)
         {
-            ValueLabel.text = $"{_valuePrefix}{System.Math.Round(value, _digits)}{_valueSuffix}";
+            ValueLabel.text = GetSteppedValue(value).ToString(_format, _provider);
+        }
+
+        private float GetSteppedValue(float value)
+        {
+            return (float)System.Math.Round(Mathf.Round(value / _stepSize) * _stepSize, _digits);
         }
 
         public void CreateUI()
@@ -135,7 +143,7 @@ namespace AdvancedDealing.UI
 
             Button[] buttons = Content.GetComponentsInChildren<Button>();
             buttons[0].onClick.RemoveAllListeners();
-            buttons[0].onClick.AddListener((UnityAction)OnCancel);
+            buttons[0].onClick.AddListener((UnityAction)Cancel);
 
             SendButton = buttons[2];
             SendButton.gameObject.name = "Send";
@@ -151,7 +159,7 @@ namespace AdvancedDealing.UI
                 fadeDuration = 0f,
             };
             SendButton.onClick.RemoveAllListeners();
-            SendButton.onClick.AddListener((UnityAction)OnSend);
+            SendButton.onClick.AddListener((UnityAction)Send);
             SendButton.GetComponent<Image>().color = Color.white;
 
             GameObject slider = Object.Instantiate(GameObject.Find("UI/ItemUIManager/AmountSelector/Slider"), Content);
