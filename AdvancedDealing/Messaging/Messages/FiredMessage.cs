@@ -4,19 +4,17 @@ using AdvancedDealing.Persistence;
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.UI.Phone.Messages;
 #elif MONO
 using ScheduleOne.DevUtilities;
-using ScheduleOne.Economy;
 using ScheduleOne.Messaging;
 using ScheduleOne.UI.Phone.Messages;
 #endif
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class Fired(DealerManager dealerManager) : MessageBase
+    public class FiredMessage(DealerManager dealerManager) : MessageMessage
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -26,7 +24,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && SyncManager.IsNoSyncOrActiveAndHost)
+            if (_dealerManager.Dealer.IsRecruited)
             {
                 return true;
             }

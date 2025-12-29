@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	
 	<!-- Import local build props -->
 	<Import Project="../local.build.props" Condition="Exists('../local.build.props')" />
 
@@ -20,12 +21,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Il2Cpp'">
-		<AssemblyName>AdvancedDealing_Il2Cpp</AssemblyName>
 		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Mono'">
-		<AssemblyName>AdvancedDealing_Mono</AssemblyName>
 		<TargetFramework>netstandard2.1</TargetFramework>
 	</PropertyGroup>
 
@@ -40,8 +39,14 @@
 		<Reference Include="Il2CppFishNet.Runtime">
 			<HintPath>$(Il2CppAssemblyPath)\Il2CppFishNet.Runtime.dll</HintPath>
 		</Reference>
+		<Reference Include="GameKit.Utilities">
+			<HintPath>$(Il2CppAssemblyPath)\Il2CppGameKit.Utilities.dll</HintPath>
+		</Reference>
 		<Reference Include="Il2Cppmscorlib">
 			<HintPath>$(Il2CppAssemblyPath)\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppSystem.Core">
+			<HintPath>$(Il2CppAssemblyPath)\Il2CppSystem.Core.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine">
 			<HintPath>$(Il2CppAssemblyPath)\UnityEngine.dll</HintPath>
@@ -67,6 +72,9 @@
 		</Reference>
 		<Reference Include="FishNet.Runtime">
 			<HintPath>$(MonoAssemblyPath)\FishNet.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="GameKit.Utilities">
+			<HintPath>$(MonoAssemblyPath)\GameKit.Utilities.dll</HintPath>
 		</Reference>
 		<Reference Include="mscorlib">
 			<HintPath>$(MonoAssemblyPath)\mscorlib.dll</HintPath>
@@ -107,10 +115,10 @@
 	<!-- MelonLoader Mono Deps -->
 	<ItemGroup Condition="'$(Configuration)' == 'Mono'">
 		<Reference Include="0Harmony">
-			<HintPath>$(MelonMonoAssemblyPath)/0Harmony.dll</HintPath>
+			<HintPath>$(MelonMonoAssemblyPath)\0Harmony.dll</HintPath>
 		</Reference>
 		<Reference Include="MelonLoader">
-			<HintPath>$(MelonMonoAssemblyPath)/MelonLoader.dll</HintPath>
+			<HintPath>$(MelonMonoAssemblyPath)\MelonLoader.dll</HintPath>
 		</Reference>
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(MelonMonoAssemblyPath)\Newtonsoft.Json.dll</HintPath>
@@ -119,26 +127,33 @@
 
 	<!-- Il2Cpp Mod Integration Deps -->
 	<ItemGroup Condition="'$(Configuration)' == 'Il2Cpp'">
+		<Reference Include="S1NetworkUtility">
+			<HintPath>$(Il2CppGamePath)\Mods\S1NetworkUtility.Il2Cpp.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- Mono Mod Integration Deps -->
 	<ItemGroup Condition="'$(Configuration)' == 'Mono'">
+		<Reference Include="S1NetworkUtility">
+			<HintPath>$(MonoGamePath)\Mods\S1NetworkUtility.Mono.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- Automated local deployment -->
 	<Target Name="PostBuildIl2Cpp" AfterTargets="Build" Condition="'$(AutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'Il2Cpp'">
 		<Message Text="[Il2Cpp] Deploying to local Il2Cpp mods folder" Importance="high" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(NexusDeploymentPath)\Il2Cpp\Mods\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Il2Cpp\Mods\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(Il2CppGamePath)\Mods\AdvancedDealing.Il2Cpp.dll" />
-		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing_Il2Cpp.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Il2Cpp.dll" Condition="'$(SendToRemote)' == 'true'" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(NexusDeploymentPath)\Il2Cpp\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Il2Cpp\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(Il2CppGamePath)\Mods\AdvancedDealing.Il2Cpp.dll" />
+		<Copy SourceFiles=".\bin\Il2Cpp\net6.0\AdvancedDealing.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Il2Cpp.dll" Condition="'$(SendToRemote)' == 'true'" />
 	</Target>
 
 	<Target Name="PostBuildMono" AfterTargets="Build" Condition="'$(AutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'Mono'">
 		<Message Text="[Mono] Deploying to local Mono mods folder" Importance="high" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(NexusDeploymentPath)\Mono\Mods\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Mono\Mods\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(MonoGamePath)\Mods\AdvancedDealing.Mono.dll" />
-		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing_Mono.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Mono.dll" Condition="'$(SendToRemote)' == 'true'" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(NexusDeploymentPath)\Mono\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(ThunderstoreDeploymentPath)\Mono\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(MonoGamePath)\Mods\AdvancedDealing.Mono.dll" />
+		<Copy SourceFiles=".\bin\Mono\netstandard2.1\AdvancedDealing.dll" DestinationFiles="$(RemoteDeploymentPath)\Mods\AdvancedDealing.Mono.dll" Condition="'$(SendToRemote)' == 'true'" />
 	</Target>
+	
 </Project>

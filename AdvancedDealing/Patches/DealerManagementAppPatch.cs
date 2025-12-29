@@ -35,16 +35,16 @@ namespace AdvancedDealing.Patches
                     deadDropName = deadDropManager.DeadDrop.DeadDropName;
                 }
 
-                UIModification.DeadDropSelector.ButtonLabel.text = deadDropName;
-                UIModification.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.Dealer.AssignedCustomers.Count}/{dealerManager.MaxCustomers})";
+                UIInjector.DeadDropSelector.ButtonLabel.text = deadDropName;
+                UIInjector.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.Dealer.AssignedCustomers.Count}/{dealerManager.MaxCustomers})";
 
                 if (!(dealerManager.Dealer.AssignedCustomers.Count >= dealerManager.MaxCustomers))
                 {
-                    UIModification.CustomersScrollView.AssignButton.SetActive(true);
+                    UIInjector.CustomersScrollView.AssignButton.SetActive(true);
                 }
                 else
                 {
-                    UIModification.CustomersScrollView.AssignButton.SetActive(false);
+                    UIInjector.CustomersScrollView.AssignButton.SetActive(false);
                 }
             }
         }

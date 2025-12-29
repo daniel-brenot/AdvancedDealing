@@ -1,4 +1,6 @@
 ﻿using AdvancedDealing.Economy;
+using AdvancedDealing.Persistence;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
@@ -14,7 +16,7 @@ using ScheduleOne.UI;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class AccessInventory(DealerManager dealerManager) : MessageBase
+    public class AccessInventoryMessage(DealerManager dealerManager) : MessageMessage
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -24,7 +26,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && !ModConfig.RealisticMode)
+            if (_dealerManager.Dealer.IsRecruited && !ModConfig.LoyalityMode)
             {
                 return true;
             }

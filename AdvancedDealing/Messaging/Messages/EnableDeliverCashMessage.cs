@@ -12,7 +12,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class EnableDeliverCash(DealerManager dealerManager) : MessageBase
+    public class EnableDeliverCashMessage(DealerManager dealerManager) : MessageMessage
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -31,7 +31,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIModification.SliderPopup.Open($"Cash Threshold ({_dealerManager.Dealer.name})", null, _dealerManager.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "C0", CultureInfo.GetCultureInfo("en-US"));
+            UIInjector.SliderPopup.Open($"Cash Threshold ({_dealerManager.Dealer.name})", null, _dealerManager.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "C0", CultureInfo.GetCultureInfo("en-US"));
         }
 
         private void OnSend(float value)

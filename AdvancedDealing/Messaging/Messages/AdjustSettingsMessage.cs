@@ -9,7 +9,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class AdjustSettings(DealerManager dealerManager) : MessageBase
+    public class AdjustSettingsMessage(DealerManager dealerManager) : MessageMessage
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -19,7 +19,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && !ModConfig.RealisticMode)
+            if (_dealerManager.Dealer.IsRecruited && !ModConfig.LoyalityMode)
             {
                 return true;
             }
@@ -28,7 +28,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIModification.SettingsPopup.Open(_dealerManager);
+            UIInjector.SettingsPopup.Open(_dealerManager);
         }
     }
 }

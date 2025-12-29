@@ -6,9 +6,8 @@ using MelonLoader;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using Newtonsoft.Json;
-using Il2CppScheduleOne.Persistence;
-using System.IO;
+
+
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
@@ -26,24 +25,11 @@ namespace AdvancedDealing.Persistence
 {
     public class SaveManager
     {
-        public static readonly JsonSerializerSettings JsonSerializerSettings = new()
-        {
-            NullValueHandling = NullValueHandling.Include,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            Formatting = Formatting.Indented
-        };
-
         public static SaveManager Instance { get; private set; }
 
         public SaveData SaveData { get; private set; }
 
-        public SaveData LastLoadedData { get; private set; }
-
-        public string LastLoadedDataString { get; private set; }
-
         public bool SavegameLoaded { get; private set; }
-
-        private static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.Name}.json");
 
         public SaveManager()
         {
@@ -64,30 +50,21 @@ namespace AdvancedDealing.Persistence
 
                 IEnumerator ClientLoadRoutine()
                 {
-                    SaveData = null;
+                    SaveData = new("temporary");
+                    SaveData.SetDefaults();
 
-                    bool dataExist = SyncManager.Instance.FetchDataFromLobby();
-                    while (SaveData == null)
-                    {
-                        if (!dataExist)
-                        {
-                            SyncManager.Instance.SendDataUpdateRequest();
-                            yield return new WaitForSecondsRealtime(2f);
-                            dataExist = SyncManager.Instance.FetchDataFromLobby();
-                        }
-                        yield return new WaitForSecondsRealtime(2f);
-                    }
+                    DeadDropManager.Initialize();
+                    DealerManager.Initialize();
+
+                    yield return new WaitForSecondsRealtime(2f);
 
                     SavegameLoaded = true;
 
-                    DeadDropManager.Load();
-                    DealerManager.Load();
+                    SyncManager.Instance.SendMessage("data_request");
 
-                    yield return new WaitForEndOfFrame();
+                    UIInjector.Inject();
 
                     Utils.Logger.Msg("Savegame modifications successfully injected");
-
-                    UIModification.Load();
                 }
             }
             else
@@ -96,74 +73,36 @@ namespace AdvancedDealing.Persistence
 
                 IEnumerator LoadRoutine()
                 {
-                    SaveData = LoadFromFile();
+                    SaveData = null;
+                    SaveData = FileManager.LoadFromFile();
 
                     while (SaveData == null)
                     {
                         yield return new WaitForSecondsRealtime(2f);
                     }
 
-                    DeadDropManager.Load();
-                    DealerManager.Load();
+                    DeadDropManager.Initialize();
+                    DealerManager.Initialize();
 
                     yield return new WaitForSecondsRealtime(2f);
 
                     SavegameLoaded = true;
 
-                    if (SyncManager.IsActive)
+                    if (SyncManager.IsSyncing)
                     {
                         SyncManager.Instance.SetAsHost();
-                        SyncManager.Instance.PushUpdate();
                     }
 
-                    Utils.Logger.Msg("Savegame modifications successfully injected");
+                    UIInjector.Inject();
 
-                    UIModification.Load();
+                    Utils.Logger.Msg("Savegame modifications successfully injected");
                 }
             }
         }
 
-        public SaveData LoadFromFile()
-        {
-            SaveData data;
-            string text;
-
-            if (!File.Exists(FilePath))
-            {
-                string id = $"Savegame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}";
-
-                data = new SaveData(id);
-                data.SetDefaults();
-
-                text = JsonConvert.SerializeObject(data, JsonSerializerSettings);
-            }
-            else
-            {
-                text = File.ReadAllText(FilePath);
-                data = JsonConvert.DeserializeObject<SaveData>(text, JsonSerializerSettings);
-            }
-
-            LastLoadedData = data;
-            LastLoadedDataString = text;
-
-            Utils.Logger.Msg($"Data for {data.Identifier} loaded");
-
-            return data;
-        }
-
-        public void SaveToFile(SaveData data)
-        {
-            data ??= LoadFromFile();
-
-            string text = JsonConvert.SerializeObject(data, JsonSerializerSettings);
-            File.WriteAllText(FilePath, text);
-
-            Utils.Logger.Msg($"Data for {data.Identifier} saved");
-        }
-
         public void ClearSavegame()
         {
-            UIModification.Clear();
+            UIInjector.Reset();
             ScheduleManager.ClearAll();
 
             SaveData = null;
@@ -172,13 +111,16 @@ namespace AdvancedDealing.Persistence
             Utils.Logger.Msg($"Savegame modifications cleared");
         }
 
-        public void UpdateSaveData(SaveData saveData)
+        public void UpdateSaveData(SaveData saveData, bool isSaveDataRequest = false)
         {
-            foreach (DealerData dealerData in saveData.Dealers)
+            if (!isSaveDataRequest)
             {
-                DealerManager manager = DealerManager.GetInstance(dealerData.Identifier);
-                manager.PatchData(dealerData);
-                manager.HasChanged = true;
+                foreach (DealerData dealerData in saveData.Dealers)
+                {
+                    DealerManager manager = DealerManager.GetInstance(dealerData.Identifier);
+                    manager.PatchData(dealerData);
+                    manager.HasChanged = true;
+                }
             }
 
             SaveData = saveData;
@@ -222,10 +164,10 @@ namespace AdvancedDealing.Persistence
 
         private void OnSaveComplete()
         {
-            if (SyncManager.IsNoSyncOrActiveAndHost)
+            if (SyncManager.IsNoSyncOrHost)
             {
                 CollectData();
-                SaveToFile(SaveData);
+                FileManager.SaveToFile(SaveData);
             }
         }
     }

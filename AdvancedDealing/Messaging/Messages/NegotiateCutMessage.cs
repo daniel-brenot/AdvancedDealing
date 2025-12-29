@@ -10,7 +10,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class NegotiateCut(DealerManager dealerManager) : MessageBase
+    public class NegotiateCutMessage(DealerManager dealerManager) : MessageMessage
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -20,7 +20,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && ModConfig.RealisticMode && _dealerManager.DaysUntilNextNegotiation <= 0)
+            if (_dealerManager.Dealer.IsRecruited && ModConfig.LoyalityMode && _dealerManager.DaysUntilNextNegotiation <= 0)
             {
                 return true;
             }
@@ -31,7 +31,7 @@ namespace AdvancedDealing.Messaging.Messages
         {
             float current = (float)Math.Round(_dealerManager.Cut, 2);
 
-            UIModification.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.Dealer.name})", $"Current: {current:n2}", current, 0f, 1f, 0.01f, 2, OnSend, null, "P0", null);
+            UIInjector.SliderPopup.Open($"Negotiate Cut % ({_dealerManager.Dealer.name})", $"Current: {current:n2}", current, 0f, 1f, 0.01f, 2, OnSend, null, "P0", null);
         }
 
         private void OnSend(float value)

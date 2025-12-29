@@ -39,8 +39,6 @@ namespace AdvancedDealing.Economy
 
         public readonly ConversationManager Conversation;
 
-        public readonly LevelWatcher LevelWatcher;
-
         public string DeadDrop;
 
         public bool IsFired;
@@ -92,14 +90,12 @@ namespace AdvancedDealing.Economy
             Schedule.AddAction(new DeliverCashSignal(this));
 
             Conversation = new(dealer);
-            Conversation.AddMessage(new EnableDeliverCash(this));
-            Conversation.AddMessage(new DisableDeliverCash(this));
-            Conversation.AddMessage(new AccessInventory(this));
-            Conversation.AddMessage(new NegotiateCut(this));
-            Conversation.AddMessage(new AdjustSettings(this));
-            Conversation.AddMessage(new Fired(this));
-
-            LevelWatcher = new(this);
+            Conversation.AddMessage(new EnableDeliverCashMessage(this));
+            Conversation.AddMessage(new DisableDeliverCashMessage(this));
+            Conversation.AddMessage(new AccessInventoryMessage(this));
+            Conversation.AddMessage(new NegotiateCutMessage(this));
+            Conversation.AddMessage(new AdjustSettingsMessage(this));
+            Conversation.AddMessage(new FiredMessage(this));
         }
 
         public static List<DealerManager> GetAllInstances()
@@ -146,7 +142,7 @@ namespace AdvancedDealing.Economy
             return Dealer.AllPlayerDealers.Contains(dealer);
         }
 
-        public static void Load()
+        public static void Initialize()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {
@@ -205,13 +201,12 @@ namespace AdvancedDealing.Economy
                 localField?.SetValue(this, fields[i].GetValue(data));
             }
 
-            if (ModConfig.RealisticMode)
+            if (SyncManager.IsNoSyncOrHost && ModConfig.LoyalityMode)
             {
-                int multiplicator = Level - 1;
-                MaxCustomers = LevelWatcher.MaxCustomersBase + (multiplicator * ModConfig.MaxCustomersPerLevel);
-                ItemSlots = LevelWatcher.ItemSlotsBase + (multiplicator * ModConfig.ItemSlotsPerLevel);
-                SpeedMultiplier = LevelWatcher.SpeedMultiplierBase + (multiplicator * ModConfig.SpeedIncreasePerLevel);
+                // loyality mode
             }
+
+            Utils.Logger.Debug("DealerManager", $"Data for {Dealer.fullName} patched");
         }
 
         public void SendMessage(string text, bool notify = true, bool network = true, float delay = 0)
@@ -271,9 +266,9 @@ namespace AdvancedDealing.Economy
             typeof(Dealer).GetProperty("IsRecruited").SetValue(Dealer, false);
 #endif
 
-            if (SyncManager.IsActiveAndHost)
+            if (SyncManager.IsSyncing)
             {
-                SyncManager.Instance.SendLobbyChatMsg($"dealer_fired__{Dealer.GUID}");
+                SyncManager.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
             }
 
             SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
@@ -331,7 +326,7 @@ namespace AdvancedDealing.Economy
                 return;
             }
 
-            if (SyncManager.IsNoSyncOrActiveAndHost && Schedule != null && !Schedule.IsEnabled)
+            if (SyncManager.IsNoSyncOrHost && Schedule != null && !Schedule.IsEnabled)
             {
                 Schedule.Start();
             }

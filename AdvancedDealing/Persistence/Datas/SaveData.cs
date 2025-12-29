@@ -2,7 +2,7 @@
 
 namespace AdvancedDealing.Persistence.Datas
 {
-    public class SaveData(string identifier) : DataBase(identifier)
+    public class SaveData(string identifier) : Data(identifier)
     {
         public List<DealerData> Dealers;
         

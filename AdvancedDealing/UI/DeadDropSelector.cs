@@ -68,9 +68,9 @@ namespace AdvancedDealing.UI
 
             Utils.Logger.Debug("DeadDropSelector", $"Dead drop for {_dealerManager.Dealer.fullName} selected: {guid}");
 
-            if (SyncManager.IsActive)
+            if (SyncManager.IsSyncing)
             {
-                SyncManager.Instance.PushUpdate();
+                SyncManager.Instance.SendData(_dealerManager.FetchData());
             }
 
             Close();
@@ -90,7 +90,7 @@ namespace AdvancedDealing.UI
 
             RectTransform oldContent = Container.transform.Find("Shade/Content/Scroll View/Viewport/Content").gameObject.GetComponent<RectTransform>();
 
-            GameObject content = new GameObject("Content");
+            GameObject content = new("Content");
             RectTransform transform = content.AddComponent<RectTransform>();
             transform.SetParent(oldContent.parent, false);
             transform.anchorMin = oldContent.anchorMin;
@@ -169,7 +169,6 @@ namespace AdvancedDealing.UI
             Object.Destroy(template.transform.Find("Mugshot").gameObject);
 
             template.transform.Find("Name").GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 0f);
-            // template.GetComponent<Button>().onClick.RemoveAllListeners();
 
             _selectableTemplate = template;
         }

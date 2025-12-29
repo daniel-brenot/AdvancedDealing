@@ -2,7 +2,7 @@
 
 namespace AdvancedDealing.Persistence.Datas
 {
-    public class DealerData(string identifier) : DataBase(identifier)
+    public class DealerData(string identifier) : Data(identifier)
     {
         public string DeadDrop;
 
@@ -45,13 +45,9 @@ namespace AdvancedDealing.Persistence.Datas
             CashThreshold = 1500f;
             DaysUntilNextNegotiation = 0;
 
-            if (ModConfig.RealisticMode)
+            if (ModConfig.LoyalityMode)
             {
-                MaxCustomers = LevelWatcher.MaxCustomersBase;
-                ItemSlots = LevelWatcher.ItemSlotsBase;
-                Cut = 0.5f;
-                SpeedMultiplier = LevelWatcher.SpeedMultiplierBase;
-
+                
             }
         }
     }

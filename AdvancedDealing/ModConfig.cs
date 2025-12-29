@@ -9,9 +9,9 @@ namespace AdvancedDealing
     {
         private static MelonPreferences_Category generalCategory;
 
-        private static MelonPreferences_Category realisticModeCategory;
+        private static MelonPreferences_Category loyalityModeCategory;
 
-        private static bool isCreated;
+        private static bool isInitialized;
 
         // General
         public static bool Debug
@@ -20,10 +20,10 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("Debug").Value = value;
         }
 
-        public static bool RealisticMode
+        public static bool LoyalityMode
         {
-            get => generalCategory.GetEntry<bool>("RealisticMode").Value;
-            set => generalCategory.GetEntry<bool>("RealisticMode").Value = value;
+            get => generalCategory.GetEntry<bool>("LoyalityMode").Value;
+            set => generalCategory.GetEntry<bool>("LoyalityMode").Value = value;
         }
 
         public static bool SkipMovement
@@ -32,47 +32,47 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("SkipMovement").Value = value;
         }
 
-        // Realistic Mode
+        // Loyality Mode
         public static float ExperienceModifier
         {
-            get => realisticModeCategory.GetEntry<float>("ExperienceModifier").Value;
-            set => realisticModeCategory.GetEntry<float>("ExperienceModifier").Value = value;
+            get => loyalityModeCategory.GetEntry<float>("ExperienceModifier").Value;
+            set => loyalityModeCategory.GetEntry<float>("ExperienceModifier").Value = value;
         }
 
         public static int MaxCustomersPerLevel
         {
-            get => realisticModeCategory.GetEntry<int>("MaxCustomersPerLevel").Value;
-            set => realisticModeCategory.GetEntry<int>("MaxCustomersPerLevel").Value = value;
+            get => loyalityModeCategory.GetEntry<int>("MaxCustomersPerLevel").Value;
+            set => loyalityModeCategory.GetEntry<int>("MaxCustomersPerLevel").Value = value;
         }
 
         public static int ItemSlotsPerLevel
         {
-            get => realisticModeCategory.GetEntry<int>("ItemSlotsPerLevel").Value;
-            set => realisticModeCategory.GetEntry<int>("ItemSlotsPerLevel").Value = value;
+            get => loyalityModeCategory.GetEntry<int>("ItemSlotsPerLevel").Value;
+            set => loyalityModeCategory.GetEntry<int>("ItemSlotsPerLevel").Value = value;
         }
 
         public static float SpeedIncreasePerLevel
         {
-            get => realisticModeCategory.GetEntry<float>("SpeedIncreasePerLevel").Value;
-            set => realisticModeCategory.GetEntry<float>("SpeedIncreasePerLevel").Value = value;
+            get => loyalityModeCategory.GetEntry<float>("SpeedIncreasePerLevel").Value;
+            set => loyalityModeCategory.GetEntry<float>("SpeedIncreasePerLevel").Value = value;
         }
 
         public static float NegotiationSuccessModifier
         {
-            get => realisticModeCategory.GetEntry<float>("NegotiationSuccessModifier").Value;
-            set => realisticModeCategory.GetEntry<float>("NegotiationSuccessModifier").Value = value;
+            get => loyalityModeCategory.GetEntry<float>("NegotiationSuccessModifier").Value;
+            set => loyalityModeCategory.GetEntry<float>("NegotiationSuccessModifier").Value = value;
         }
 
         public static void Initialize()
         {
-            if (isCreated) return;
+            if (isInitialized) return;
 
             generalCategory = MelonPreferences.CreateCategory($"{ModInfo.Name}_01_General", $"{ModInfo.Name} - General Settings", false, true);
-            realisticModeCategory = MelonPreferences.CreateCategory($"{ModInfo.Name}_02_RealisticMode", $"{ModInfo.Name} - Realistic Mode Settings", false, true);
+            loyalityModeCategory = MelonPreferences.CreateCategory($"{ModInfo.Name}_02_LoyalityMode", $"{ModInfo.Name} - Loyality Mode Settings", false, true);
             string path = Path.Combine(MelonEnvironment.UserDataDirectory, $"{ModInfo.Name}.cfg");
 
             generalCategory.SetFilePath(path, true, false);
-            realisticModeCategory.SetFilePath(path, true, false);
+            loyalityModeCategory.SetFilePath(path, true, false);
 
             CreateEntries();
 
@@ -83,15 +83,16 @@ namespace AdvancedDealing
                     entry.ResetToDefault();
                 }
 
-                foreach (var entry in realisticModeCategory.Entries)
+                foreach (var entry in loyalityModeCategory.Entries)
                 {
                     entry.ResetToDefault();
                 }
 
                 generalCategory.SaveToFile(false);
+                loyalityModeCategory.SaveToFile(false);
             }
 
-            isCreated = true;
+            isInitialized = true;
         }
 
         private static void CreateEntries()
@@ -107,9 +108,9 @@ namespace AdvancedDealing
             );
             generalCategory.CreateEntry<bool>
             (
-                identifier: "RealisticMode",
+                identifier: "LoyalityMode",
                 default_value: false,
-                display_name: "Realistic Mode (WIP) - New savegame recommended",
+                display_name: "Loyality Mode (WIP)",
                 description: "Makes the mod less feel like a cheat",
                 is_hidden: false
             );
@@ -122,8 +123,8 @@ namespace AdvancedDealing
                 is_hidden: false
             );
 
-            // Realistic Mode
-            realisticModeCategory.CreateEntry<float>
+            // Loyality Mode
+            loyalityModeCategory.CreateEntry<float>
             (
                 identifier: "ExperienceModifier",
                 default_value: 2f,
@@ -132,7 +133,7 @@ namespace AdvancedDealing
                 is_hidden: false,
                 validator: new ValueRange<float>(0.1f, 5f)
             );
-            realisticModeCategory.CreateEntry<int>
+            loyalityModeCategory.CreateEntry<int>
             (
                 identifier: "MaxCustomersPerLevel",
                 default_value: 1,
@@ -141,7 +142,7 @@ namespace AdvancedDealing
                 is_hidden: false,
                 validator: new ValueRange<int>(0, 10)
             );
-            realisticModeCategory.CreateEntry<int>
+            loyalityModeCategory.CreateEntry<int>
             (
                 identifier: "ItemSlotsPerLevel",
                 default_value: 1,
@@ -150,7 +151,7 @@ namespace AdvancedDealing
                 is_hidden: false,
                 validator: new ValueRange<int>(0, 10)
             );
-            realisticModeCategory.CreateEntry<float>
+            loyalityModeCategory.CreateEntry<float>
             (
                 identifier: "SpeedIncreasePerLevel",
                 default_value: 0.15f,
@@ -159,7 +160,7 @@ namespace AdvancedDealing
                 is_hidden: false,
                 validator: new ValueRange<float>(0.1f, 1f)
             );
-            realisticModeCategory.CreateEntry<float>
+            loyalityModeCategory.CreateEntry<float>
             (
                 identifier: "NegotiationSuccessModifier",
                 default_value: 50f,

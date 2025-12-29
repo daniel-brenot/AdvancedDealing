@@ -22,9 +22,9 @@ namespace AdvancedDealing.Messaging
 
         private static readonly List<ConversationManager> cache = [];
 
-        private readonly List<MessageBase> _messageList = [];
+        private readonly List<Messages.MessageMessage> _messageList = [];
 
-        private readonly List<MessageBase> _sendableMessages = [];
+        private readonly List<Messages.MessageMessage> _sendableMessages = [];
 
         public ConversationManager(NPC npc)
         {
@@ -38,7 +38,7 @@ namespace AdvancedDealing.Messaging
 
         public void CreateSendableMessages()
         {
-            foreach (MessageBase msg in _messageList)
+            foreach (Messages.MessageMessage msg in _messageList)
             {
 #if IL2CPP
                 bool exists = Conversation.Sendables.Exists((Func<SendableMessage, bool>)(x => x.Text == msg.Text));
@@ -86,7 +86,7 @@ namespace AdvancedDealing.Messaging
             cache.Remove(this);
         }
 
-        public void AddMessage(MessageBase message)
+        public void AddMessage(Messages.MessageMessage message)
         {
             Type type = message.GetType();
 

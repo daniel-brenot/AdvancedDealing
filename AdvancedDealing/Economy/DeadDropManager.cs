@@ -74,7 +74,7 @@ namespace AdvancedDealing.Economy
             return cache.Any(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static void Load()
+        public static void Initialize()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {

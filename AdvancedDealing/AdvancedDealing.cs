@@ -1,13 +1,21 @@
 ﻿using AdvancedDealing;
-using AdvancedDealing.Economy;
 using AdvancedDealing.Persistence;
 using MelonLoader;
-using System;
-using System.Reflection.Emit;
+using UnityEngine.Events;
+using SaveManager = AdvancedDealing.Persistence.SaveManager;
+
+#if IL2CPP
+using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.Persistence;
+#elif MONO
+using ScheduleOne.DevUtilities;
+using ScheduleOne.Persistence;
+#endif
 
 [assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.Name}", ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("TVGS", "Schedule I")]
-[assembly: MelonColor(255, 170, 0, 255)]
+[assembly: MelonColor(255, 113, 195, 230)]
+[assembly: MelonOptionalDependencies(["S1NetworkUtility"])]
 #if IL2CPP
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 #elif MONO
@@ -24,25 +32,20 @@ namespace AdvancedDealing
 
         public SyncManager SyncManager { get; private set; }
 
-        public override void OnInitializeMelon()
-        {
-            ModConfig.Initialize();
-
-            Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
-        }
-
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
-        {
-            if (sceneName == "Main")
-            {
-                SaveManager.LoadSavegame();
-            }
-            else if (sceneName == "Menu")
+        { 
+            if (sceneName == "Menu")
             {
                 if (!IsInitialized)
                 {
+                    ModConfig.Initialize();
+
                     SaveManager = new();
                     SyncManager = new();
+
+                    PersistentSingleton<LoadManager>.Instance.onLoadComplete.AddListener((UnityAction)SaveManager.LoadSavegame);
+
+                    Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
 
                     IsInitialized = true;
                 }

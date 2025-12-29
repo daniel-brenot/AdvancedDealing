@@ -4,6 +4,7 @@
     <BuildType Name="Mono" />
   </Configurations>
   <Folder Name="/Solution Items/">
+    <File Path="local.alternate.props" />
     <File Path="local.build.props" />
     <File Path="local.empty.props" />
     <File Path="README.md" />

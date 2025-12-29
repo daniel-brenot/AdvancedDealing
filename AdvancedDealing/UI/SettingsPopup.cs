@@ -102,10 +102,11 @@ namespace AdvancedDealing.UI
 
             if (updated)
             {
-                if (SyncManager.IsActive)
+                if (SyncManager.IsSyncing)
                 {
-                    SyncManager.Instance.PushUpdate();
+                    SyncManager.Instance.SendData(_dealerManager.FetchData());
                 }
+
                 _dealerManager.HasChanged = true;
                 _dealerManager.SendPlayerMessage("Maaaan.. please change your behavior!");
                 _dealerManager.SendMessage($"Hmkay .. i'm sorry", false, true, 2f);
