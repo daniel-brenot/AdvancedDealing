@@ -9,7 +9,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class AdjustSettingsMessage(DealerManager dealerManager) : MessageMessage
+    public class AdjustSettingsMessage(DealerManager dealerManager) : Message
     {
         private readonly DealerManager _dealerManager = dealerManager;
 

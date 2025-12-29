@@ -32,6 +32,12 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("SkipMovement").Value = value;
         }
 
+        public static bool AccessInventory
+        {
+            get => generalCategory.GetEntry<bool>("AccessInventory").Value;
+            set => generalCategory.GetEntry<bool>("AccessInventory").Value = value;
+        }
+
         public static void Initialize()
         {
             if (isInitialized) return;
@@ -80,6 +86,14 @@ namespace AdvancedDealing
                 default_value: false,
                 display_name: "Skip Movement (Instant Delivery)",
                 description: "Skips all movement actions for dealers",
+                is_hidden: false
+            );
+            generalCategory.CreateEntry<bool>
+            (
+                identifier: "AccessInventory",
+                default_value: false,
+                display_name: "Access Dealer Inventories Remotely",
+                description: "Enables the option to access the inventory via text message",
                 is_hidden: false
             );
         }

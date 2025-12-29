@@ -14,7 +14,7 @@ using ScheduleOne.UI.Phone.Messages;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class FiredMessage(DealerManager dealerManager) : MessageMessage
+    public class FiredMessage(DealerManager dealerManager) : Message
     {
         private readonly DealerManager _dealerManager = dealerManager;
 

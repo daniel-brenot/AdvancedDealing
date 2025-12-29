@@ -8,7 +8,7 @@ using ScheduleOne.NPCs;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public abstract class MessageMessage
+    public abstract class Message
     {
         public virtual string Text => "Text";
 

@@ -51,10 +51,6 @@ namespace AdvancedDealing.Economy
 
         public float SpeedMultiplier;
 
-        public float Experience;
-
-        public int Level;
-
         public float Loyality;
 
         public bool DeliverCash;
@@ -221,14 +217,14 @@ namespace AdvancedDealing.Economy
             }
             else
             {
-                Message msg = new(text, Message.ESenderType.Other);
+                Il2CppScheduleOne.Messaging.Message msg = new(text, Il2CppScheduleOne.Messaging.Message.ESenderType.Other);
                 Dealer.MSGConversation.SendMessage(msg, notify, network);
             }
         }
 
         public void SendPlayerMessage(string text)
         {
-            Message msg = new(text, Message.ESenderType.Player);
+            Il2CppScheduleOne.Messaging.Message msg = new(text, Il2CppScheduleOne.Messaging.Message.ESenderType.Player);
             Dealer.MSGConversation.SendMessage(msg);
         }
 

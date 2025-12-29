@@ -12,7 +12,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class EnableDeliverCashMessage(DealerManager dealerManager) : MessageMessage
+    public class EnableDeliverCashMessage(DealerManager dealerManager) : Message
     {
         private readonly DealerManager _dealerManager = dealerManager;
 

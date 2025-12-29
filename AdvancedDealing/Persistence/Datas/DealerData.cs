@@ -14,11 +14,6 @@ namespace AdvancedDealing.Persistence.Datas
 
         public float SpeedMultiplier;
 
-        // Stats
-        public float Experience;
-
-        public int Level;
-
         public float Loyality;
 
         // Behavior
@@ -37,8 +32,6 @@ namespace AdvancedDealing.Persistence.Datas
             ItemSlots = 5;
             Cut = 0.2f;
             SpeedMultiplier = 1f;
-            Experience = 1f;
-            Level = 1;
             Loyality = 50f;
             DeliverCash = false;
             NotifyOnCashDelivery = true;

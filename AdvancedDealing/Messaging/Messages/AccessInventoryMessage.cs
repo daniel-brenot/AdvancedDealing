@@ -16,7 +16,7 @@ using ScheduleOne.UI;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class AccessInventoryMessage(DealerManager dealerManager) : MessageMessage
+    public class AccessInventoryMessage(DealerManager dealerManager) : Message
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -26,7 +26,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && !ModConfig.LoyalityMode)
+            if (_dealerManager.Dealer.IsRecruited && ModConfig.AccessInventory)
             {
                 return true;
             }

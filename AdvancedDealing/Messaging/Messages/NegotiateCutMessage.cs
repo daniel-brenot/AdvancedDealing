@@ -1,6 +1,10 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.UI;
 using System;
+using AdvancedDealing.Persistence;
+
+using Il2CppScheduleOne.Economy;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
@@ -10,7 +14,7 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class NegotiateCutMessage(DealerManager dealerManager) : MessageMessage
+    public class NegotiateCutMessage(DealerManager dealerManager) : Message
     {
         private readonly DealerManager _dealerManager = dealerManager;
 
@@ -20,7 +24,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && ModConfig.LoyalityMode && _dealerManager.DaysUntilNextNegotiation <= 0)
+            if (_dealerManager.Dealer.IsRecruited && _dealerManager.DaysUntilNextNegotiation <= 0)
             {
                 return true;
             }
@@ -47,6 +51,7 @@ namespace AdvancedDealing.Messaging.Messages
             else if (value > _dealerManager.Cut)
             {
                 _dealerManager.SendMessage("Haha.. you idiot! Yeah sure", false, true, 2f);
+                _dealerManager.Loyality -= -5f;
             }
             else
             {
@@ -61,6 +66,12 @@ namespace AdvancedDealing.Messaging.Messages
                     _dealerManager.SendMessage("Naah.. no chance!", false, true, 2f);
 
                     _dealerManager.DaysUntilNextNegotiation = 3;
+                    _dealerManager.Loyality -= -10f;
+
+                    if (SyncManager.IsSyncing)
+                    {
+                        SyncManager.Instance.SendData(_dealerManager.FetchData());
+                    }
 
                     return;
                 }
@@ -68,13 +79,17 @@ namespace AdvancedDealing.Messaging.Messages
 
             _dealerManager.Cut = value;
             _dealerManager.DaysUntilNextNegotiation = 7;
-
             _dealerManager.HasChanged = true;
+
+            if (SyncManager.IsSyncing)
+            {
+                SyncManager.Instance.SendData(_dealerManager.FetchData());
+            }
         }
 
-        private static bool CalculateResponse(float oldCut, float newCut)
+        private bool CalculateResponse(float oldCut, float newCut)
         {
-            float baseChance = 50f;
+            float baseChance = _dealerManager.Loyality;
             float difference = Math.Abs(oldCut - newCut);
             float chance = (baseChance - (baseChance * (difference * 100) / 100)) / 100;
 
