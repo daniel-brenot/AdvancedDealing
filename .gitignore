@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /local.build.props
+/local.alternate.props
+/S1FishNetUtility/S1FishNetUtility.csproj
+/S1FishNetUtility/S1FishNetUtility.csproj
