@@ -19,11 +19,11 @@ namespace AdvancedDealing.Patches
         [HarmonyPatch("SetOpen")]
         public static void SetOpenPostfix()
         {
-            if (SaveManager.Instance.SavegameLoaded)
+            if (SaveModifier.Instance.SavegameLoaded)
             {
-                foreach (ConversationManager conversation in ConversationManager.GetAllManager())
+                foreach (Conversation conversation in Conversation.GetAllConversations())
                 {
-                    conversation.CreateSendableMessages();
+                    conversation.PatchSendableMessages();
                 }
             }
         }

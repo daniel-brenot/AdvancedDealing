@@ -10,18 +10,18 @@ using ScheduleOne.Economy;
 
 namespace AdvancedDealing.Economy
 {
-    public class DeadDropManager
+    public class DeadDropExtension
     {
         public readonly DeadDrop DeadDrop;
 
-        private static readonly List<DeadDropManager> cache = [];
+        private static readonly List<DeadDropExtension> cache = [];
 
-        public DeadDropManager(DeadDrop deadDrop)
+        public DeadDropExtension(DeadDrop deadDrop)
         {
             DeadDrop = deadDrop;
         }
 
-        public static List<DeadDropManager> GetAllInstances()
+        public static List<DeadDropExtension> GetAllInstances()
         {
             return cache;
         }
@@ -30,9 +30,9 @@ namespace AdvancedDealing.Economy
         {
             List<DeadDrop> deadDrops = [];
 
-            foreach (DeadDropManager manager in cache)
+            foreach (DeadDropExtension deadDrop in cache)
             {
-                deadDrops.Add(manager.DeadDrop);
+                deadDrops.Add(deadDrop.DeadDrop);
             }
 
             deadDrops.Sort((x, y) => (x.transform.position - origin.position).sqrMagnitude.CompareTo((y.transform.position - origin.position).sqrMagnitude));
@@ -40,9 +40,9 @@ namespace AdvancedDealing.Economy
             return deadDrops;
         }
 
-        public static DeadDropManager GetInstance(DeadDrop deadDrop) => GetInstance(deadDrop.GUID.ToString());
+        public static DeadDropExtension GetExtension(DeadDrop deadDrop) => GetExtension(deadDrop.GUID.ToString());
 
-        public static DeadDropManager GetInstance(string guid)
+        public static DeadDropExtension GetExtension(string guid)
         {
             if (guid == null)
             {
@@ -52,19 +52,19 @@ namespace AdvancedDealing.Economy
             return cache.Find(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static void AddDeadDrop(DeadDrop deadDrop)
+        public static void CreateExtension(DeadDrop deadDrop)
         {
-            if (!DeadDropExists(deadDrop))
+            if (!ExtensionExists(deadDrop))
             {
                 cache.Add(new(deadDrop));
 
-                Utils.Logger.Debug("DeadDropManager", $"Dead drop added: {deadDrop.DeadDropName}");
+                Utils.Logger.Debug("DeadDropExtension", $"Extension created for dead drop: {deadDrop.DeadDropName}");
             }
         }
 
-        public static bool DeadDropExists(DeadDrop deadDrop) => DeadDropExists(deadDrop.GUID.ToString());
+        public static bool ExtensionExists(DeadDrop deadDrop) => ExtensionExists(deadDrop.GUID.ToString());
 
-        public static bool DeadDropExists(string guid)
+        public static bool ExtensionExists(string guid)
         {
             if (guid == null)
             {
@@ -74,7 +74,7 @@ namespace AdvancedDealing.Economy
             return cache.Any(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static void Initialize()
+        public static void ExtendDeadDrops()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {
@@ -83,7 +83,7 @@ namespace AdvancedDealing.Economy
 
             foreach (DeadDrop deadDrop in DeadDrop.DeadDrops)
             {
-                AddDeadDrop(deadDrop);
+                CreateExtension(deadDrop);
             }
         }
 

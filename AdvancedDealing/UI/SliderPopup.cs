@@ -110,7 +110,7 @@ namespace AdvancedDealing.UI
             return (float)System.Math.Round(Mathf.Round(value / _stepSize) * _stepSize, _digits);
         }
 
-        public void CreateUI()
+        public void BuildUI()
         {
             if (UICreated) return;
 

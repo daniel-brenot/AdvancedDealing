@@ -16,9 +16,9 @@ using ScheduleOne.UI;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class AccessInventoryMessage(DealerManager dealerManager) : Message
+    public class AccessInventoryMessage(DealerExtension dealerExtension) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerExtension _dealer = dealerExtension;
 
         public override string Text => "I need to access your inventory";
 
@@ -26,7 +26,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && ModConfig.AccessInventory)
+            if (_dealer.Dealer.IsRecruited && ModConfig.AccessInventory)
             {
                 return true;
             }
@@ -37,9 +37,9 @@ namespace AdvancedDealing.Messaging.Messages
         {
             Singleton<GameplayMenu>.Instance.SetIsOpen(false);
 #if IL2CPP
-            _dealerManager.Dealer.TradeItems();
+            _dealer.Dealer.TradeItems();
 #elif MONO
-            typeof(Dealer).GetMethod("TradeItems", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(_dealerManager.Dealer, []);
+            typeof(Dealer).GetMethod("TradeItems", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(_dealer.Dealer, []);
 #endif
         }
     }

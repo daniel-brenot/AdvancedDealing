@@ -28,7 +28,7 @@ namespace AdvancedDealing.UI
 
         public bool UICreated { get; private set; }
 
-        public void CreateUI()
+        public void BuildUI()
         {
             Container = PlayerSingleton<DealerManagementApp>.Instance.transform.Find("Container/Background/Content").gameObject;
             float height = 620f;

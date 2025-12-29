@@ -1,8 +1,6 @@
-﻿using AdvancedDealing.Economy;
-
-namespace AdvancedDealing.Persistence.Datas
+﻿namespace AdvancedDealing.Persistence.Datas
 {
-    public class DealerData(string identifier) : Data(identifier)
+    public class DealerDataContainer : DataContainer
     {
         public string DeadDrop;
 
@@ -16,7 +14,6 @@ namespace AdvancedDealing.Persistence.Datas
 
         public float Loyality;
 
-        // Behavior
         public bool DeliverCash;
 
         public bool NotifyOnCashDelivery;
@@ -25,7 +22,15 @@ namespace AdvancedDealing.Persistence.Datas
 
         public int DaysUntilNextNegotiation;
 
-        public override void SetDefaults()
+        public DealerDataContainer(string identifier, bool loadDefaults = false) : base(identifier)
+        {
+            if (loadDefaults)
+            {
+                LoadDefaults();
+            }
+        }
+
+        public void LoadDefaults()
         {
             DeadDrop = null;
             MaxCustomers = 8;

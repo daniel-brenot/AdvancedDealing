@@ -14,9 +14,9 @@ using ScheduleOne.UI.Phone.Messages;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class FiredMessage(DealerManager dealerManager) : Message
+    public class FiredMessage(DealerExtension dealerExtension) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerExtension _dealer = dealerExtension;
 
         public override string Text => "You are no longer my dealer";
 
@@ -24,7 +24,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited)
+            if (_dealer.Dealer.IsRecruited)
             {
                 return true;
             }
@@ -40,7 +40,7 @@ namespace AdvancedDealing.Messaging.Messages
         {
             if (response == ConfirmationPopup.EResponse.Confirm)
             {
-                _dealerManager.Fire();
+                _dealer.FireDealer();
             }
         }
     }

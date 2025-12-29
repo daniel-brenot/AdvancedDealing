@@ -8,7 +8,7 @@ using ScheduleOne.NPCs;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public abstract class Message
+    public abstract class MessageBase
     {
         public virtual string Text => "Text";
 
@@ -16,11 +16,11 @@ namespace AdvancedDealing.Messaging.Messages
 
         protected MSGConversation S1Conversation;
 
-        protected ConversationManager Conversation;
+        protected Conversation Conversation;
 
         public virtual bool DisableDefaultSendBehaviour => false;
 
-        public virtual void SetReferences(NPC npc, ConversationManager conversation, MSGConversation originalConversation)
+        public virtual void SetReferences(NPC npc, Conversation conversation, MSGConversation originalConversation)
         {
             NPC = npc;
             Conversation = conversation;

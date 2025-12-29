@@ -9,8 +9,6 @@ namespace AdvancedDealing
     {
         private static MelonPreferences_Category generalCategory;
 
-        private static MelonPreferences_Category loyalityModeCategory;
-
         private static bool isInitialized;
 
         // General

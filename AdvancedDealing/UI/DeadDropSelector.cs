@@ -33,7 +33,7 @@ namespace AdvancedDealing.UI
 
         private readonly List<GameObject> _selectables = [];
 
-        private DealerManager _dealerManager;
+        private DealerExtension _dealer;
 
         private GameObject _selectableTemplate;
 
@@ -41,12 +41,12 @@ namespace AdvancedDealing.UI
 
         public bool IsOpen { get; private set; }
 
-        public void Open(DealerManager dealerManager)
+        public void Open(DealerExtension dealerExtension)
         {
             IsOpen = true;
-            _dealerManager = dealerManager;
+            _dealer = dealerExtension;
 
-            foreach (DeadDrop deadDrop in DeadDropManager.GetDeadDropsByDistance(Player.Local.transform))
+            foreach (DeadDrop deadDrop in DeadDropExtension.GetDeadDropsByDistance(Player.Local.transform))
             {
                 GameObject selectable = _selectables.Find(x => x.transform.Find("Name").GetComponent<Text>().text == deadDrop.DeadDropName);
                 selectable.transform.SetAsLastSibling();
@@ -63,20 +63,20 @@ namespace AdvancedDealing.UI
 
         private void OnSelected(string guid, string name)
         {
-            _dealerManager.DeadDrop = guid;
+            _dealer.DeadDrop = guid;
             ButtonLabel.text = name;
 
-            Utils.Logger.Debug("DeadDropSelector", $"Dead drop for {_dealerManager.Dealer.fullName} selected: {guid}");
+            Utils.Logger.Debug("DeadDropSelector", $"Dead drop for {_dealer.Dealer.fullName} selected: {guid}");
 
-            if (SyncManager.IsSyncing)
+            if (NetworkSynchronizer.IsSyncing)
             {
-                SyncManager.Instance.SendData(_dealerManager.FetchData());
+                NetworkSynchronizer.Instance.SendData(_dealer.FetchData());
             }
 
             Close();
         }
 
-        public void CreateUI()
+        public void BuildUI()
         {
             if (UICreated) return;
 
@@ -156,7 +156,7 @@ namespace AdvancedDealing.UI
             
             void OpenSelector()
             {
-                Open(DealerManager.GetInstance(PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer));
+                Open(DealerExtension.GetExtension(PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer));
             }
         }
 

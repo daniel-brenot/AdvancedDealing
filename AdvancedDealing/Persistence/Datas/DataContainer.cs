@@ -11,7 +11,7 @@ using FishNet.Broadcast;
 
 namespace AdvancedDealing.Persistence.Datas
 {
-    public abstract class Data(string identifier)
+    public abstract class DataContainer(string identifier)
     {
         public virtual string DataType => GetType().Name;
 
@@ -19,25 +19,26 @@ namespace AdvancedDealing.Persistence.Datas
 
         public string Identifier = identifier;
 
-        public virtual void SetDefaults() { }
-
-        public virtual bool HasChanges(object other)
+        public virtual bool IsEqual(object other)
         {
             if (!GetType().Equals(other.GetType()))
             {
                 throw new Exception($"Tried to compare {GetType()} with {other.GetType()}");
             }
 
+            bool isEqual = true;
+
             FieldInfo[] fields = GetType().GetFields();
             foreach (FieldInfo field in fields)
             {
                 if (field.GetValue(this) != field.GetValue(other))
                 {
-                    return true;
+                    isEqual = false;
+                    break;
                 }
             }
 
-            return false;
+            return isEqual;
         }
     }
 }

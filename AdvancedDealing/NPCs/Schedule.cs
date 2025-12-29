@@ -1,6 +1,8 @@
 ﻿using AdvancedDealing.NPCs.Actions;
 using System;
 using System.Collections.Generic;
+using AdvancedDealing.Persistence;
+
 
 #if IL2CPP
 using Il2CppFishNet;
@@ -18,11 +20,11 @@ using ScheduleOne.NPCs;
 
 namespace AdvancedDealing.NPCs
 {
-    public class ScheduleManager
+    public class Schedule
     {
         public readonly NPC NPC;
 
-        private static readonly List<ScheduleManager> cache = [];
+        private static readonly List<Schedule> cache = [];
 
         private readonly List<ActionBase> _actionList = [];
 
@@ -36,12 +38,12 @@ namespace AdvancedDealing.NPCs
 
         private List<ActionBase> ActionsAwaitingStart { get; set; } = [];
 
-        public ScheduleManager(NPC npc)
+        public Schedule(NPC npc)
         {
             NPC = npc;
             _originalSchedule = npc.GetComponentInChildren<NPCScheduleManager>();
 
-            Utils.Logger.Debug("ScheduleManager", $"Schedule created: {npc.fullName}");
+            Utils.Logger.Debug("Schedule", $"Schedule created: {npc.fullName}");
 
             cache.Add(this);
         }
@@ -88,7 +90,7 @@ namespace AdvancedDealing.NPCs
 
         protected void MinPassed()
         {
-            if ((!InstanceFinder.IsServer && !NetworkSingleton<ReplicationQueue>.Instance.ReplicationDoneForLocalPlayer) || !NPC.IsSpawned)  return;
+            if (!NetworkSynchronizer.IsNoSyncOrHost || !NetworkSingleton<ReplicationQueue>.Instance.ReplicationDoneForLocalPlayer || !NPC.IsSpawned)  return;
 
             if (!IsEnabled)
             {
@@ -183,22 +185,22 @@ namespace AdvancedDealing.NPCs
             }
         }
 
-        public static ScheduleManager GetManager(string npcGuid)
+        public static Schedule GetSchedule(string npcGuid)
         {
-            ScheduleManager manager = cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
+            Schedule schedule = cache.Find(x => x.NPC.GUID.ToString().Contains(npcGuid));
 
-            if (manager == null)
+            if (schedule == null)
             {
-                Utils.Logger.Debug("ScheduleManager", $"Could not find schedule for: {npcGuid}");
+                Utils.Logger.Debug("Schedule", $"Could not find schedule for: {npcGuid}");
                 return null;
             }
 
-            return manager;
+            return schedule;
         }
 
-        public static void ClearAll()
+        public static void ClearAllSchedules()
         {
-            foreach (ScheduleManager schedule in cache)
+            foreach (Schedule schedule in cache)
             {
                 foreach (ActionBase action in schedule._actionList)
                 {
@@ -209,12 +211,12 @@ namespace AdvancedDealing.NPCs
 
             cache.Clear();
 
-            Utils.Logger.Debug("ScheduleManager", "Schedules deinitialized");
+            Utils.Logger.Debug("Schedule", "Schedules deinitialized");
         }
 
         public static bool ScheduleExists(string npcName)
         {
-            ScheduleManager instance = cache.Find(x => x.NPC.name.Contains(npcName));
+            Schedule instance = cache.Find(x => x.NPC.name.Contains(npcName));
 
             return instance != null;
         }

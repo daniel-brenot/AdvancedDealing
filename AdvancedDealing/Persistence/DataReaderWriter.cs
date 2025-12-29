@@ -12,7 +12,7 @@ using ScheduleOne.Persistence;
 
 namespace AdvancedDealing.Persistence
 {
-    public static class FileManager
+    public static class DataReaderWriter
     {
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {
@@ -23,28 +23,28 @@ namespace AdvancedDealing.Persistence
 
         private static string FilePath => Path.Combine(Singleton<LoadManager>.Instance.ActiveSaveInfo.SavePath, $"{ModInfo.Name}.json");
 
-        public static SaveData LastLoadedData { get; private set; }
+        public static SaveDataContainer LastLoadedData { get; private set; }
 
         public static string LastLoadedDataString { get; private set; }
 
-        public static SaveData LoadFromFile()
+        public static SaveDataContainer LoadFromFile()
         {
-            SaveData data;
+            SaveDataContainer data;
             string text;
-
+            
             if (!File.Exists(FilePath))
             {
                 string id = $"Savegame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}";
 
-                data = new SaveData(id);
-                data.SetDefaults();
+                data = new SaveDataContainer(id);
+                data.LoadDefaults();
 
                 text = JsonConvert.SerializeObject(data, JsonSerializerSettings);
             }
             else
             {
                 text = File.ReadAllText(FilePath);
-                data = JsonConvert.DeserializeObject<SaveData>(text, JsonSerializerSettings);
+                data = JsonConvert.DeserializeObject<SaveDataContainer>(text, JsonSerializerSettings);
             }
 
             LastLoadedData = data;
@@ -55,7 +55,7 @@ namespace AdvancedDealing.Persistence
             return data;
         }
 
-        public static void SaveToFile(SaveData data)
+        public static void SaveToFile(SaveDataContainer data)
         {
             data ??= LoadFromFile();
 

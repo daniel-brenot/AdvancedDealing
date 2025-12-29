@@ -23,7 +23,7 @@ using System.Text;
 
 namespace AdvancedDealing.Persistence
 {
-    public class SyncManager
+    public class NetworkSynchronizer
     {
         protected Callback<LobbyChatMsg_t> LobbyChatMsgCallback;
 
@@ -37,7 +37,7 @@ namespace AdvancedDealing.Persistence
 
         private bool _isHost;
 
-        public static SyncManager Instance { get; private set; }
+        public static NetworkSynchronizer Instance { get; private set; }
 
         public static bool IsSyncing => Instance._isRunning;
 
@@ -47,7 +47,7 @@ namespace AdvancedDealing.Persistence
 
         public static CSteamID LocalSteamID => Singleton<Lobby>.Instance.LocalPlayerID;
 
-        public SyncManager()
+        public NetworkSynchronizer()
         {
             if (Instance == null)
             {
@@ -59,31 +59,31 @@ namespace AdvancedDealing.Persistence
             }
         }
 
-        private void Start()
+        private void StartSyncing()
         {
             _isHost = false;
             _lobbySteamID = Singleton<Lobby>.Instance.LobbySteamID;
             _isRunning = true;
 
-            Utils.Logger.Msg("SyncManager", "Synchronization started");
+            Utils.Logger.Msg("NetworkSynchronizer", "Synchronization started");
         }
 
-        private void Stop()
+        private void StopSyncing()
         {
             _isHost = false;
             _lobbySteamID = CSteamID.Nil;
             _isRunning = false;
 
-            Utils.Logger.Msg("SyncManager", "Synchronization stopped");
+            Utils.Logger.Msg("NetworkSynchronizer", "Synchronization stopped");
         }
 
         public void SetAsHost()
         {
             _isHost = true;
-            Utils.Logger.Debug("SyncManager", "Set as host");
+            Utils.Logger.Debug("NetworkSynchronizer", "Set as host");
         }
 
-        public void SendData(Data data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, FileManager.JsonSerializerSettings));
+        public void SendData(DataContainer data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, DataReaderWriter.JsonSerializerSettings));
 
         public void SendData(string dataType, string identifier, string dataString)
         {
@@ -95,7 +95,7 @@ namespace AdvancedDealing.Persistence
 
             SendMessage(key);
 
-            Utils.Logger.Debug("SyncManager", $"Data synced with lobby: {key}");
+            Utils.Logger.Debug("NetworkSynchronizer", $"Data synced with lobby: {key}");
         }
 
         public void SendMessage(string text, string identifier = null)
@@ -116,7 +116,7 @@ namespace AdvancedDealing.Persistence
             SteamMatchmaking.SendLobbyChatMsg(_lobbySteamID, bytes, bytes.Length);
         }
 
-        public void GetData(CSteamID steamId, string key)
+        public void FetchData(CSteamID steamId, string key)
         {
             string dataString = SteamMatchmaking.GetLobbyMemberData(_lobbySteamID, steamId, key);
 
@@ -133,12 +133,13 @@ namespace AdvancedDealing.Persistence
 
                     if (dataType == "DealerData")
                     {
-                        DealerManager dealerManager = DealerManager.GetInstance(identifier);
+                        DealerExtension dealerExtension = DealerExtension.GetExtension(identifier);
 
-                        if (dealerManager != null)
+                        if (dealerExtension != null)
                         {
-                            DealerData dealerData = JsonConvert.DeserializeObject<DealerData>(dataString);
-                            dealerManager.PatchData(dealerData);
+                            DealerDataContainer dealerData = JsonConvert.DeserializeObject<DealerDataContainer>(dataString);
+
+                            dealerExtension.PatchData(dealerData);
 
                             success = true;
                         }
@@ -148,11 +149,11 @@ namespace AdvancedDealing.Persistence
 
             if (success)
             {
-                Utils.Logger.Debug("SyncManager", $"Data from lobby fetched: {key}");
+                Utils.Logger.Debug("NetworkSynchronizer", $"Data from lobby fetched: {key}");
             }
             else
             {
-                Utils.Logger.Debug("SyncManager", $"Could not fetch data from lobby: {key}");
+                Utils.Logger.Debug("NetworkSynchronizer", $"Could not fetch data from lobby: {key}");
             }
         }
 
@@ -176,7 +177,7 @@ namespace AdvancedDealing.Persistence
 
             if (textArray[0] == _prefix)
             {
-                Utils.Logger.Debug("SyncManager", $"Received msg: {textArray[1]}");
+                Utils.Logger.Debug("NetworkSynchronizer", $"Received msg: {textArray[1]}");
 
                 switch (textArray[1])
                 {
@@ -184,7 +185,7 @@ namespace AdvancedDealing.Persistence
 
                         if (_isHost)
                         {
-                            foreach (DealerData data in SaveManager.Instance.SaveData.Dealers)
+                            foreach (DealerDataContainer data in SaveModifier.Instance.SaveData.Dealers)
                             {
                                 SendData(data);
                             }
@@ -192,11 +193,11 @@ namespace AdvancedDealing.Persistence
                         break;
                     case "dealer_fired":
                         
-                        DealerManager.GetInstance(textArray[2])?.Fire();
+                        DealerExtension.GetExtension(textArray[2])?.FireDealer();
                         break;
                     default:
 
-                        GetData(userSteamID, textArray[1]);
+                        FetchData(userSteamID, textArray[1]);
                         break;
                 }
             }
@@ -210,11 +211,11 @@ namespace AdvancedDealing.Persistence
             }
             else if (Singleton<Lobby>.Instance.IsInLobby && !_isRunning)
             {
-                Start();
+                StartSyncing();
             }
             else if (!Singleton<Lobby>.Instance.IsInLobby && _isRunning)
             {
-                Stop();
+                StopSyncing();
             }
         }
     }

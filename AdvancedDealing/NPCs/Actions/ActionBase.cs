@@ -25,7 +25,7 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected NPC NPC;
 
-        protected ScheduleManager S1Schedule;
+        protected Schedule S1Schedule;
 
         protected NPCScheduleManager Schedule;
 
@@ -51,7 +51,7 @@ namespace AdvancedDealing.NPCs.Actions
         {
         }
 
-        public virtual void SetReferences(NPC npc, ScheduleManager schedule, NPCScheduleManager originalSchedule, int StartTime = 0)
+        public virtual void SetReferences(NPC npc, Schedule schedule, NPCScheduleManager originalSchedule, int StartTime = 0)
         {
             this.NPC = npc;
             this.S1Schedule = schedule;
@@ -65,12 +65,15 @@ namespace AdvancedDealing.NPCs.Actions
 
         public virtual void Start()
         {
-            Schedule.DisableSchedule();
+            if (ShouldOverrideOriginalSchedule())
+            {
+                Schedule.DisableSchedule();
+            }
 
             NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(MinPassed);
             NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(MinPassed);
 
-            Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {NPC.name} started.");
+            Utils.Logger.Debug($"{ActionType} \"{ActionName}\" for {NPC.name} started.");
 
             IsActive = true;
             S1Schedule.ActiveAction = this;
@@ -104,7 +107,10 @@ namespace AdvancedDealing.NPCs.Actions
 
         public virtual void End()
         {
-            Schedule.EnableSchedule();
+            if (ShouldOverrideOriginalSchedule())
+            {
+                Schedule.EnableSchedule();
+            }
 
             Utils.Logger.Debug("ScheduleManager", $"{ActionType} \"{ActionName}\" for {NPC.name} ended.");
 
@@ -146,6 +152,11 @@ namespace AdvancedDealing.NPCs.Actions
         }
 
         public virtual void MinPassed() { }
+
+        public virtual bool ShouldOverrideOriginalSchedule ()
+        {
+            return true;
+        }
 
         public virtual bool ShouldStart() 
         { 

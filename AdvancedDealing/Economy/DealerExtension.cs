@@ -29,15 +29,15 @@ using ScheduleOne.GameTime;
 
 namespace AdvancedDealing.Economy
 {
-    public class DealerManager
+    public class DealerExtension
     {
-        private static readonly List<DealerManager> cache = [];
+        private static readonly List<DealerExtension> cache = [];
 
         public readonly Dealer Dealer;
 
-        public readonly ScheduleManager Schedule;
+        public readonly Schedule Schedule;
 
-        public readonly ConversationManager Conversation;
+        public readonly Conversation Conversation;
 
         public string DeadDrop;
 
@@ -63,21 +63,19 @@ namespace AdvancedDealing.Economy
 
         public bool HasChanged;
 
-        public DealerManager(Dealer dealer)
+        public DealerExtension(Dealer dealer)
         {
             Dealer = dealer;
-            DealerData dealerData = SaveManager.Instance.SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.GUID.ToString()));
+            DealerDataContainer dealerData = SaveModifier.Instance.SaveData.Dealers.Find(x => x.Identifier.Contains(dealer.GUID.ToString()));
 
             if (dealerData == null)
             {
                 dealerData = new(dealer.GUID.ToString());
-                dealerData.SetDefaults();
-                SaveManager.Instance.SaveData.Dealers.Add(dealerData);
+                dealerData.LoadDefaults();
+                SaveModifier.Instance.SaveData.Dealers.Add(dealerData);
             }
 
             PatchData(dealerData);
-
-            UpdateDealer();
 
             NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(OnMinPassed);
             NetworkSingleton<TimeManager>.Instance.onDayPass += new Action(OnDayPassed);
@@ -86,22 +84,22 @@ namespace AdvancedDealing.Economy
             Schedule.AddAction(new DeliverCashSignal(this));
 
             Conversation = new(dealer);
-            Conversation.AddMessage(new EnableDeliverCashMessage(this));
-            Conversation.AddMessage(new DisableDeliverCashMessage(this));
-            Conversation.AddMessage(new AccessInventoryMessage(this));
-            Conversation.AddMessage(new NegotiateCutMessage(this));
-            Conversation.AddMessage(new AdjustSettingsMessage(this));
-            Conversation.AddMessage(new FiredMessage(this));
+            Conversation.AddSendableMessage(new EnableDeliverCashMessage(this));
+            Conversation.AddSendableMessage(new DisableDeliverCashMessage(this));
+            Conversation.AddSendableMessage(new AccessInventoryMessage(this));
+            Conversation.AddSendableMessage(new NegotiateCutMessage(this));
+            Conversation.AddSendableMessage(new AdjustSettingsMessage(this));
+            Conversation.AddSendableMessage(new FiredMessage(this));
         }
 
-        public static List<DealerManager> GetAllInstances()
+        public static List<DealerExtension> GetAllExtensions()
         {
             return cache;
         }
 
-        public static DealerManager GetInstance(Dealer dealer) => GetInstance(dealer.GUID.ToString());
+        public static DealerExtension GetExtension(Dealer dealer) => GetExtension(dealer.GUID.ToString());
 
-        public static DealerManager GetInstance(string guid)
+        public static DealerExtension GetExtension(string guid)
         {
             if (guid == null)
             {
@@ -111,19 +109,19 @@ namespace AdvancedDealing.Economy
             return cache.Find(x => x.Dealer.GUID.ToString().Contains(guid));
         }
 
-        public static void AddDealer(Dealer dealer)
+        public static void CreateExtension(Dealer dealer)
         {
-            if (dealer.IsRecruited && IsPlayerDealer(dealer) && !DealerExists(dealer))
+            if (dealer.IsRecruited && Dealer.AllPlayerDealers.Contains(dealer) && !ExtensionExists(dealer))
             {
                 cache.Add(new(dealer));
 
-                Utils.Logger.Debug("DealerManager", $"Dealer added: {dealer.fullName}");
+                Utils.Logger.Debug("DeadDropExtension", $"Extension created for dealer: {dealer.fullName}");
             }
         }
 
-        public static bool DealerExists(Dealer dealer) => DealerExists(dealer.GUID.ToString());
+        public static bool ExtensionExists(Dealer dealer) => ExtensionExists(dealer.GUID.ToString());
 
-        public static bool DealerExists(string guid)
+        public static bool ExtensionExists(string guid)
         {
             if (guid == null)
             {
@@ -133,12 +131,7 @@ namespace AdvancedDealing.Economy
             return cache.Any(x => x.Dealer.GUID.ToString().Contains(guid));
         }
 
-        public static bool IsPlayerDealer(Dealer dealer)
-        {
-            return Dealer.AllPlayerDealers.Contains(dealer);
-        }
-
-        public static void Initialize()
+        public static void ExtendDealers()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {
@@ -147,7 +140,7 @@ namespace AdvancedDealing.Economy
 
             foreach (Dealer dealer in Dealer.AllPlayerDealers)
             {
-                AddDealer(dealer);
+                CreateExtension(dealer);
             }
 
             Dealer.onDealerRecruited -= new Action<Dealer>(OnDealerRecruited);
@@ -156,7 +149,7 @@ namespace AdvancedDealing.Economy
 
         private static void OnDealerRecruited(Dealer dealer)
         {
-            AddDealer(dealer);
+            CreateExtension(dealer);
         }
 
         public void Destroy()
@@ -170,10 +163,10 @@ namespace AdvancedDealing.Economy
             cache.Remove(this);
         }
 
-        public DealerData FetchData()
+        public DealerDataContainer FetchData()
         {
-            DealerData data = new(Dealer.GUID.ToString());
-            FieldInfo[] fields = typeof(DealerData).GetFields();
+            DealerDataContainer data = new(Dealer.GUID.ToString());
+            FieldInfo[] fields = typeof(DealerDataContainer).GetFields();
 
             for (int i = 0; i < fields.Length; i++)
             {
@@ -187,22 +180,27 @@ namespace AdvancedDealing.Economy
             return data;
         }
 
-        public void PatchData(DealerData data)
+        public void PatchData(DealerDataContainer data)
         {
-            FieldInfo[] fields = typeof(DealerData).GetFields();
+            DealerDataContainer oldData = FetchData();
 
-            for (int i = 0; i < fields.Length; i++)
+            if (!oldData.IsEqual(data))
             {
-                FieldInfo localField = GetType().GetField(fields[i].Name);
-                localField?.SetValue(this, fields[i].GetValue(data));
-            }
+                FieldInfo[] fields = typeof(DealerDataContainer).GetFields();
 
-            if (SyncManager.IsNoSyncOrHost && ModConfig.LoyalityMode)
-            {
-                // loyality mode
-            }
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    FieldInfo localField = GetType().GetField(fields[i].Name);
+                    localField?.SetValue(this, fields[i].GetValue(data));
+                }
 
-            Utils.Logger.Debug("DealerManager", $"Data for {Dealer.fullName} patched");
+                if (NetworkSynchronizer.IsNoSyncOrHost && ModConfig.LoyalityMode)
+                {
+                    // loyality mode
+                }
+
+                Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} patched");
+            }
         }
 
         public void SendMessage(string text, bool notify = true, bool network = true, float delay = 0)
@@ -217,18 +215,18 @@ namespace AdvancedDealing.Economy
             }
             else
             {
-                Il2CppScheduleOne.Messaging.Message msg = new(text, Il2CppScheduleOne.Messaging.Message.ESenderType.Other);
+                Message msg = new(text, Message.ESenderType.Other);
                 Dealer.MSGConversation.SendMessage(msg, notify, network);
             }
         }
 
         public void SendPlayerMessage(string text)
         {
-            Il2CppScheduleOne.Messaging.Message msg = new(text, Il2CppScheduleOne.Messaging.Message.ESenderType.Player);
+            Message msg = new(text, Message.ESenderType.Player);
             Dealer.MSGConversation.SendMessage(msg);
         }
 
-        public void Fire()
+        public void FireDealer()
         {
             IsFired = true;
 
@@ -262,16 +260,16 @@ namespace AdvancedDealing.Economy
             typeof(Dealer).GetProperty("IsRecruited").SetValue(Dealer, false);
 #endif
 
-            if (SyncManager.IsSyncing)
+            if (NetworkSynchronizer.IsSyncing)
             {
-                SyncManager.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
+                NetworkSynchronizer.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
             }
 
             SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
-            SaveManager.Instance.UpdateData(FetchData());
+            SaveModifier.Instance.UpdateData(FetchData());
             Destroy();
 
-            Utils.Logger.Debug("DealerManager", $"Dealer fired: {Dealer.fullName}");
+            Utils.Logger.Debug("DealerExtension", $"Dealer fired: {Dealer.fullName}");
         }
 
         private void UpdateDealer()
@@ -288,7 +286,7 @@ namespace AdvancedDealing.Economy
                     inventory.SlotCount = ItemSlots;
                 }
 
-                Utils.Logger.Debug("DealerManager", $"Added item slots to {Dealer.fullName}: {slotsToAdd} ");
+                Utils.Logger.Debug("DealerExtension", $"Added item slots to {Dealer.fullName}: {slotsToAdd} ");
             }
             else if (inventory.ItemSlots.Count > ItemSlots)
             {
@@ -297,21 +295,21 @@ namespace AdvancedDealing.Economy
                 inventory.ItemSlots.RemoveRange(inventory.ItemSlots.Count - slotsToRemove, slotsToRemove);
                 inventory.SlotCount = ItemSlots;
 
-                Utils.Logger.Debug("DealerManager", $"Removed item slots from {Dealer.fullName}: {slotsToRemove} ");
+                Utils.Logger.Debug("DealerExtension", $"Removed item slots from {Dealer.fullName}: {slotsToRemove} ");
             }
 
             if (Dealer.Cut != Cut)
             {
                 Dealer.Cut = Cut;
 
-                Utils.Logger.Debug("DealerManager", $"Cut for {Dealer.fullName} set: {Cut}");
+                Utils.Logger.Debug("DealerExtension", $"Cut for {Dealer.fullName} set: {Cut}");
             }
 
             if (Dealer.Movement.SpeedController.SpeedMultiplier != SpeedMultiplier)
             {
                 Dealer.Movement.SpeedController.SpeedMultiplier = SpeedMultiplier;
 
-                Utils.Logger.Debug("DealerManager", $"Speed multiplier for {Dealer.fullName} set: {SpeedMultiplier}");
+                Utils.Logger.Debug("DealerExtension", $"Speed multiplier for {Dealer.fullName} set: {SpeedMultiplier}");
             }
         }
 
@@ -322,7 +320,7 @@ namespace AdvancedDealing.Economy
                 return;
             }
 
-            if (SyncManager.IsNoSyncOrHost && Schedule != null && !Schedule.IsEnabled)
+            if (NetworkSynchronizer.IsNoSyncOrHost && Schedule != null && !Schedule.IsEnabled)
             {
                 Schedule.Start();
             }

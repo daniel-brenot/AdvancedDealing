@@ -13,9 +13,9 @@ using ScheduleOne.Persistence;
 
 namespace AdvancedDealing.UI
 {
-    public class UIInjector
+    public static class UIBuilder
     {
-        public static bool IsInjected { get; private set; }
+        public static bool HasBuild { get; private set; }
 
         public static SettingsPopup SettingsPopup { get; private set; }
 
@@ -25,9 +25,9 @@ namespace AdvancedDealing.UI
 
         public static CustomersScrollView CustomersScrollView { get; private set; }
 
-        public static void Inject()
+        public static void Build()
         {
-            if (!IsInjected)
+            if (!HasBuild)
             {
 
                 SettingsPopup ??= new();
@@ -35,20 +35,20 @@ namespace AdvancedDealing.UI
                 DeadDropSelector ??= new();
                 CustomersScrollView ??= new();
 
-                MelonCoroutines.Start(InjectUI());
+                MelonCoroutines.Start(CreateUI());
 
-                IEnumerator InjectUI()
+                static IEnumerator CreateUI()
                 {
                     yield return new WaitUntil((Func<bool>)(() => !PersistentSingleton<LoadManager>.Instance.IsLoading && PersistentSingleton<LoadManager>.Instance.IsGameLoaded));
 
-                    SettingsPopup.CreateUI();
-                    SliderPopup.CreateUI();
-                    DeadDropSelector.CreateUI();
-                    CustomersScrollView.CreateUI();
+                    SettingsPopup.BuildUI();
+                    SliderPopup.BuildUI();
+                    DeadDropSelector.BuildUI();
+                    CustomersScrollView.BuildUI();
 
                     Utils.Logger.Msg("UI elements created");
 
-                    IsInjected = true;
+                    HasBuild = true;
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace AdvancedDealing.UI
             DeadDropSelector = null;
             CustomersScrollView = null;
 
-            IsInjected = false;
+            HasBuild = false;
         }
     }
 }

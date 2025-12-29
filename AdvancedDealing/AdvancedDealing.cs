@@ -2,7 +2,7 @@
 using AdvancedDealing.Persistence;
 using MelonLoader;
 using UnityEngine.Events;
-using SaveManager = AdvancedDealing.Persistence.SaveManager;
+using SaveModifier = AdvancedDealing.Persistence.SaveModifier;
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
@@ -28,9 +28,9 @@ namespace AdvancedDealing
     {
         public bool IsInitialized { get; private set; }
 
-        public SaveManager SaveManager { get; private set; }
+        public SaveModifier SaveModifier { get; private set; }
 
-        public SyncManager SyncManager { get; private set; }
+        public NetworkSynchronizer NetworkSynchronizer { get; private set; }
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         { 
@@ -40,19 +40,19 @@ namespace AdvancedDealing
                 {
                     ModConfig.Initialize();
 
-                    SaveManager = new();
-                    SyncManager = new();
+                    SaveModifier = new();
+                    NetworkSynchronizer = new();
 
-                    PersistentSingleton<LoadManager>.Instance.onLoadComplete.AddListener((UnityAction)SaveManager.LoadSavegame);
+                    PersistentSingleton<LoadManager>.Instance.onLoadComplete.AddListener((UnityAction)SaveModifier.LoadModifications);
 
                     Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
 
                     IsInitialized = true;
                 }
 
-                if (SaveManager.SavegameLoaded)
+                if (SaveModifier.SavegameLoaded)
                 {
-                    SaveManager.ClearSavegame();
+                    SaveModifier.ClearModifications();
                 }
             }
         }

@@ -20,31 +20,31 @@ namespace AdvancedDealing.Patches
         [HarmonyPatch("SetDisplayedDealer")]
         public static void SetDisplayedDealerPostfix(DealerManagementApp __instance, Dealer dealer)
         {
-            if (SaveManager.Instance.SavegameLoaded)
+            if (SaveModifier.Instance.SavegameLoaded)
             {
-                DealerManager dealerManager = DealerManager.GetInstance(dealer);
+                DealerExtension dealerExtension = DealerExtension.GetExtension(dealer);
 
-                if (dealerManager == null) return;
+                if (dealerExtension == null) return;
 
                 string deadDropName = "None";
-                string guid = dealerManager.DeadDrop;
+                string guid = dealerExtension.DeadDrop;
 
                 if (guid != null)
                 {
-                    DeadDropManager deadDropManager = DeadDropManager.GetInstance(dealerManager.DeadDrop);
-                    deadDropName = deadDropManager.DeadDrop.DeadDropName;
+                    DeadDropExtension deadDrop = DeadDropExtension.GetExtension(dealerExtension.DeadDrop);
+                    deadDropName = deadDrop.DeadDrop.DeadDropName;
                 }
 
-                UIInjector.DeadDropSelector.ButtonLabel.text = deadDropName;
-                UIInjector.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerManager.Dealer.AssignedCustomers.Count}/{dealerManager.MaxCustomers})";
+                UIBuilder.DeadDropSelector.ButtonLabel.text = deadDropName;
+                UIBuilder.CustomersScrollView.TitleLabel.text = $"Assigned Customers ({dealerExtension.Dealer.AssignedCustomers.Count}/{dealerExtension.MaxCustomers})";
 
-                if (!(dealerManager.Dealer.AssignedCustomers.Count >= dealerManager.MaxCustomers))
+                if (!(dealerExtension.Dealer.AssignedCustomers.Count >= dealerExtension.MaxCustomers))
                 {
-                    UIInjector.CustomersScrollView.AssignButton.SetActive(true);
+                    UIBuilder.CustomersScrollView.AssignButton.SetActive(true);
                 }
                 else
                 {
-                    UIInjector.CustomersScrollView.AssignButton.SetActive(false);
+                    UIBuilder.CustomersScrollView.AssignButton.SetActive(false);
                 }
             }
         }

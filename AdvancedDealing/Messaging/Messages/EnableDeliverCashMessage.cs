@@ -12,9 +12,9 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class EnableDeliverCashMessage(DealerManager dealerManager) : Message
+    public class EnableDeliverCashMessage(DealerExtension dealerExtension) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerExtension _dealer = dealerExtension;
 
         public override string Text => "Please deliver cash";
 
@@ -22,7 +22,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && !_dealerManager.DeliverCash)
+            if (_dealer.Dealer.IsRecruited && !_dealer.DeliverCash)
             {
                 return true;
             }
@@ -31,16 +31,16 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIInjector.SliderPopup.Open($"Cash Threshold ({_dealerManager.Dealer.name})", null, _dealerManager.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "C0", CultureInfo.GetCultureInfo("en-US"));
+            UIBuilder.SliderPopup.Open($"Cash Threshold ({_dealer.Dealer.name})", null, _dealer.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "C0", CultureInfo.GetCultureInfo("en-US"));
         }
 
         private void OnSend(float value)
         {
-            _dealerManager.DeliverCash = true;
-            _dealerManager.CashThreshold = value;
+            _dealer.DeliverCash = true;
+            _dealer.CashThreshold = value;
 
-            _dealerManager.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
-            _dealerManager.SendMessage($"Sure thing boss!", false, true, 2f);
+            _dealer.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
+            _dealer.SendMessage($"Sure thing boss!", false, true, 2f);
         }
     }
 }

@@ -8,9 +8,9 @@ using ScheduleOne.Messaging;
 
 namespace AdvancedDealing.Messaging.Messages
 {
-    public class DisableDeliverCashMessage(DealerManager dealerManager) : Message
+    public class DisableDeliverCashMessage(DealerExtension dealerExtension) : MessageBase
     {
-        private readonly DealerManager _dealerManager = dealerManager;
+        private readonly DealerExtension _dealer = dealerExtension;
 
         public override string Text => "Stop delivering cash";
 
@@ -18,7 +18,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealerManager.Dealer.IsRecruited && _dealerManager.DeliverCash)
+            if (_dealer.Dealer.IsRecruited && _dealer.DeliverCash)
             {
                 return true;
             }
@@ -27,10 +27,10 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            _dealerManager.DeliverCash = false;
+            _dealer.DeliverCash = false;
 
-            _dealerManager.SendPlayerMessage("The dead drops are not safe atm... I will meet you to take the cash!");
-            _dealerManager.SendMessage($"Okay", false, true, 2f);
+            _dealer.SendPlayerMessage("The dead drops are not safe atm... I will meet you to take the cash!");
+            _dealer.SendMessage($"Okay", false, true, 2f);
         }
     }
 }

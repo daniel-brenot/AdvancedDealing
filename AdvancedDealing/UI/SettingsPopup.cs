@@ -31,7 +31,7 @@ namespace AdvancedDealing.UI
 
         private readonly List<GameObject> _inputFields = [];
 
-        private DealerManager _dealerManager;
+        private DealerExtension _dealer;
 
         private GameObject _inputFieldTemplate;
 
@@ -53,13 +53,13 @@ namespace AdvancedDealing.UI
             }
         }
 
-        public void Open(DealerManager dealerManager)
+        public void Open(DealerExtension dealerExtension)
         {
             IsOpen = true;
-            _dealerManager = dealerManager;
+            _dealer = dealerExtension;
 
             Container.SetActive(true);
-            TitleLabel.text = $"Adjust Settings ({_dealerManager.Dealer.name})";
+            TitleLabel.text = $"Adjust Settings ({_dealer.Dealer.name})";
 
             foreach (GameObject field in _inputFields)
             {
@@ -89,11 +89,11 @@ namespace AdvancedDealing.UI
                 {
                     if (input.contentType == InputField.ContentType.IntegerNumber)
                     {
-                        typeof(DealerManager).GetField(field.name).SetValue(_dealerManager, int.Parse(value));
+                        typeof(DealerExtension).GetField(field.name).SetValue(_dealer, int.Parse(value));
                     }
                     else if (input.contentType == InputField.ContentType.DecimalNumber)
                     {
-                        typeof(DealerManager).GetField(field.name).SetValue(_dealerManager, float.Parse(value));
+                        typeof(DealerExtension).GetField(field.name).SetValue(_dealer, float.Parse(value));
                     }
 
                     updated = true;
@@ -102,14 +102,14 @@ namespace AdvancedDealing.UI
 
             if (updated)
             {
-                if (SyncManager.IsSyncing)
+                if (NetworkSynchronizer.IsSyncing)
                 {
-                    SyncManager.Instance.SendData(_dealerManager.FetchData());
+                    NetworkSynchronizer.Instance.SendData(_dealer.FetchData());
                 }
 
-                _dealerManager.HasChanged = true;
-                _dealerManager.SendPlayerMessage("Maaaan.. please change your behavior!");
-                _dealerManager.SendMessage($"Hmkay .. i'm sorry", false, true, 2f);
+                _dealer.HasChanged = true;
+                _dealer.SendPlayerMessage("Maaaan.. please change your behavior!");
+                _dealer.SendMessage($"Hmkay .. i'm sorry", false, true, 2f);
             }
 
             Close();
@@ -120,7 +120,7 @@ namespace AdvancedDealing.UI
             Close();
         }
 
-        public void CreateUI()
+        public void BuildUI()
         {
             if (UICreated) return;
 
@@ -252,12 +252,12 @@ namespace AdvancedDealing.UI
 
         private string GetDataValue(string key)
         {
-            if (_dealerManager == null)
+            if (_dealer == null)
             {
                 return null;
             }
 
-            return typeof(DealerManager).GetField(key).GetValue(_dealerManager).ToString();
+            return typeof(DealerExtension).GetField(key).GetValue(_dealer).ToString();
         }
     }
 }
