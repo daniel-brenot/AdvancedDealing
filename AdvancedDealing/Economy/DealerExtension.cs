@@ -8,12 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using GameKit.Utilities;
-
-
 
 #if IL2CPP
+using Il2CppGameKit.Utilities;
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Messaging;
@@ -21,6 +18,7 @@ using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
 using Il2CppScheduleOne.GameTime;
 #elif MONO
+using GameKit.Utilities;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.Economy;
 using ScheduleOne.Messaging;
@@ -274,7 +272,7 @@ namespace AdvancedDealing.Economy
             Utils.Logger.Debug("DealerExtension", $"Dealer fired: {Dealer.fullName}");
         }
 
-        public void ChangeLoyality(float amount, bool shouldSync = false)
+        public void ChangeLoyality(float amount)
         {
             float newLoyality = Loyality + amount;
             
@@ -291,7 +289,9 @@ namespace AdvancedDealing.Economy
                 Loyality = newLoyality;
             }
 
-            if (shouldSync && NetworkSynchronizer.IsSyncing)
+            Utils.Logger.Debug("DealerExtension", $"Loyality for {Dealer.fullName} changed: {newLoyality}");
+
+            if (NetworkSynchronizer.IsSyncing)
             {
                 NetworkSynchronizer.Instance.SendData(FetchData());
             }

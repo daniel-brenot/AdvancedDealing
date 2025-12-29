@@ -13,13 +13,13 @@ namespace AdvancedDealing.Messaging.Messages
     {
         private readonly DealerExtension _dealer = dealerExtension;
 
-        public override string Text => "Need to adjust settings";
+        public override string Text => "Need to adjust settings (Cheat Menu)";
 
         public override bool DisableDefaultSendBehaviour => true;
 
         public override bool ShouldShowCheck(SendableMessage sMsg)
         {
-            if (_dealer.Dealer.IsRecruited && !ModConfig.LoyalityMode)
+            if (_dealer.Dealer.IsRecruited && ModConfig.CheatMenu)
             {
                 return true;
             }

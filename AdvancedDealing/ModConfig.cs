@@ -11,7 +11,6 @@ namespace AdvancedDealing
 
         private static bool isInitialized;
 
-        // General
         public static bool Debug
         {
             get => generalCategory.GetEntry<bool>("Debug").Value;
@@ -34,6 +33,12 @@ namespace AdvancedDealing
         {
             get => generalCategory.GetEntry<bool>("AccessInventory").Value;
             set => generalCategory.GetEntry<bool>("AccessInventory").Value = value;
+        }
+
+        public static bool CheatMenu
+        {
+            get => generalCategory.GetEntry<bool>("CheatMenu").Value;
+            set => generalCategory.GetEntry<bool>("CheatMenu").Value = value;
         }
 
         public static void Initialize()
@@ -91,7 +96,15 @@ namespace AdvancedDealing
                 identifier: "AccessInventory",
                 default_value: false,
                 display_name: "Access Dealer Inventories Remotely",
-                description: "Enables the option to access the inventory via text message",
+                description: "Enables the option to access the dealer inventory via text message",
+                is_hidden: false
+            );
+            generalCategory.CreateEntry<bool>
+            (
+                identifier: "CheatMenu",
+                default_value: false,
+                display_name: "Enable Dealer Cheat Menu",
+                description: "Allows access to the dealer cheat menu via text message",
                 is_hidden: false
             );
         }
