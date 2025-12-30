@@ -8,18 +8,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine.Events;
 
 #if IL2CPP
 using Il2CppGameKit.Utilities;
 using Il2CppScheduleOne.DevUtilities;
+using Il2CppScheduleOne.Dialogue;
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
 using Il2CppScheduleOne.GameTime;
+using Il2CppInterop.Runtime;
 #elif MONO
 using GameKit.Utilities;
 using ScheduleOne.DevUtilities;
+using ScheduleOne.Dialogue;
 using ScheduleOne.Economy;
 using ScheduleOne.Messaging;
 using ScheduleOne.NPCs;
@@ -63,6 +67,8 @@ namespace AdvancedDealing.Economy
 
         public bool HasChanged;
 
+        private DialogueController.DialogueChoice _payBonusChoice;
+
         public DealerExtension(Dealer dealer)
         {
             Dealer = dealer;
@@ -77,12 +83,12 @@ namespace AdvancedDealing.Economy
 
             PatchData(dealerData);
 
-            Initialize();
+            Awake();
         }
 
-        public static DealerExtension GetExtension(Dealer dealer, bool includeFired = false) => GetExtension(dealer.GUID.ToString(), includeFired);
+        public static DealerExtension GetDealer(Dealer dealer, bool includeFired = false) => GetDealer(dealer.GUID.ToString(), includeFired);
 
-        public static DealerExtension GetExtension(string guid, bool includeFired = false)
+        public static DealerExtension GetDealer(string guid, bool includeFired = false)
         {
             if (guid == null)
             {
@@ -99,36 +105,36 @@ namespace AdvancedDealing.Economy
             return dealer;
         }
 
-        public static List<DealerExtension> GetAllExtensions()
+        public static List<DealerExtension> GetAllDealers()
         {
             return cache;
         }
 
-        public static void CreateExtension(Dealer dealer)
+        public static void AddDealer(Dealer dealer)
         {
             if (dealer.IsRecruited && Dealer.AllPlayerDealers.Contains(dealer))
             {
-                if (!ExtensionExists(dealer))
+                if (!DealerExists(dealer))
                 {
                     cache.Add(new(dealer));
                     Utils.Logger.Debug("DeadDropExtension", $"Extension created for dealer: {dealer.fullName}");
                 }
                 else
                 {
-                    DealerExtension dealer2 = GetExtension(dealer, true);
+                    DealerExtension dealer2 = GetDealer(dealer, true);
                     if (dealer2.IsFired)
                     {
                         dealer2.IsFired = false;
-                        dealer2.Initialize();
+                        dealer2.Awake();
                         Utils.Logger.Debug("DeadDropExtension", $"Extension resumed for dealer: {dealer.fullName}");
                     }
                 }
             }
         }
 
-        public static bool ExtensionExists(Dealer dealer) => ExtensionExists(dealer.GUID.ToString());
+        public static bool DealerExists(Dealer dealer) => DealerExists(dealer.GUID.ToString());
 
-        public static bool ExtensionExists(string guid)
+        public static bool DealerExists(string guid)
         {
             if (guid == null)
             {
@@ -138,7 +144,7 @@ namespace AdvancedDealing.Economy
             return cache.Any(x => x.Dealer.GUID.ToString().Contains(guid));
         }
 
-        public static void ExtendDealers()
+        public static void Initialize()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {
@@ -147,14 +153,14 @@ namespace AdvancedDealing.Economy
 
             foreach (Dealer dealer in Dealer.AllPlayerDealers)
             {
-                CreateExtension(dealer);
+                AddDealer(dealer);
             }
 
             Dealer.onDealerRecruited -= new Action<Dealer>(OnDealerRecruited);
             Dealer.onDealerRecruited += new Action<Dealer>(OnDealerRecruited);
         }
 
-        public static List<DealerData> GetAllDealerData()
+        public static List<DealerData> FetchAllDealerDatas()
         {
             List<DealerData> dataCollection = [];
 
@@ -164,11 +170,6 @@ namespace AdvancedDealing.Economy
             }
 
             return dataCollection;
-        }
-
-        private static void OnDealerRecruited(Dealer dealer)
-        {
-            CreateExtension(dealer);
         }
 
         public void Destroy(bool clearCache = true)
@@ -183,23 +184,6 @@ namespace AdvancedDealing.Economy
             {
                 cache.Remove(this);
             }
-        }
-
-        private void Initialize()
-        {
-            NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(OnMinPassed);
-            NetworkSingleton<TimeManager>.Instance.onSleepStart += new Action(OnSleepStart);
-
-            Schedule = new(Dealer);
-            Schedule.AddAction(new DeliverCashSignal(this));
-
-            Conversation = new(Dealer);
-            Conversation.AddSendableMessage(new EnableDeliverCashMessage(this));
-            Conversation.AddSendableMessage(new DisableDeliverCashMessage(this));
-            Conversation.AddSendableMessage(new AccessInventoryMessage(this));
-            Conversation.AddSendableMessage(new NegotiateCutMessage(this));
-            Conversation.AddSendableMessage(new AdjustSettingsMessage(this));
-            Conversation.AddSendableMessage(new FiredMessage(this));
         }
 
         public DealerData FetchData()
@@ -229,13 +213,14 @@ namespace AdvancedDealing.Economy
 
                 for (int i = 0; i < fields.Length; i++)
                 {
+                    // Loyality Mode
+                    if ((fields[i].Name == "MaxCustomers" || fields[i].Name == "SpeedMultiplier") && NetworkSynchronizer.IsNoSyncOrHost && ModConfig.LoyalityMode)
+                    {
+                        continue;
+                    }
+
                     FieldInfo localField = GetType().GetField(fields[i].Name);
                     localField?.SetValue(this, fields[i].GetValue(data));
-                }
-
-                if (NetworkSynchronizer.IsNoSyncOrHost && ModConfig.LoyalityMode)
-                {
-                    // loyality mode
                 }
 
                 Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} patched");
@@ -265,7 +250,7 @@ namespace AdvancedDealing.Economy
             Dealer.MSGConversation.SendMessage(msg);
         }
 
-        public void FireDealer()
+        public void Fire()
         {
             IsFired = true;
 
@@ -304,9 +289,11 @@ namespace AdvancedDealing.Economy
                 NetworkSynchronizer.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
             }
 
+            // Loyality Mode
             if (ModConfig.LoyalityMode)
             {
                 ChangeLoyality(-30);
+                _payBonusChoice.Enabled = false;
             }
 
             SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
@@ -319,11 +306,11 @@ namespace AdvancedDealing.Economy
         {
             float newLoyality = Loyality + amount;
             
-            if (newLoyality > 100)
+            if (newLoyality >= 100)
             {
                 Loyality = 100;
             }
-            else if (newLoyality < 0)
+            else if (newLoyality <= 0)
             {
                 Loyality = 0;
             }
@@ -334,13 +321,102 @@ namespace AdvancedDealing.Economy
 
             Utils.Logger.Debug("DealerExtension", $"Loyality for {Dealer.fullName} changed: {newLoyality}");
 
+            SetLoyalityStats();
+
             if (NetworkSynchronizer.IsSyncing)
             {
                 NetworkSynchronizer.Instance.SendData(FetchData());
             }
         }
 
-        private void UpdateDealer()
+        private static void OnDealerRecruited(Dealer dealer)
+        {
+            AddDealer(dealer);
+        }
+
+        private void SetLoyalityStats()
+        {
+            int maxCustomers;
+            float speedMultiplier;
+
+            if (Loyality <= 19)
+            {
+                maxCustomers = 4;
+                speedMultiplier = 0.6f;
+            }
+            else if (Loyality <= 39)
+            {
+                maxCustomers = 6;
+                speedMultiplier = 0.8f;
+            }
+            else if (Loyality <= 59)
+            {
+                maxCustomers = 8;
+                speedMultiplier = 1f;
+            }
+            else if (Loyality <= 79)
+            {
+                maxCustomers = 10;
+                speedMultiplier = 1.2f;
+            }
+            else
+            {
+                maxCustomers = 14;
+                speedMultiplier = 1.4f;
+            }
+
+            if (Dealer.AssignedCustomers.Count > maxCustomers)
+            {
+                for (int i = Dealer.AssignedCustomers.Count; i >= 0; i--)
+                {
+                    if (i <= maxCustomers)
+                    {
+                        break;
+                    }
+
+                    Dealer.RemoveCustomer(Dealer.AssignedCustomers[i]);
+                }
+            }
+
+            MaxCustomers = maxCustomers;
+            SpeedMultiplier = speedMultiplier;
+            HasChanged = true;
+
+            Utils.Logger.Debug("DealerExtension", $"Loyality stats for {Dealer.fullName} updated");
+        }
+
+        private void Awake()
+        {
+            NetworkSingleton<TimeManager>.Instance.onMinutePass += new Action(OnMinPassed);
+            NetworkSingleton<TimeManager>.Instance.onSleepStart += new Action(OnSleepStart);
+
+            Schedule = new(Dealer);
+            Schedule.AddAction(new DeliverCashSignal(this));
+
+            Conversation = new(Dealer);
+            Conversation.AddSendableMessage(new EnableDeliverCashMessage(this));
+            Conversation.AddSendableMessage(new DisableDeliverCashMessage(this));
+            Conversation.AddSendableMessage(new AccessInventoryMessage(this));
+            Conversation.AddSendableMessage(new PayBonusMessage(this));
+            Conversation.AddSendableMessage(new NegotiateCutMessage(this));
+            Conversation.AddSendableMessage(new AdjustSettingsMessage(this));
+            Conversation.AddSendableMessage(new FiredMessage(this));
+
+            _payBonusChoice = new();
+            _payBonusChoice.ChoiceText = "I will pay you a bonus";
+            _payBonusChoice.Enabled = ModConfig.LoyalityMode;
+            _payBonusChoice.Conversation = new(); // TODO
+            _payBonusChoice.onChoosen.AddListener((UnityAction)PayBonus);
+            _payBonusChoice.Priority = 99;
+            Dealer.DialogueController.AddDialogueChoice(_payBonusChoice);
+        }
+
+        private void PayBonus()
+        {
+            Utils.Logger.Debug("Choosen Pay Bonus");
+        }
+
+        private void Update()
         {
             NPCInventory inventory = Dealer.Inventory;
 
@@ -397,7 +473,7 @@ namespace AdvancedDealing.Economy
             {
                 HasChanged = false;
 
-                UpdateDealer();
+                Update();
             }
         }
 
@@ -408,6 +484,7 @@ namespace AdvancedDealing.Economy
                 DaysUntilNextNegotiation--;
             }
 
+            // Loyality Mode
             if (ModConfig.LoyalityMode && NetworkSynchronizer.IsNoSyncOrHost)
             {
                 StartRandomLoyalityAction();

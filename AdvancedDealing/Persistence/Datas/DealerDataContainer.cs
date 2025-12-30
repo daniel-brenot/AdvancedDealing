@@ -1,6 +1,6 @@
 ﻿namespace AdvancedDealing.Persistence.Datas
 {
-    public class DealerData : DataBase
+    public class DealerDataContainer : DataBase
     {
         public string DeadDrop;
 
@@ -22,7 +22,7 @@
 
         public int DaysUntilNextNegotiation;
 
-        public DealerData(string identifier, bool loadDefaults = false) : base(identifier)
+        public DealerDataContainer(string identifier, bool loadDefaults = false) : base(identifier)
         {
             if (loadDefaults)
             {
@@ -42,6 +42,11 @@
             NotifyOnCashDelivery = true;
             CashThreshold = 1500f;
             DaysUntilNextNegotiation = 0;
+
+            if (ModConfig.LoyalityMode)
+            {
+                
+            }
         }
     }
 }

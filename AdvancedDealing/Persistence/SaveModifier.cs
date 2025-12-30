@@ -1,6 +1,5 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.NPCs;
-using AdvancedDealing.Persistence.Datas;
 using AdvancedDealing.UI;
 using MelonLoader;
 using System.Collections;
@@ -8,15 +7,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.IO;
 
-
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Networking;
 using Il2CppScheduleOne.Persistence;
 #elif MONO
 using ScheduleOne.DevUtilities;
-using ScheduleOne.Economy;
 using ScheduleOne.Networking;
 using ScheduleOne.Persistence;
 #endif
@@ -57,7 +53,7 @@ namespace AdvancedDealing.Persistence
 
             IEnumerator LoadRoutine()
             {
-                if (!ReaderWriter.LoadFromFile<DataWrapper>(FilePath, out var data))
+                if (!JsonReaderWriter.LoadFromFile<DataWrapper>(FilePath, out var data))
                 {
                     SaveData = new()
                     {
@@ -71,7 +67,7 @@ namespace AdvancedDealing.Persistence
                 }
 
                 DeadDropExtension.ExtendDeadDrops();
-                DealerExtension.ExtendDealers();
+                DealerExtension.Initialize();
 
                 yield return new WaitForSecondsRealtime(2f);
 
@@ -101,7 +97,7 @@ namespace AdvancedDealing.Persistence
                 };
 
                 DeadDropExtension.ExtendDeadDrops();
-                DealerExtension.ExtendDealers();
+                DealerExtension.Initialize();
 
                 yield return new WaitForSecondsRealtime(2f);
 
@@ -132,10 +128,12 @@ namespace AdvancedDealing.Persistence
                 DataWrapper wrapper = new()
                 {
                     SaveName = $"savegame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}",
-                    Dealers = DealerExtension.GetAllDealerData()
+                    Dealers = DealerExtension.FetchAllDealerDatas()
                 };
 
-                ReaderWriter.SaveToFile(FilePath, wrapper);
+                Utils.Logger.Msg($"Data for {wrapper.SaveName} saved");
+
+                JsonReaderWriter.SaveToFile(FilePath, wrapper);
             }
         }
     }

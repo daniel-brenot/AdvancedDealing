@@ -40,7 +40,7 @@ namespace AdvancedDealing.Messaging.Messages
         {
             if (response == ConfirmationPopup.EResponse.Confirm)
             {
-                _dealer.FireDealer();
+                _dealer.Fire();
             }
         }
     }

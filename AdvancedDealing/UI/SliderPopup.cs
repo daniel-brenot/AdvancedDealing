@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using System;
+using Object = UnityEngine.Object;
 
 #if IL2CPP
 using Il2CppScheduleOne;
@@ -60,7 +62,7 @@ namespace AdvancedDealing.UI
             }
         }
 
-        public void Open(string title, string subtitle, float startValue, float minValue, float maxValue, float stepSize = 0.05f, int digits = 2, System.Action<float> onSendCallback = null, System.Action onCancelCallback = null, string format = "", System.IFormatProvider provider = null)
+        public void Open(string title, string subtitle, float startValue, float minValue, float maxValue, float stepSize = 0.05f, int digits = 2, System.Action<float> onSendCallback = null, System.Action onCancelCallback = null, string format = "")
         {
             IsOpen = true;
             Container.SetActive(true);
@@ -70,11 +72,10 @@ namespace AdvancedDealing.UI
             _digits = digits;
             _stepSize = stepSize;
             _format = format;
-            _provider = provider;
 
             TitleLabel.text = title;
             SubtitleLabel.text = subtitle;
-            ValueLabel.text = GetSteppedValue(startValue).ToString(_format, _provider);
+            ValueLabel.text = String.Format(_format, GetSteppedValue(startValue));
             Slider.value = startValue;
             Slider.minValue = minValue;
             Slider.maxValue = maxValue;
@@ -102,7 +103,7 @@ namespace AdvancedDealing.UI
 
         private void OnValueChanged(float value)
         {
-            ValueLabel.text = GetSteppedValue(value).ToString(_format, _provider);
+            ValueLabel.text = String.Format(_format, GetSteppedValue(value));
         }
 
         private float GetSteppedValue(float value)

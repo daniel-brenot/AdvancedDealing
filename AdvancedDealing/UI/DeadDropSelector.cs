@@ -156,7 +156,7 @@ namespace AdvancedDealing.UI
             
             void OpenSelector()
             {
-                Open(DealerExtension.GetExtension(PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer));
+                Open(DealerExtension.GetDealer(PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer));
             }
         }
 

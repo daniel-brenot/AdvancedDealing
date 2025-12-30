@@ -81,7 +81,7 @@ namespace AdvancedDealing.Persistence
             Utils.Logger.Debug("NetworkSynchronizer", "Set as host");
         }
 
-        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, ReaderWriter.JsonSerializerSettings));
+        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, JsonReaderWriter.JsonSerializerSettings));
 
         public void SendData(string dataType, string identifier, string dataString)
         {
@@ -131,7 +131,7 @@ namespace AdvancedDealing.Persistence
 
                     if (dataType == "DealerData")
                     {
-                        DealerExtension dealerExtension = DealerExtension.GetExtension(identifier);
+                        DealerExtension dealerExtension = DealerExtension.GetDealer(identifier);
 
                         if (dealerExtension != null)
                         {
@@ -191,7 +191,7 @@ namespace AdvancedDealing.Persistence
                         break;
                     case "dealer_fired":
                         
-                        DealerExtension.GetExtension(textArray[2])?.FireDealer();
+                        DealerExtension.GetDealer(textArray[2])?.Fire();
                         break;
                     default:
 

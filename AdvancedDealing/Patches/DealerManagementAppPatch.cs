@@ -22,7 +22,7 @@ namespace AdvancedDealing.Patches
         {
             if (SaveModifier.Instance.SavegameLoaded)
             {
-                DealerExtension dealerExtension = DealerExtension.GetExtension(dealer);
+                DealerExtension dealerExtension = DealerExtension.GetDealer(dealer);
 
                 if (dealerExtension == null) return;
 

@@ -1,8 +1,5 @@
 ﻿using AdvancedDealing.Economy;
 using AdvancedDealing.UI;
-using System;
-using System.Globalization;
-
 
 #if IL2CPP
 using Il2CppScheduleOne.Messaging;
@@ -31,7 +28,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIBuilder.SliderPopup.Open($"Cash Threshold ({_dealer.Dealer.name})", null, _dealer.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "C0", CultureInfo.GetCultureInfo("en-US"));
+            UIBuilder.SliderPopup.Open($"Cash Threshold ({_dealer.Dealer.name})", null, _dealer.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "${0:0}");
         }
 
         private void OnSend(float value)

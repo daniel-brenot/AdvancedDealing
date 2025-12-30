@@ -14,7 +14,7 @@ using ScheduleOne.Persistence;
 
 namespace AdvancedDealing.Persistence
 {
-    public static class ReaderWriter
+    public static class JsonReaderWriter
     {
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {
@@ -37,7 +37,7 @@ namespace AdvancedDealing.Persistence
                 LastLoadedDataType = data.GetType();
                 LastLoadedDataString = text;
 
-                Utils.Logger.Debug($"Data for loaded: {filePath}");
+                Utils.Logger.Debug($"Loaded from file: {filePath}");
 
                 return true;
             }
@@ -52,7 +52,7 @@ namespace AdvancedDealing.Persistence
             string text = JsonConvert.SerializeObject(data, JsonSerializerSettings);
             File.WriteAllText(filePath, text);
 
-            Utils.Logger.Debug($"Data for saved: {filePath}");
+            Utils.Logger.Debug($"Saved to file: {filePath}");
         }
     }
 }

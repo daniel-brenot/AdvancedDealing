@@ -103,19 +103,19 @@ namespace AdvancedDealing.NPCs
 
             if (actionsToStart.Count > 0)
             {
-                ActionBase nPCAction = actionsToStart[0];
-                if (ActiveAction != nPCAction)
+                ActionBase actionToStart = actionsToStart[0];
+                if (ActiveAction != actionToStart)
                 {
-                    if (ActiveAction != null && nPCAction.Priority > ActiveAction.Priority)
+                    if (ActiveAction != null && actionToStart.Priority > ActiveAction.Priority)
                     {
                         ActiveAction.Interrupt();
                     }
 
                     if (ActiveAction == null)
                     {
-                        if (_originalSchedule.ActiveAction == null || (_originalSchedule.ActiveAction != null && nPCAction.Priority > _originalSchedule.ActiveAction.Priority))
+                        if (!actionToStart.ShouldOverrideOriginalSchedule() || _originalSchedule.ActiveAction == null || (_originalSchedule.ActiveAction != null && actionToStart.Priority > _originalSchedule.ActiveAction.Priority))
                         {
-                            StartAction(nPCAction);
+                            StartAction(actionToStart);
                         }
                     }
                 }
