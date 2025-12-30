@@ -42,7 +42,7 @@ namespace AdvancedDealing.NPCs.Actions
         {
             base.Start();
 
-            _deadDrop = DeadDropExtension.GetExtension(_dealer.DeadDrop);
+            _deadDrop = DeadDropExtension.GetDeadDrop(_dealer.DeadDrop);
 
             if (_deadDrop == null)
             {
@@ -193,7 +193,7 @@ namespace AdvancedDealing.NPCs.Actions
                 return false;
             }
 
-            DeadDropExtension deadDrop = DeadDropExtension.GetExtension(_dealer.DeadDrop);
+            DeadDropExtension deadDrop = DeadDropExtension.GetDeadDrop(_dealer.DeadDrop);
 
             if (deadDrop != null && deadDrop.IsFull())
             {

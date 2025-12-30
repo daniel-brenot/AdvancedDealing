@@ -31,7 +31,7 @@ namespace AdvancedDealing.Patches
 
                 if (guid != null)
                 {
-                    DeadDropExtension deadDrop = DeadDropExtension.GetExtension(dealerExtension.DeadDrop);
+                    DeadDropExtension deadDrop = DeadDropExtension.GetDeadDrop(dealerExtension.DeadDrop);
                     deadDropName = deadDrop.DeadDrop.DeadDropName;
                 }
 

@@ -11,13 +11,20 @@ using FishNet.Broadcast;
 
 namespace AdvancedDealing.Persistence.Datas
 {
-    public abstract class DataBase(string identifier)
+    public abstract class DataBase
     {
-        public virtual string DataType => GetType().Name;
+        public string DataType;
 
-        public string ModVersion = ModInfo.Version;
+        public string ModVersion;
 
-        public string Identifier = identifier;
+        public string Identifier;
+
+        public DataBase(string identifier)
+        {
+            DataType = GetType().Name;
+            ModVersion = ModInfo.Version;
+            Identifier = identifier;
+        }
 
         public virtual bool IsEqual(object other)
         {

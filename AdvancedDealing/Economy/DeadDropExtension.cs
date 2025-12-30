@@ -21,7 +21,7 @@ namespace AdvancedDealing.Economy
             DeadDrop = deadDrop;
         }
 
-        public static List<DeadDropExtension> GetAllInstances()
+        public static List<DeadDropExtension> GetAllDeadDrops()
         {
             return cache;
         }
@@ -40,9 +40,9 @@ namespace AdvancedDealing.Economy
             return deadDrops;
         }
 
-        public static DeadDropExtension GetExtension(DeadDrop deadDrop) => GetExtension(deadDrop.GUID.ToString());
+        public static DeadDropExtension GetDeadDrop(DeadDrop deadDrop) => GetDeadDrop(deadDrop.GUID.ToString());
 
-        public static DeadDropExtension GetExtension(string guid)
+        public static DeadDropExtension GetDeadDrop(string guid)
         {
             if (guid == null)
             {
@@ -52,19 +52,19 @@ namespace AdvancedDealing.Economy
             return cache.Find(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static void CreateExtension(DeadDrop deadDrop)
+        public static void AddDeadDrop(DeadDrop deadDrop)
         {
-            if (!ExtensionExists(deadDrop))
+            if (!DeadDropExists(deadDrop))
             {
                 cache.Add(new(deadDrop));
 
-                Utils.Logger.Debug("DeadDropExtension", $"Extension created for dead drop: {deadDrop.DeadDropName}");
+                Utils.Logger.Debug("DeadDropExtension", $"Extension for dead drop created: {deadDrop.DeadDropName}");
             }
         }
 
-        public static bool ExtensionExists(DeadDrop deadDrop) => ExtensionExists(deadDrop.GUID.ToString());
+        public static bool DeadDropExists(DeadDrop deadDrop) => DeadDropExists(deadDrop.GUID.ToString());
 
-        public static bool ExtensionExists(string guid)
+        public static bool DeadDropExists(string guid)
         {
             if (guid == null)
             {
@@ -74,7 +74,7 @@ namespace AdvancedDealing.Economy
             return cache.Any(x => x.DeadDrop.GUID.ToString().Contains(guid));
         }
 
-        public static void ExtendDeadDrops()
+        public static void Initialize()
         {
             for (int i = cache.Count - 1; i >= 0; i--)
             {
@@ -83,7 +83,7 @@ namespace AdvancedDealing.Economy
 
             foreach (DeadDrop deadDrop in DeadDrop.DeadDrops)
             {
-                CreateExtension(deadDrop);
+                AddDeadDrop(deadDrop);
             }
         }
 

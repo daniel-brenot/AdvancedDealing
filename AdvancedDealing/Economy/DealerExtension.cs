@@ -117,7 +117,7 @@ namespace AdvancedDealing.Economy
                 if (!DealerExists(dealer))
                 {
                     cache.Add(new(dealer));
-                    Utils.Logger.Debug("DeadDropExtension", $"Extension created for dealer: {dealer.fullName}");
+                    Utils.Logger.Debug("DealerExtension", $"Extension for dealer created: {dealer.fullName}");
                 }
                 else
                 {
@@ -126,7 +126,7 @@ namespace AdvancedDealing.Economy
                     {
                         dealer2.IsFired = false;
                         dealer2.Awake();
-                        Utils.Logger.Debug("DeadDropExtension", $"Extension resumed for dealer: {dealer.fullName}");
+                        Utils.Logger.Debug("DealerExtension", $"Extension for dealer resumed: {dealer.fullName}");
                     }
                 }
             }
@@ -156,8 +156,8 @@ namespace AdvancedDealing.Economy
                 AddDealer(dealer);
             }
 
-            Dealer.onDealerRecruited -= new Action<Dealer>(OnDealerRecruited);
-            Dealer.onDealerRecruited += new Action<Dealer>(OnDealerRecruited);
+            Dealer.onDealerRecruited -= new Action<Dealer>(AddDealer);
+            Dealer.onDealerRecruited += new Action<Dealer>(AddDealer);
         }
 
         public static List<DealerData> FetchAllDealerDatas()
@@ -213,17 +213,17 @@ namespace AdvancedDealing.Economy
 
                 for (int i = 0; i < fields.Length; i++)
                 {
-                    // Loyality Mode
-                    if ((fields[i].Name == "MaxCustomers" || fields[i].Name == "SpeedMultiplier") && NetworkSynchronizer.IsNoSyncOrHost && ModConfig.LoyalityMode)
-                    {
-                        continue;
-                    }
-
                     FieldInfo localField = GetType().GetField(fields[i].Name);
                     localField?.SetValue(this, fields[i].GetValue(data));
                 }
 
                 Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} patched");
+            }
+
+            // Loyality Mode
+            if (ModConfig.LoyalityMode)
+            {
+                SetLoyalityStats();
             }
         }
 
@@ -327,11 +327,6 @@ namespace AdvancedDealing.Economy
             {
                 NetworkSynchronizer.Instance.SendData(FetchData());
             }
-        }
-
-        private static void OnDealerRecruited(Dealer dealer)
-        {
-            AddDealer(dealer);
         }
 
         private void SetLoyalityStats()

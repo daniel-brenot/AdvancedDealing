@@ -66,7 +66,7 @@ namespace AdvancedDealing.Persistence
                     SaveData = data;
                 }
 
-                DeadDropExtension.ExtendDeadDrops();
+                DeadDropExtension.Initialize();
                 DealerExtension.Initialize();
 
                 yield return new WaitForSecondsRealtime(2f);
@@ -96,7 +96,7 @@ namespace AdvancedDealing.Persistence
                     Dealers = []
                 };
 
-                DeadDropExtension.ExtendDeadDrops();
+                DeadDropExtension.Initialize();
                 DealerExtension.Initialize();
 
                 yield return new WaitForSecondsRealtime(2f);
