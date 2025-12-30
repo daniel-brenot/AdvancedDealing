@@ -52,6 +52,14 @@ If you're running into any bugs or issues using this mod, use the [Issues sectio
 Config files for general settings will be generated after the first game launch after installation and can be found inside the **UserData** folder.
 Savegame related settings can be applied ingame by using the messaging app on your phone.
 
+### Multiplayer behavior
+
+The followeing settings are restricted to change if you are in a multiplayer session:
+* LoyalityMode
+* AccessInventory
+* SettingsMenu
+* NegotiationModifier
+
 # Loyality Mode
 
 The loyality mode is still WIP and some features are not implemented at this state. Use at your own risk! It's **highly recommended** to test it in a fresh savegame.
