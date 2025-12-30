@@ -1,6 +1,11 @@
 ﻿using AdvancedDealing.Economy;
 using HarmonyLib;
+
+#if IL2CPP
 using Il2CppScheduleOne.Economy;
+#elif MONO
+using ScheduleOne.Economy;
+#endif
 
 namespace AdvancedDealing.Patches
 {

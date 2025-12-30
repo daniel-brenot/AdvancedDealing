@@ -42,8 +42,6 @@ namespace AdvancedDealing.UI
 
         private string _format;
 
-        private System.IFormatProvider _provider;
-
         public bool UICreated { get; private set; }
 
         public bool IsOpen { get; private set; }

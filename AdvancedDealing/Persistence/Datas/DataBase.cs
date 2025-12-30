@@ -34,8 +34,8 @@ namespace AdvancedDealing.Persistence.Datas
             }
 
             bool isEqual = true;
-
             FieldInfo[] fields = GetType().GetFields();
+
             foreach (FieldInfo field in fields)
             {
                 if (field.GetValue(this) != field.GetValue(other))
@@ -46,6 +46,19 @@ namespace AdvancedDealing.Persistence.Datas
             }
 
             return isEqual;
+        }
+
+        public virtual void Merge(DataBase other)
+        {
+            FieldInfo[] fields = GetType().GetFields();
+
+            foreach (FieldInfo field in fields)
+            {
+                if (field.GetValue(other) == null || field.GetValue(this) != field.GetValue(other))
+                {
+                    field.SetValue(this, field.GetValue(other));
+                }
+            }
         }
     }
 }

@@ -80,6 +80,13 @@ namespace AdvancedDealing.Economy
                 dealerData.LoadDefaults();
                 SaveModifier.Instance.SaveData.Dealers.Add(dealerData);
             }
+            else if (dealerData.ModVersion != ModInfo.Version)
+            {
+                DealerData oldDealerData = dealerData;
+                dealerData = new(oldDealerData.Identifier);
+                dealerData.LoadDefaults();
+                dealerData.Merge(oldDealerData);
+            }
 
             PatchData(dealerData);
             Update();
@@ -484,6 +491,8 @@ namespace AdvancedDealing.Economy
             {
                 StartRandomLoyalityAction();
             }
+
+            DailyContractCount = 0;
         }
 
         private void StartRandomLoyalityAction()

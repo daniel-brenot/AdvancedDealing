@@ -6,8 +6,6 @@ namespace AdvancedDealing.NPCs.Actions
     {
         private readonly DealerExtension _dealer;
 
-        private readonly float _range;
-
         protected override string ActionName => "Steal Products";
 
         protected override bool RemoveOnEnd => true;
