@@ -59,7 +59,7 @@ namespace AdvancedDealing.Persistence
                 {
                     SaveData = new()
                     {
-                        SaveName = $"savegame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}",
+                        SaveName = $"SaveGame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}",
                         Dealers = []
                     };
                 }
@@ -135,7 +135,7 @@ namespace AdvancedDealing.Persistence
             {
                 DataWrapper wrapper = new()
                 {
-                    SaveName = $"savegame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}",
+                    SaveName = $"SaveGame_{Singleton<LoadManager>.Instance.ActiveSaveInfo.SaveSlotNumber}",
                     Dealers = DealerExtension.FetchAllDealerDatas()
                 };
 
