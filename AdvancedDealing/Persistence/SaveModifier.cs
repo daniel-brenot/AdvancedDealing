@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.IO;
 using System.Collections.Generic;
+using AdvancedDealing.Persistence.IO;
+
 
 
 #if IL2CPP
@@ -55,7 +57,7 @@ namespace AdvancedDealing.Persistence
 
             IEnumerator LoadRoutine()
             {
-                if (!JsonReaderWriter.LoadFromFile<DataWrapper>(FilePath, out var data))
+                if (!JsonSerializer.LoadFromFile<DataWrapper>(FilePath, out var data))
                 {
                     SaveData = new()
                     {
@@ -141,7 +143,7 @@ namespace AdvancedDealing.Persistence
 
                 Utils.Logger.Msg($"Data for {wrapper.SaveName} saved");
 
-                JsonReaderWriter.SaveToFile(FilePath, wrapper);
+                JsonSerializer.SaveToFile(FilePath, wrapper);
             }
         }
     }

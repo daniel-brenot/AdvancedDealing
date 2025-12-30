@@ -22,7 +22,7 @@ namespace AdvancedDealing
         {
             get
             {
-                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                if (NetworkSynchronizer.IsSyncing && NetworkSynchronizer.Instance.SessionData != null)
                 {
                     return NetworkSynchronizer.Instance.SessionData.LoyalityMode;
                 }
@@ -48,7 +48,7 @@ namespace AdvancedDealing
         {
             get
             {
-                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                if (NetworkSynchronizer.IsSyncing && NetworkSynchronizer.Instance.SessionData != null)
                 {
                     return NetworkSynchronizer.Instance.SessionData.AccessInventory;
                 }
@@ -62,7 +62,7 @@ namespace AdvancedDealing
         {
             get
             {
-                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                if (NetworkSynchronizer.IsSyncing && NetworkSynchronizer.Instance.SessionData != null)
                 {
                     return NetworkSynchronizer.Instance.SessionData.SettingsMenu;
                 }
@@ -76,7 +76,7 @@ namespace AdvancedDealing
         {
             get
             {
-                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                if (NetworkSynchronizer.IsSyncing && NetworkSynchronizer.Instance.SessionData != null)
                 {
                     return NetworkSynchronizer.Instance.SessionData.NegotiationModifier;
                 }

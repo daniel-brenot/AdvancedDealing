@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using AdvancedDealing.Economy;
+using AdvancedDealing.Persistence.IO;
+
 
 
 #if IL2CPP
@@ -85,7 +87,7 @@ namespace AdvancedDealing.Persistence
             Utils.Logger.Debug("NetworkSynchronizer", "Set as host");
         }
 
-        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, JsonReaderWriter.JsonSerializerSettings));
+        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, JsonSerializer.JsonSerializerSettings));
 
         public void SendData(string dataType, string identifier, string dataString)
         {
@@ -196,14 +198,16 @@ namespace AdvancedDealing.Persistence
 
                         if (_isHost)
                         {
-                            SendData(new SessionData(_lobbySteamID.ToString())
+                            SessionData = new(_lobbySteamID.ToString())
                             {
                                 LoyalityMode = ModConfig.LoyalityMode,
                                 AccessInventory = ModConfig.AccessInventory,
                                 SettingsMenu = ModConfig.SettingsMenu
-                            });
+                            };
 
-                            foreach (DealerData data in SaveModifier.Instance.SaveData.Dealers)
+                            SendData(SessionData);
+
+                            foreach (DealerData data in DealerExtension.FetchAllDealerDatas())
                             {
                                 SendData(data);
                             }

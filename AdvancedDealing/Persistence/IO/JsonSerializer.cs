@@ -4,6 +4,7 @@ using System.IO;
 using System;
 
 
+
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.Persistence;
@@ -12,9 +13,9 @@ using ScheduleOne.DevUtilities;
 using ScheduleOne.Persistence;
 #endif
 
-namespace AdvancedDealing.Persistence
+namespace AdvancedDealing.Persistence.IO
 {
-    public static class JsonReaderWriter
+    public static class JsonSerializer
     {
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {
