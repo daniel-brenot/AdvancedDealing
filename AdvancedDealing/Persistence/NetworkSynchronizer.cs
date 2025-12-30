@@ -25,6 +25,8 @@ namespace AdvancedDealing.Persistence
 {
     public class NetworkSynchronizer
     {
+        public SessionData SessionData;
+
         protected Callback<LobbyChatMsg_t> LobbyChatMsgCallback;
 
         protected Callback<LobbyDataUpdate_t> LobbyDataUpdateCallback;
@@ -42,6 +44,8 @@ namespace AdvancedDealing.Persistence
         public static bool IsSyncing => Instance._isSyncing;
 
         public static bool IsNoSyncOrHost => !IsSyncing || (IsSyncing && Instance._isHost);
+
+        public static bool IsHost => Instance._isHost;
 
         public static CSteamID LocalSteamID => Singleton<Lobby>.Instance.LocalPlayerID;
 
@@ -142,6 +146,15 @@ namespace AdvancedDealing.Persistence
                             success = true;
                         }
                     }
+                    else if (dataType == "SessionData")
+                    {
+                        if (!_isHost)
+                        {
+                            SessionData = JsonConvert.DeserializeObject<SessionData>(dataString);
+
+                            success = true;
+                        }
+                    }
                 }
             }
 
@@ -183,6 +196,13 @@ namespace AdvancedDealing.Persistence
 
                         if (_isHost)
                         {
+                            SendData(new SessionData(_lobbySteamID.ToString())
+                            {
+                                LoyalityMode = ModConfig.LoyalityMode,
+                                AccessInventory = ModConfig.AccessInventory,
+                                CheatMenu = ModConfig.CheatMenu
+                            });
+
                             foreach (DealerData data in SaveModifier.Instance.SaveData.Dealers)
                             {
                                 SendData(data);

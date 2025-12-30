@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿using AdvancedDealing.Persistence;
+using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
 using System.IO;
@@ -19,7 +20,15 @@ namespace AdvancedDealing
 
         public static bool LoyalityMode
         {
-            get => generalCategory.GetEntry<bool>("LoyalityMode").Value;
+            get
+            {
+                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                {
+                    return NetworkSynchronizer.Instance.SessionData.LoyalityMode;
+                }
+
+                return generalCategory.GetEntry<bool>("LoyalityMode").Value;
+            }
             set => generalCategory.GetEntry<bool>("LoyalityMode").Value = value;
         }
 
@@ -29,15 +38,37 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("SkipMovement").Value = value;
         }
 
+        public static bool NotifyOnAction
+        {
+            get => generalCategory.GetEntry<bool>("NotifyOnAction").Value;
+            set => generalCategory.GetEntry<bool>("NotifyOnAction").Value = value;
+        }
+
         public static bool AccessInventory
         {
-            get => generalCategory.GetEntry<bool>("AccessInventory").Value;
+            get
+            {
+                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                {
+                    return NetworkSynchronizer.Instance.SessionData.AccessInventory;
+                }
+
+                return generalCategory.GetEntry<bool>("AccessInventory").Value;
+            }
             set => generalCategory.GetEntry<bool>("AccessInventory").Value = value;
         }
 
         public static bool CheatMenu
         {
-            get => generalCategory.GetEntry<bool>("CheatMenu").Value;
+            get
+            {
+                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                {
+                    return NetworkSynchronizer.Instance.SessionData.CheatMenu;
+                }
+
+                return generalCategory.GetEntry<bool>("CheatMenu").Value;
+            }
             set => generalCategory.GetEntry<bool>("CheatMenu").Value = value;
         }
 
@@ -89,6 +120,14 @@ namespace AdvancedDealing
                 default_value: false,
                 display_name: "Skip Movement (Instant Delivery)",
                 description: "Skips all movement actions for dealers",
+                is_hidden: false
+            );
+            generalCategory.CreateEntry<bool>
+            (
+                identifier: "NotifyOnAction",
+                default_value: true,
+                display_name: "Notify On Actions",
+                description: "Sends notifications after some actions got triggered",
                 is_hidden: false
             );
             generalCategory.CreateEntry<bool>

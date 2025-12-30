@@ -120,9 +120,9 @@ namespace AdvancedDealing.NPCs.Actions
 
                 _dealer.Dealer.SetAnimationTrigger("GrabItem");
                 _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
-                _dealer.SendMessage($"I've put ${cash:F0} inside the dead drop at {_deadDrop.DeadDrop.name}.", _dealer.NotifyOnCashDelivery);
+                _dealer.SendMessage($"I've put ${cash:F0} inside the dead drop at {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
 
-                if (_dealer.NotifyOnCashDelivery)
+                if (ModConfig.NotifyOnAction)
                 {
                     DeaddropQuest quest = NetworkSingleton<QuestManager>.Instance.CreateDeaddropCollectionQuest(_deadDrop.DeadDrop.GUID.ToString());
 
@@ -152,7 +152,7 @@ namespace AdvancedDealing.NPCs.Actions
                 float cash = _dealer.Dealer.Cash;
 
                 NetworkSingleton<MoneyManager>.Instance.ChangeCashBalance(+cash, true, true);
-                _dealer.SendMessage($"Sent you ${cash:F0} from my earnings.", _dealer.NotifyOnCashDelivery);
+                _dealer.SendMessage($"Sent you ${cash:F0} from my earnings.", ModConfig.NotifyOnAction);
                 _dealer.Dealer.ChangeCash(-cash);
 
                 yield return new WaitUntil((Func<bool>)(() => _dealer.Dealer.Cash < _dealer.CashThreshold));
@@ -200,7 +200,7 @@ namespace AdvancedDealing.NPCs.Actions
                 if (!_deadDropIsFull)
                 {
                     _deadDropIsFull = true;
-                    _dealer.SendMessage($"Could not deliver cash to dead drop {deadDrop.DeadDrop.DeadDropName}. There is no space inside!", _dealer.NotifyOnCashDelivery);
+                    _dealer.SendMessage($"Could not deliver cash to dead drop {deadDrop.DeadDrop.DeadDropName}. There is no space inside!", ModConfig.NotifyOnAction);
                 }
                 return false;
             }

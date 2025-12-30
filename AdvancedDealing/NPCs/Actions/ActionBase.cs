@@ -154,7 +154,13 @@ namespace AdvancedDealing.NPCs.Actions
             }
         }
 
-        public virtual void MinPassed() { }
+        public virtual void MinPassed() 
+        {
+            if (ShouldOverrideOriginalSchedule() && IsActive && S1Schedule.ScheduleEnabled)
+            {
+                S1Schedule.DisableSchedule();
+            }
+        }
 
         public virtual bool ShouldOverrideOriginalSchedule ()
         {

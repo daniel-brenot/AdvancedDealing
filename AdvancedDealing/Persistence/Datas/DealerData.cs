@@ -16,8 +16,6 @@
 
         public bool DeliverCash;
 
-        public bool NotifyOnCashDelivery;
-
         public float CashThreshold;
 
         public int DaysUntilNextNegotiation;
@@ -39,7 +37,6 @@
             SpeedMultiplier = 1f;
             Loyality = 50f;
             DeliverCash = false;
-            NotifyOnCashDelivery = true;
             CashThreshold = 1500f;
             DaysUntilNextNegotiation = 0;
         }

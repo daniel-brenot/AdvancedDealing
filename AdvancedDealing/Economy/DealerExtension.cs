@@ -59,8 +59,6 @@ namespace AdvancedDealing.Economy
 
         public bool DeliverCash;
 
-        public bool NotifyOnCashDelivery;
-
         public float CashThreshold;
 
         public int DaysUntilNextNegotiation;
@@ -82,7 +80,7 @@ namespace AdvancedDealing.Economy
             }
 
             PatchData(dealerData);
-
+            Update();
             Awake();
         }
 
