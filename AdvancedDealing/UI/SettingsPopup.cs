@@ -64,6 +64,16 @@ namespace AdvancedDealing.UI
             foreach (GameObject field in _inputFields)
             {
                 field.GetComponent<InputField>().text = GetDataValue(field.name);
+                field.SetActive(true);
+            }
+
+            if (ModConfig.LoyalityMode)
+            {
+                GameObject speedMultiplierField = _inputFields.Find(x => x.name == "SpeedMultiplier");
+                speedMultiplierField?.SetActive(false);
+
+                GameObject maxCustomersField = _inputFields.Find(x => x.name == "MaxCustomers");
+                maxCustomersField?.SetActive(false);
             }
         }
 
