@@ -6,6 +6,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using System.IO;
+using System.Collections.Generic;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
@@ -115,6 +117,12 @@ namespace AdvancedDealing.Persistence
         {
             UIBuilder.Reset();
             Schedule.ClearAllSchedules();
+            List<DealerExtension> dealers = DealerExtension.GetAllDealers();
+
+            for (int i = dealers.Count - 1; i >= 0; i--)
+            {
+                dealers[i].Destroy(true);
+            }
 
             SavegameLoaded = false;
 

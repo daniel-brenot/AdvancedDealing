@@ -1,5 +1,7 @@
 ﻿using AdvancedDealing.Economy;
 using System.Collections.Generic;
+using System;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.ItemFramework;
@@ -48,8 +50,11 @@ namespace AdvancedDealing.NPCs.Actions
             {
                 int i = UnityEngine.Random.Range(0, products.Count);
                 ItemInstance product = products[i];
+                int amountToSteal = (int)Math.Round((float)product.Quantity * _range / 100, MidpointRounding.AwayFromZero);
 
-                product.SetQuantity(product.Quantity - (product.Quantity * _range / 100));
+                product.ChangeQuantity(0 - amountToSteal);
+
+                Utils.Logger.Debug($"{_dealer.Dealer.fullName} has stolen some products: {amountToSteal} {product.Name}");
             }
 
             End();

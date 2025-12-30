@@ -21,7 +21,7 @@ namespace AdvancedDealing.Patches
                 DealerExtension dealer = DealerExtension.GetDealer(__instance);
                 dealer.DailyContractCount++;
 
-                if (dealer.DailyContractCount < 6)
+                if (dealer.DailyContractCount > 6)
                 {
                     dealer.ChangeLoyality(-10f);
                 }

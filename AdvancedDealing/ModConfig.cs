@@ -58,18 +58,32 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("AccessInventory").Value = value;
         }
 
-        public static bool CheatMenu
+        public static bool SettingsMenu
         {
             get
             {
                 if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
                 {
-                    return NetworkSynchronizer.Instance.SessionData.CheatMenu;
+                    return NetworkSynchronizer.Instance.SessionData.SettingsMenu;
                 }
 
-                return generalCategory.GetEntry<bool>("CheatMenu").Value;
+                return generalCategory.GetEntry<bool>("SettingsMenu").Value;
             }
-            set => generalCategory.GetEntry<bool>("CheatMenu").Value = value;
+            set => generalCategory.GetEntry<bool>("SettingsMenu").Value = value;
+        }
+
+        public static float NegotiationModifier
+        {
+            get
+            {
+                if (NetworkSynchronizer.IsSyncing && !NetworkSynchronizer.IsHost && NetworkSynchronizer.Instance.SessionData != null)
+                {
+                    return NetworkSynchronizer.Instance.SessionData.NegotiationModifier;
+                }
+                
+                return generalCategory.GetEntry<float>("NegotiationModifier").Value;
+            }
+            set => generalCategory.GetEntry<float>("NegotiationModifier").Value = value;
         }
 
         public static void Initialize()
@@ -140,11 +154,20 @@ namespace AdvancedDealing
             );
             generalCategory.CreateEntry<bool>
             (
-                identifier: "CheatMenu",
+                identifier: "SettingsMenu",
                 default_value: false,
-                display_name: "Enable Dealer Cheat Menu",
-                description: "Allows access to the dealer cheat menu via text message",
+                display_name: "Enable Dealer Settings Menu",
+                description: "Allows access to the dealer settings menu via text message",
                 is_hidden: false
+            );
+            generalCategory.CreateEntry<float>
+            (
+                identifier: "NegotiationModifier",
+                default_value: 0.5f,
+                display_name: "Negotiation Modifier (Higher = Better Chance)",
+                description: "Modifier used to calculate the negotiation success.",
+                is_hidden: false,
+                validator: new ValueRange<float>(0f, 1f)
             );
         }
     }

@@ -200,7 +200,7 @@ namespace AdvancedDealing.Persistence
                             {
                                 LoyalityMode = ModConfig.LoyalityMode,
                                 AccessInventory = ModConfig.AccessInventory,
-                                CheatMenu = ModConfig.CheatMenu
+                                SettingsMenu = ModConfig.SettingsMenu
                             });
 
                             foreach (DealerData data in SaveModifier.Instance.SaveData.Dealers)

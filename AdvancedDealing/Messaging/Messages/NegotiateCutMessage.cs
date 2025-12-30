@@ -86,7 +86,14 @@ namespace AdvancedDealing.Messaging.Messages
 
         private bool CalculateResponse(float oldCut, float newCut)
         {
-            float baseChance = _dealer.Loyality;
+            float baseChance = ModConfig.NegotiationModifier;
+
+            // Loyality mode
+            if (ModConfig.LoyalityMode)
+            {
+                baseChance = _dealer.Loyality / 100;
+            }
+
             float difference = Math.Abs(oldCut - newCut);
             float chance = (baseChance - (baseChance * (difference * 100) / 100)) / 100;
 

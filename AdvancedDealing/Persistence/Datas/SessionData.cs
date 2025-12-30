@@ -6,7 +6,9 @@
 
         public bool AccessInventory;
 
-        public bool CheatMenu;
+        public bool SettingsMenu;
+
+        public float NegotiationModifier;
 
         public SessionData(string identifier) : base(identifier) { }
     }

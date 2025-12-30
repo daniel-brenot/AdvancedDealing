@@ -30,6 +30,8 @@ namespace AdvancedDealing.NPCs.Actions
             {
                 _dealer.SendMessage("I cannot work for you anymore. I'm out!");
                 _dealer.Fire();
+
+                Utils.Logger.Debug($"{_dealer.Dealer.fullName} has resigned");
             }
             else
             {

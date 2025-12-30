@@ -27,7 +27,11 @@ namespace AdvancedDealing.NPCs.Actions
 
         private void StealCash()
         {
-            _dealer.Dealer.SetCash(_dealer.Dealer.Cash - (_dealer.Dealer.Cash * _range / 100));
+            float cashToSteal = _dealer.Dealer.Cash * _range / 100;
+
+            Utils.Logger.Debug($"{_dealer.Dealer.fullName} has stolen some money: ${cashToSteal}");
+
+            _dealer.Dealer.ChangeCash(0f - cashToSteal);
 
             End();
         }

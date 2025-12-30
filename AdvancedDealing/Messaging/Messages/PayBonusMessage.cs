@@ -41,11 +41,19 @@ namespace AdvancedDealing.Messaging.Messages
 
             float amount;
 
-            if (value < 500)
+            if (value < 50f)
+            {
+                amount = 1f;
+            }
+            else if (value < 100f)
+            {
+                amount = 5f;
+            }
+            else if (value < 500f)
             {
                 amount = 20f;
             }
-            else if (value < 1000)
+            else if (value < 1000f)
             {
                 amount = 40f;
             }

@@ -43,8 +43,6 @@ namespace AdvancedDealing
                     SaveModifier = new();
                     NetworkSynchronizer = new();
 
-                    PersistentSingleton<LoadManager>.Instance.onLoadComplete.AddListener((UnityAction)SaveModifier.LoadModifications);
-
                     Utils.Logger.Msg($"{ModInfo.Name} v{ModInfo.Version} initialized");
 
                     IsInitialized = true;
@@ -54,6 +52,10 @@ namespace AdvancedDealing
                 {
                     SaveModifier.ClearModifications();
                 }
+            }
+            else if (sceneName == "Main")
+            {
+                SaveModifier.LoadModifications();
             }
         }
     }

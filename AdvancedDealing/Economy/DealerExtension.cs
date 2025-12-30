@@ -9,6 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine.Events;
+using Il2CppScheduleOne.ItemFramework;
+using static Il2CppFluffyUnderware.Curvy.Generator.CGModule;
+
+
 
 #if IL2CPP
 using Il2CppGameKit.Utilities;
@@ -67,8 +71,6 @@ namespace AdvancedDealing.Economy
 
         public bool HasChanged;
 
-        private DialogueController.DialogueChoice _payBonusChoice;
-
         public DealerExtension(Dealer dealer)
         {
             Dealer = dealer;
@@ -86,6 +88,8 @@ namespace AdvancedDealing.Economy
                 dealerData = new(oldDealerData.Identifier);
                 dealerData.LoadDefaults();
                 dealerData.Merge(oldDealerData);
+
+                Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} merged to newer Version");
             }
 
             PatchData(dealerData);
@@ -119,7 +123,7 @@ namespace AdvancedDealing.Economy
 
         public static void AddDealer(Dealer dealer)
         {
-            if (dealer.IsRecruited && Dealer.AllPlayerDealers.Contains(dealer))
+            if (dealer.IsRecruited && dealer.DealerType == EDealerType.PlayerDealer)
             {
                 if (!DealerExists(dealer))
                 {
@@ -153,16 +157,6 @@ namespace AdvancedDealing.Economy
 
         public static void Initialize()
         {
-            for (int i = cache.Count - 1; i >= 0; i--)
-            {
-                cache[i].Destroy();
-            }
-
-            foreach (Dealer dealer in Dealer.AllPlayerDealers)
-            {
-                AddDealer(dealer);
-            }
-
             Dealer.onDealerRecruited -= new Action<Dealer>(AddDealer);
             Dealer.onDealerRecruited += new Action<Dealer>(AddDealer);
         }
@@ -181,11 +175,11 @@ namespace AdvancedDealing.Economy
 
         public void Destroy(bool clearCache = true)
         {
-            NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(OnMinPassed);
-            NetworkSingleton<TimeManager>.Instance.onSleepStart = new Action(OnSleepStart);
+            NetworkSingleton<TimeManager>.Instance?.onMinutePass -= new Action(OnMinPassed);
+            NetworkSingleton<TimeManager>.Instance?.onSleepStart -= new Action(OnSleepStart);
 
-            Schedule.Destroy();
-            Conversation.Destroy();
+            Schedule?.Destroy();
+            Conversation?.Destroy();
 
             if (clearCache)
             {
@@ -296,13 +290,6 @@ namespace AdvancedDealing.Economy
                 NetworkSynchronizer.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
             }
 
-            // Loyality Mode
-            if (ModConfig.LoyalityMode)
-            {
-                ChangeLoyality(-30);
-                _payBonusChoice.Enabled = false;
-            }
-
             SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
             Destroy(false);
 
@@ -369,9 +356,9 @@ namespace AdvancedDealing.Economy
 
             if (Dealer.AssignedCustomers.Count > maxCustomers)
             {
-                for (int i = Dealer.AssignedCustomers.Count; i >= 0; i--)
+                for (int i = Dealer.AssignedCustomers.Count - 1; i >= 0; i--)
                 {
-                    if (i <= maxCustomers)
+                    if (i + 1 <= maxCustomers)
                     {
                         break;
                     }
@@ -403,19 +390,6 @@ namespace AdvancedDealing.Economy
             Conversation.AddSendableMessage(new NegotiateCutMessage(this));
             Conversation.AddSendableMessage(new AdjustSettingsMessage(this));
             Conversation.AddSendableMessage(new FiredMessage(this));
-
-            _payBonusChoice = new();
-            _payBonusChoice.ChoiceText = "I will pay you a bonus";
-            _payBonusChoice.Enabled = ModConfig.LoyalityMode;
-            _payBonusChoice.Conversation = new(); // TODO
-            _payBonusChoice.onChoosen.AddListener((UnityAction)PayBonus);
-            _payBonusChoice.Priority = 99;
-            Dealer.DialogueController.AddDialogueChoice(_payBonusChoice);
-        }
-
-        private void PayBonus()
-        {
-            Utils.Logger.Debug("Choosen Pay Bonus");
         }
 
         private void Update()
