@@ -64,10 +64,5 @@ namespace AdvancedDealing.NPCs.Actions
 
             End();
         }
-
-        public override bool ShouldOverrideOriginalSchedule()
-        {
-            return false;
-        }
     }
 }

@@ -442,8 +442,8 @@ namespace AdvancedDealing.Economy
             NetworkSingleton<TimeManager>.Instance.onSleepStart += new Action(OnSleepStart);
 
             Schedule = new(Dealer);
-            Schedule.AddAction(new DeliverCashSignal(this));
-            Schedule.AddAction(new PickupProductsSignal(this));
+            Schedule.AddAction(new DeliverCashAction(this));
+            Schedule.AddAction(new PickupProductsAction(this));
 
             Conversation = new(Dealer);
             Conversation.AddSendableMessage(new EnableDeliverCashMessage(this));

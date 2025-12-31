@@ -18,7 +18,7 @@ using ScheduleOne.Quests;
 
 namespace AdvancedDealing.NPCs.Actions
 {
-    public class DeliverCashSignal : SignalBase
+    public class DeliverCashAction : ActionBase
     {
         private readonly DealerExtension _dealer;
 
@@ -32,10 +32,12 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected override string ActionName => "Deliver Cash";
 
-        public DeliverCashSignal(DealerExtension dealer)
+        public override bool OverrideOriginalSchedule => true;
+
+        public DeliverCashAction(DealerExtension dealer)
         {
             _dealer = dealer;
-            Priority = 90;
+            Priority = 9;
         }
 
         public override void Start()
@@ -185,7 +187,7 @@ namespace AdvancedDealing.NPCs.Actions
 
         public override bool ShouldStart()
         {
-            if (!_dealer.Dealer.IsRecruited || !_dealer.DeliverCash || _dealer.Dealer.ActiveContracts.Count > 0 || _dealer.Dealer.Cash < _dealer.CashThreshold || TimeManager.Instance.CurrentTime == 400)
+            if (!_dealer.Dealer.IsRecruited || !_dealer.DeliverCash || _dealer.Dealer.Cash < _dealer.CashThreshold || TimeManager.Instance.CurrentTime == 400)
             {
                 return false;
             }

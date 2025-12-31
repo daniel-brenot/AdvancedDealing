@@ -16,7 +16,7 @@ using ScheduleOne.Product;
 
 namespace AdvancedDealing.NPCs.Actions
 {
-    public class PickupProductsSignal : SignalBase
+    public class PickupProductsAction : ActionBase
     {
         private readonly DealerExtension _dealer;
 
@@ -24,24 +24,41 @@ namespace AdvancedDealing.NPCs.Actions
 
         private object _pickupRoutine;
 
+        private object _instantPickupRoutine;
+
         private bool _deadDropIsEmpty = false;
 
         protected override string ActionName => "Pickup Products";
 
-        public PickupProductsSignal(DealerExtension dealerExtension)
+        public override bool OverrideOriginalSchedule => true;
+
+        public PickupProductsAction(DealerExtension dealerExtension)
         {
             _dealer = dealerExtension;
-            Priority = 100;
+            Priority = 20;
         }
 
         public override void Start()
         {
+            base.Start();
+
             _deadDrop = DeadDropExtension.GetDeadDrop(_dealer.DeadDrop);
 
-            if (_deadDrop == null) return;
-
-            base.Start();
-            SetDestination(_deadDrop.GetPosition());
+            if (_deadDrop == null)
+            {
+                BeginInstantPickup();
+            }
+            else
+            {
+                if (ModConfig.SkipMovement)
+                {
+                    BeginPickup();
+                }
+                else
+                {
+                    SetDestination(_deadDrop.GetPosition());
+                }
+            }
         }
 
         public override void End()
@@ -55,7 +72,7 @@ namespace AdvancedDealing.NPCs.Actions
         {
             base.MinPassed();
 
-            if (!IsActive) return;
+            if (!IsActive || _instantPickupRoutine != null) return;
 
             if (_deadDrop.DeadDrop.GUID.ToString() != _dealer.DeadDrop || !_dealer.PickupProducts || TimeManager.Instance.CurrentTime == 400)
             {
@@ -70,14 +87,7 @@ namespace AdvancedDealing.NPCs.Actions
 
                 if (IsAtDestination())
                 {
-                    if (!_deadDrop.IsFull())
-                    {
-                        BeginPickup();
-                    }
-                    else
-                    {
-                        End();
-                    }
+                    BeginPickup();
                 }
                 else
                 {
@@ -123,6 +133,45 @@ namespace AdvancedDealing.NPCs.Actions
                     Utils.Logger.Debug($"Product pickup for {_dealer.Dealer.fullName} was successfull");
                 }
 
+                yield return new WaitForSeconds(2f);
+
+                End();
+            }
+        }
+
+        private void BeginInstantPickup()
+        {
+            _instantPickupRoutine ??= MelonCoroutines.Start(InstantPickupRoutine());
+
+            IEnumerator InstantPickupRoutine()
+            {
+                if (_deadDrop.GetAllProducts().Count <= 0)
+                {
+                    _dealer.SendMessage($"Could not pickup products at dead drop {_deadDrop.DeadDrop.DeadDropName}. There are no products inside!", ModConfig.NotifyOnAction);
+                    _deadDropIsEmpty = true;
+
+                    Utils.Logger.Debug($"Product pickup for {_dealer.Dealer.fullName} failed: Dead drop is empty");
+                }
+                else
+                {
+                    Dictionary<ProductItemInstance, ItemSlot> products = _deadDrop.GetAllProducts();
+
+                    foreach (KeyValuePair<ProductItemInstance, ItemSlot> product in products)
+                    {
+                        if (_dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1)
+                        {
+                            break;
+                        }
+
+                        _dealer.Dealer.Inventory.InsertItem(product.Key);
+                        product.Value.ChangeQuantity(0 - product.Key.Quantity);
+                    }
+
+                    Utils.Logger.Debug($"Product pickup for {_dealer.Dealer.fullName} was successfull");
+                }
+
+                yield return new WaitForSecondsRealtime(2f);
+
                 End();
             }
         }
@@ -143,7 +192,7 @@ namespace AdvancedDealing.NPCs.Actions
 
         public override bool ShouldStart()
         {
-            if (!_dealer.Dealer.IsRecruited || !_dealer.PickupProducts || TimeManager.Instance.CurrentTime == 400 || _dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1)
+            if (!_dealer.Dealer.IsRecruited || !_dealer.PickupProducts || _dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1 || TimeManager.Instance.CurrentTime == 400)
             {
                 return false;
             }
