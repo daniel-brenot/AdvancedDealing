@@ -118,7 +118,7 @@ namespace AdvancedDealing.UI
                 }
 
                 _dealer.HasChanged = true;
-                _dealer.SendPlayerMessage("Maaaan.. please change your behavior!");
+                _dealer.SendPlayerMessage("Damn.. please change your behavior!");
                 _dealer.SendMessage($"Hmkay .. i'm sorry", false, true, 2f);
             }
 

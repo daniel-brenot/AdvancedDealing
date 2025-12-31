@@ -48,7 +48,11 @@ namespace AdvancedDealing.Messaging.Messages
             else if (value > _dealer.Cut)
             {
                 _dealer.SendMessage("Haha.. you idiot! Yeah sure", false, true, 2f);
-                _dealer.Loyality -= -5f;
+
+                if (ModConfig.LoyalityMode)
+                {
+                    _dealer.ChangeLoyality(0f - 5f);
+                }
             }
             else
             {
@@ -63,7 +67,11 @@ namespace AdvancedDealing.Messaging.Messages
                     _dealer.SendMessage("Naah.. no chance!", false, true, 2f);
 
                     _dealer.DaysUntilNextNegotiation = 3;
-                    _dealer.Loyality -= -10f;
+
+                    if (ModConfig.LoyalityMode)
+                    {
+                        _dealer.ChangeLoyality(0f - 10f);
+                    }
 
                     if (NetworkSynchronizer.IsSyncing)
                     {

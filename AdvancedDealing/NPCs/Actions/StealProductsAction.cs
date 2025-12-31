@@ -24,7 +24,7 @@ namespace AdvancedDealing.NPCs.Actions
         public StealProductsAction(DealerExtension dealerExtension, int minRange, int maxRange)
         {
             _dealer = dealerExtension;
-            _range = UnityEngine.Random.Range(minRange, maxRange);
+            _range = UnityEngine.Random.Range(minRange, maxRange + 1);
         }
 
         public override void Start()
@@ -36,25 +36,30 @@ namespace AdvancedDealing.NPCs.Actions
 
         private void StealProducts()
         {
-            List<ItemInstance> products = [];
+            List<ItemSlot> validSlots = [];
 
             foreach (ItemSlot slot in NPC.Inventory.ItemSlots)
             {
-                if (slot.ItemInstance != null && slot.ItemInstance?.Category == EItemCategory.Product && slot.ItemInstance.Quantity > 0)
+                if (slot.ItemInstance != null && slot.ItemInstance.Category == EItemCategory.Product && slot.ItemInstance.Quantity > 0)
                 {
-                    products.Add(slot.ItemInstance);
+                    validSlots.Add(slot);
                 }
             }
 
-            if (products.Count > 0)
+            if (validSlots.Count > 0)
             {
-                int i = UnityEngine.Random.Range(0, products.Count);
-                ItemInstance product = products[i];
-                int amountToSteal = (int)Math.Round((float)product.Quantity * _range / 100, MidpointRounding.AwayFromZero);
+                int i = UnityEngine.Random.Range(0, validSlots.Count);
+                int amountToSteal = validSlots[i].Quantity * _range / 100;
+                string productName = validSlots[i].ItemInstance.Name;
 
-                product.ChangeQuantity(0 - amountToSteal);
+                if (amountToSteal <= 0)
+                {
+                    amountToSteal = 1;
+                }
 
-                Utils.Logger.Debug($"{_dealer.Dealer.fullName} has stolen some products: {amountToSteal} {product.Name}");
+                validSlots[i].ChangeQuantity(0 - amountToSteal);
+
+                Utils.Logger.Debug($"{_dealer.Dealer.fullName} has stolen some products: {amountToSteal} {productName}");
             }
 
             End();

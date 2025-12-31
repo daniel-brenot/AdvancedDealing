@@ -15,7 +15,7 @@ using ScheduleOne.Persistence;
 
 namespace AdvancedDealing.Persistence.IO
 {
-    public static class JsonSerializer
+    public static class FileSerializer
     {
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
         {

@@ -27,7 +27,7 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected Schedule Schedule;
 
-        protected NPCScheduleManager S1Schedule;
+        protected NPCScheduleManager S1Schedule => Schedule.S1Schedule;
 
         protected int ConsecutivePathingFailures;
 
@@ -43,15 +43,14 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected NPCMovement Movement => NPC.Movement;
 
-        public virtual void SetReferences(NPC npc, Schedule schedule, NPCScheduleManager originalSchedule, int StartTime = 0)
+        public virtual void SetReferences(NPC npc, Schedule schedule, int startTime = 0)
         {
-            this.NPC = npc;
-            this.Schedule = schedule;
-            this.S1Schedule = originalSchedule;
+            NPC = npc;
+            Schedule = schedule;
 
             if (StartTime != 0)
             {
-                this.StartTime = StartTime;
+                StartTime = startTime;
             }
         }
 

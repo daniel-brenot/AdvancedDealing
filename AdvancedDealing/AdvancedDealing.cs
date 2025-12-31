@@ -3,6 +3,8 @@ using AdvancedDealing.Persistence;
 using MelonLoader;
 using UnityEngine.Events;
 using SaveModifier = AdvancedDealing.Persistence.SaveModifier;
+using System;
+
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;

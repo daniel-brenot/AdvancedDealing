@@ -16,20 +16,19 @@ namespace AdvancedDealing.Messaging
     {
         public readonly NPC NPC;
 
-        public readonly MSGConversation S1Conversation;
-
         public bool UIPatched;
 
         private static readonly List<Conversation> cache = [];
 
-        private readonly List<Messages.MessageBase> _sendableMessages = [];
+        public MSGConversation S1Conversation => NPC.MSGConversation;
 
-        private readonly List<Messages.MessageBase> _patchedMessages = [];
+        private readonly List<MessageBase> _sendableMessages = [];
+
+        private readonly List<MessageBase> _patchedMessages = [];
 
         public Conversation(NPC npc)
         {
             NPC = npc;
-            S1Conversation = npc.MSGConversation;
 
             Utils.Logger.Debug("Conversation", $"Conversation created: {npc.fullName}");
 
@@ -38,7 +37,9 @@ namespace AdvancedDealing.Messaging
 
         public void PatchSendableMessages()
         {
-            foreach (Messages.MessageBase msg in _sendableMessages)
+            if (NPC == null || S1Conversation == null) return;
+
+            foreach (MessageBase msg in _sendableMessages)
             {
 #if IL2CPP
                 bool exists = S1Conversation.Sendables.Exists((Func<SendableMessage, bool>)(x => x.Text == msg.Text));
@@ -74,25 +75,22 @@ namespace AdvancedDealing.Messaging
 
         public void Destroy()
         {
-            if (UIPatched && NPC != null && S1Conversation !=null)
+            if (NPC != null)
             {
                 NPC.ConversationCanBeHidden = true;
-
-                S1Conversation.EnsureUIExists();
-                S1Conversation.SetEntryVisibility(false);
             }
 
             UIPatched = false;
             cache.Remove(this);
         }
 
-        public void AddSendableMessage(Messages.MessageBase message)
+        public void AddSendableMessage(MessageBase message)
         {
             Type type = message.GetType();
 
             if (_sendableMessages.Exists(a => a.GetType() == type)) return;
 
-            message.SetReferences(NPC, this, S1Conversation);
+            message.SetReferences(NPC, this);
             _sendableMessages.Add(message);
         }
 

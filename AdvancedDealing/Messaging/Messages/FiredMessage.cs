@@ -41,6 +41,8 @@ namespace AdvancedDealing.Messaging.Messages
             if (response == ConfirmationPopup.EResponse.Confirm)
             {
                 _dealer.Fire();
+                _dealer.SendPlayerMessage("I don't need your service anymore. You are out!");
+                _dealer.SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
             }
         }
     }

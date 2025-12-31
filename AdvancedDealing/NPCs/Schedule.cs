@@ -28,20 +28,19 @@ namespace AdvancedDealing.NPCs
 
         private readonly List<ActionBase> _actionList = [];
 
-        private readonly NPCScheduleManager _originalSchedule;
-
         public bool IsEnabled { get; protected set; }
 
         public ActionBase ActiveAction { get; set; }
 
         public List<ActionBase> PendingActions { get; set; } = [];
 
+        public NPCScheduleManager S1Schedule => NPC?.GetComponentInChildren<NPCScheduleManager>();
+
         private List<ActionBase> ActionsAwaitingStart { get; set; } = [];
 
         public Schedule(NPC npc)
         {
             NPC = npc;
-            _originalSchedule = npc.GetComponentInChildren<NPCScheduleManager>();
 
             Utils.Logger.Debug("Schedule", $"Schedule created: {npc.fullName}");
 
@@ -86,6 +85,11 @@ namespace AdvancedDealing.NPCs
             {
                 NetworkSingleton<TimeManager>.Instance.onMinutePass -= new Action(MinPassed);
             }
+
+            if (NPC != null && S1Schedule != null)
+            {
+                ActiveAction?.Interrupt();
+            }
         }
 
         protected void MinPassed()
@@ -113,7 +117,7 @@ namespace AdvancedDealing.NPCs
 
                     if (ActiveAction == null)
                     {
-                        if (!actionToStart.ShouldOverrideOriginalSchedule() || _originalSchedule.ActiveAction == null || (_originalSchedule.ActiveAction != null && actionToStart.Priority > _originalSchedule.ActiveAction.Priority))
+                        if (!actionToStart.ShouldOverrideOriginalSchedule() || S1Schedule.ActiveAction == null || (S1Schedule.ActiveAction != null && actionToStart.Priority > S1Schedule.ActiveAction.Priority))
                         {
                             StartAction(actionToStart);
                         }
@@ -171,7 +175,7 @@ namespace AdvancedDealing.NPCs
 
             if (_actionList.Exists(a => a.GetType() == type)) return;
 
-            action.SetReferences(NPC, this, _originalSchedule, StartTime);
+            action.SetReferences(NPC, this, StartTime);
             _actionList.Add(action);
         }
 

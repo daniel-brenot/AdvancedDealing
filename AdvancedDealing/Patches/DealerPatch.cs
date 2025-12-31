@@ -1,4 +1,5 @@
 ﻿using AdvancedDealing.Economy;
+using AdvancedDealing.Persistence;
 using HarmonyLib;
 
 #if IL2CPP
@@ -16,14 +17,14 @@ namespace AdvancedDealing.Patches
         [HarmonyPatch("CustomerContractEnded")]
         public static void CustomerContractEndedPostfix(Dealer __instance)
         {
-            if (DealerExtension.DealerExists(__instance))
+            if (DealerExtension.DealerExists(__instance) && NetworkSynchronizer.IsNoSyncOrHost)
             {
                 DealerExtension dealer = DealerExtension.GetDealer(__instance);
                 dealer.DailyContractCount++;
 
                 if (dealer.DailyContractCount > 6)
                 {
-                    dealer.ChangeLoyality(-10f);
+                    dealer.ChangeLoyality(0f - 10f);
                 }
             }
         }

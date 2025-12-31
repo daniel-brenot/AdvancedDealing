@@ -15,7 +15,7 @@ namespace AdvancedDealing.NPCs.Actions
         public StealCashAction(DealerExtension dealerExtension, float minRange, float maxRange)
         {
             _dealer = dealerExtension;
-            _range = UnityEngine.Random.Range(minRange, maxRange);
+            _range = UnityEngine.Random.Range(minRange, maxRange + 1f);
         }
 
         public override void Start()

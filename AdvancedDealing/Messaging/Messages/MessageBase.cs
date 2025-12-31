@@ -14,17 +14,16 @@ namespace AdvancedDealing.Messaging.Messages
 
         protected NPC NPC;
 
-        protected MSGConversation S1Conversation;
-
         protected Conversation Conversation;
+
+        protected MSGConversation S1Conversation => NPC.MSGConversation;
 
         public virtual bool DisableDefaultSendBehaviour => false;
 
-        public virtual void SetReferences(NPC npc, Conversation conversation, MSGConversation originalConversation)
+        public virtual void SetReferences(NPC npc, Conversation conversation)
         {
             NPC = npc;
             Conversation = conversation;
-            S1Conversation = originalConversation;
         }
 
         public virtual bool ShouldShowCheck(SendableMessage sMsg)

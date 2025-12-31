@@ -8,26 +8,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEngine.Events;
-using Il2CppScheduleOne.ItemFramework;
-using static Il2CppFluffyUnderware.Curvy.Generator.CGModule;
-
-
 
 #if IL2CPP
 using Il2CppGameKit.Utilities;
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Dialogue;
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Messaging;
 using Il2CppScheduleOne.NPCs;
 using Il2CppScheduleOne.UI.Phone.Messages;
 using Il2CppScheduleOne.GameTime;
-using Il2CppInterop.Runtime;
 #elif MONO
 using GameKit.Utilities;
 using ScheduleOne.DevUtilities;
-using ScheduleOne.Dialogue;
 using ScheduleOne.Economy;
 using ScheduleOne.Messaging;
 using ScheduleOne.NPCs;
@@ -264,7 +256,29 @@ namespace AdvancedDealing.Economy
 
             Dealer.ActiveContracts.Clear();
             Dealer.Inventory.Clear();
-            Dealer.HasChanged = true;
+
+            if (Dealer.DealerPoI != null)
+            {
+                Dealer.DealerPoI.enabled = false;
+            }
+
+            if (Dealer.DialogueController != null)
+            {
+                Dealer.DialogueController.GreetingOverrides.Clear();
+
+                foreach (var choice in Dealer.DialogueController.Choices)
+                {
+                    if (!choice.Enabled)
+                    {
+                        choice.Enabled = true;
+                    }
+                    else if (choice.ChoiceText != "Nevermind")
+                    {
+
+                        choice.Enabled = false;
+                    }
+                }
+            }
 
 #if IL2CPP
             if (PlayerSingleton<DealerManagementApp>.Instance.SelectedDealer == Dealer)
@@ -285,12 +299,13 @@ namespace AdvancedDealing.Economy
             typeof(Dealer).GetProperty("IsRecruited").SetValue(Dealer, false);
 #endif
 
+            Dealer.HasChanged = true;
+
             if (NetworkSynchronizer.IsSyncing)
             {
                 NetworkSynchronizer.Instance.SendMessage("dealer_fired", Dealer.GUID.ToString());
             }
 
-            SendMessage("Hmpf okay, get in touch if you need me", false, true, 0.5f);
             Destroy(false);
 
             Utils.Logger.Debug("DealerExtension", $"Dealer fired: {Dealer.fullName}");
@@ -300,13 +315,13 @@ namespace AdvancedDealing.Economy
         {
             float newLoyality = Loyality + amount;
             
-            if (newLoyality >= 100)
+            if (newLoyality >= 100f)
             {
-                Loyality = 100;
+                Loyality = 100f;
             }
-            else if (newLoyality <= 0)
+            else if (newLoyality <= 0f)
             {
-                Loyality = 0;
+                Loyality = 0f;
             }
             else
             {
@@ -345,13 +360,13 @@ namespace AdvancedDealing.Economy
             }
             else if (Loyality <= 79)
             {
-                maxCustomers = 10;
-                speedMultiplier = 1.2f;
+                maxCustomers = 12;
+                speedMultiplier = 1.3f;
             }
             else
             {
-                maxCustomers = 14;
-                speedMultiplier = 1.4f;
+                maxCustomers = 16;
+                speedMultiplier = 1.6f;
             }
 
             if (Dealer.AssignedCustomers.Count > maxCustomers)
@@ -506,7 +521,7 @@ namespace AdvancedDealing.Economy
             }
             else if (actions.Count > 1)
             {
-                int i = UnityEngine.Random.Range(0, actions.Count - 1);
+                int i = UnityEngine.Random.Range(0, actions.Count);
 
                 Schedule.AddAction(actions[i]);
             }

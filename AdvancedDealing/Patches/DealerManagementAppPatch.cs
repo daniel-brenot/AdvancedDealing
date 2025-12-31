@@ -20,7 +20,7 @@ namespace AdvancedDealing.Patches
         [HarmonyPatch("SetDisplayedDealer")]
         public static void SetDisplayedDealerPostfix(DealerManagementApp __instance, Dealer dealer)
         {
-            if (SaveModifier.Instance.SavegameLoaded)
+            if (SaveModifier.Instance.SavegameLoaded && UIBuilder.HasBuild)
             {
                 DealerExtension dealerExtension = DealerExtension.GetDealer(dealer);
 

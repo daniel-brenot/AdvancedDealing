@@ -120,7 +120,7 @@ namespace AdvancedDealing.NPCs.Actions
 
                 _dealer.Dealer.SetAnimationTrigger("GrabItem");
                 _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
-                _dealer.SendMessage($"I've put ${cash:F0} inside the dead drop at {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
+                _dealer.SendMessage($"I've put ${cash:F0} inside the dead drop {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
 
                 if (ModConfig.NotifyOnAction)
                 {
@@ -129,7 +129,7 @@ namespace AdvancedDealing.NPCs.Actions
                     if (quest != null)
                     {
                         quest.Description = $"Collect cash at {_deadDrop.DeadDrop.DeadDropDescription}";
-                        quest.Entries[0].SetEntryTitle($"{_dealer.Dealer.name}'s cash delivery at {_deadDrop.DeadDrop.DeadDropName}");
+                        quest.Entries[0].SetEntryTitle($"{_dealer.Dealer.name}'s cash delivery {_deadDrop.DeadDrop.DeadDropName}");
                     }
                 }
 
@@ -204,6 +204,8 @@ namespace AdvancedDealing.NPCs.Actions
                 }
                 return false;
             }
+
+            _deadDropIsFull = false;
 
             return base.ShouldStart();
         }

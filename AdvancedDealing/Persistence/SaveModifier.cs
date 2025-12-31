@@ -57,7 +57,7 @@ namespace AdvancedDealing.Persistence
 
             IEnumerator LoadRoutine()
             {
-                if (!JsonSerializer.LoadFromFile<DataWrapper>(FilePath, out var data))
+                if (!FileSerializer.LoadFromFile<DataWrapper>(FilePath, out var data))
                 {
                     SaveData = new()
                     {
@@ -73,14 +73,21 @@ namespace AdvancedDealing.Persistence
                 DeadDropExtension.Initialize();
                 DealerExtension.Initialize();
 
-                yield return new WaitForSecondsRealtime(2f);
-
-                SavegameLoaded = true;
-
                 if (NetworkSynchronizer.IsSyncing)
                 {
                     NetworkSynchronizer.Instance.SetAsHost();
+                    NetworkSynchronizer.Instance.SessionData = new(Singleton<Lobby>.Instance.LobbySteamID.ToString())
+                    {
+                        LoyalityMode = ModConfig.LoyalityMode,
+                        AccessInventory = ModConfig.AccessInventory,
+                        SettingsMenu = ModConfig.SettingsMenu,
+                        NegotiationModifier = ModConfig.NegotiationModifier
+                    };
                 }
+
+                yield return new WaitForSecondsRealtime(2f);
+
+                SavegameLoaded = true;
 
                 UIBuilder.Build();
 
@@ -143,7 +150,7 @@ namespace AdvancedDealing.Persistence
 
                 Utils.Logger.Msg($"Data for {wrapper.SaveName} saved");
 
-                JsonSerializer.SaveToFile(FilePath, wrapper);
+                FileSerializer.SaveToFile(FilePath, wrapper);
             }
         }
     }

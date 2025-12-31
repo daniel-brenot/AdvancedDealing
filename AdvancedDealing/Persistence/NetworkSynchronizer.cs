@@ -4,20 +4,16 @@ using System;
 using AdvancedDealing.Economy;
 using AdvancedDealing.Persistence.IO;
 
-
-
 #if IL2CPP
 using Il2CppGameKit.Utilities;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Networking;
 using Il2CppSteamworks;
 using Il2CppSystem.Text;
 #elif MONO
 using GameKit.Utilities;
 using ScheduleOne.DevUtilities;
-using ScheduleOne.Economy;
 using ScheduleOne.Networking;
 using Steamworks;
 using System.Text;
@@ -77,6 +73,7 @@ namespace AdvancedDealing.Persistence
             _isHost = false;
             _lobbySteamID = CSteamID.Nil;
             _isSyncing = false;
+            SessionData = null;
 
             Utils.Logger.Msg("NetworkSynchronizer", "Synchronization stopped");
         }
@@ -87,7 +84,7 @@ namespace AdvancedDealing.Persistence
             Utils.Logger.Debug("NetworkSynchronizer", "Set as host");
         }
 
-        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, JsonSerializer.JsonSerializerSettings));
+        public void SendData(DataBase data) => SendData(data.DataType, data.Identifier, JsonConvert.SerializeObject(data, FileSerializer.JsonSerializerSettings));
 
         public void SendData(string dataType, string identifier, string dataString)
         {
@@ -198,13 +195,6 @@ namespace AdvancedDealing.Persistence
 
                         if (_isHost)
                         {
-                            SessionData = new(_lobbySteamID.ToString())
-                            {
-                                LoyalityMode = ModConfig.LoyalityMode,
-                                AccessInventory = ModConfig.AccessInventory,
-                                SettingsMenu = ModConfig.SettingsMenu
-                            };
-
                             SendData(SessionData);
 
                             foreach (DealerData data in DealerExtension.FetchAllDealerDatas())
