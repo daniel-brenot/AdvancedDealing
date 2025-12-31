@@ -17,7 +17,6 @@ using ScheduleOne.Persistence;
 [assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.Name}", ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("TVGS", "Schedule I")]
 [assembly: MelonColor(255, 113, 195, 230)]
-[assembly: MelonOptionalDependencies(["S1NetworkUtility"])]
 #if IL2CPP
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 #elif MONO
