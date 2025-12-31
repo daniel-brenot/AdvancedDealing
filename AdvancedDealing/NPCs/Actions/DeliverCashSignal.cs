@@ -32,9 +32,9 @@ namespace AdvancedDealing.NPCs.Actions
 
         protected override string ActionName => "Deliver Cash";
 
-        public DeliverCashSignal(DealerExtension dealerExtension)
+        public DeliverCashSignal(DealerExtension dealer)
         {
-            _dealer = dealerExtension;
+            _dealer = dealer;
             Priority = 90;
         }
 
@@ -72,10 +72,7 @@ namespace AdvancedDealing.NPCs.Actions
         {
             base.MinPassed();
 
-            if (!IsActive || _instantDeliveryRoutine != null)
-            {
-                return;
-            }
+            if (!IsActive || _instantDeliveryRoutine != null) return;
 
             if (_dealer.Dealer.Cash < _dealer.CashThreshold || _deadDrop.DeadDrop.GUID.ToString() != _dealer.DeadDrop || !_dealer.DeliverCash || TimeManager.Instance.CurrentTime == 400)
             {
