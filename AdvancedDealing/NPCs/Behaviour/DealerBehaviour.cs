@@ -12,9 +12,7 @@ using S1Behaviour = Il2CppScheduleOne.NPCs.Behaviour.Behaviour;
 using FishNet;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.NPCs;
-using ScheduleOne.NPCs.Behaviour;
 using S1Behaviour = ScheduleOne.NPCs.Behaviour.Behaviour;
-using System.Reflection;
 #endif
 
 namespace AdvancedDealing.NPCs.Behaviour
@@ -43,11 +41,7 @@ namespace AdvancedDealing.NPCs.Behaviour
 
         protected NPCMovement Movement => Dealer.Dealer.Movement;
 
-#if IL2CPP
         private S1Behaviour activeBehaviour => Dealer.Dealer.Behaviour?.activeBehaviour;
-#elif MONO
-        private S1Behaviour activeBehaviour => (S1Behaviour)typeof(NPCBehaviour).GetField("activeBehaviour", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Dealer.Dealer.Behaviour);
-#endif
 
         private NPCScheduleManager schedule => Dealer.Dealer.GetComponentInChildren<NPCScheduleManager>();
 

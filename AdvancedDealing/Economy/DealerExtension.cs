@@ -446,7 +446,7 @@ namespace AdvancedDealing.Economy
 
                 if (_activeBehaviour == null)
                 {
-                    if (_pickupProductsBehaviour.IsEnabled)
+                    if (_pickupProductsBehaviour.IsEnabled && DeadDrop != null)
                     {
                         _pickupProductsBehaviour.Start();
                     }

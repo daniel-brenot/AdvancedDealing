@@ -61,8 +61,7 @@ namespace AdvancedDealing.NPCs.Behaviour
 
             if (_deadDrop == null)
             {
-                BeginInstantPickup();
-
+                End();
                 return;
             }
             else if (ModConfig.SkipMovement)
@@ -106,7 +105,38 @@ namespace AdvancedDealing.NPCs.Behaviour
 
                 Dealer.Dealer.SetAnimationTrigger("GrabItem");
 
-                if (_deadDrop.GetAllProducts().Count <= 0)
+                bool shouldNotify = true;
+
+                if (_deadDrop.GetAllProducts().Count > 0)
+                {
+                    Dictionary<ProductItemInstance, ItemSlot> products = _deadDrop.GetAllProducts();
+
+                    foreach (KeyValuePair<ProductItemInstance, ItemSlot> product in products)
+                    {
+                        if (Dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1)
+                        {
+                            break;
+                        }
+
+                        Dealer.Dealer.Inventory.InsertItem(product.Key);
+                        product.Value.ChangeQuantity(0 - product.Key.Quantity);
+                    }
+
+                    Dealer.GetAllProducts(out var totalAmount);
+
+                    if (totalAmount <= Dealer.ProductThreshold && !Dealer.IsInventoryFull(out var freeSlots2) && freeSlots2 > 1)
+                    {
+                        shouldNotify = true;
+                    }
+                    else
+                    {
+                        shouldNotify = false;
+
+                        Utils.Logger.Debug($"Product pickup for {Dealer.Dealer.fullName} was successfull");
+                    }
+                }
+
+                if (shouldNotify)
                 {
                     Dealer.SendMessage($"Could not pickup products at dead drop {_deadDrop.DeadDrop.DeadDropName}. There are no products inside!", ModConfig.NotifyOnAction);
                     _deadDropIsEmpty = true;
@@ -118,62 +148,8 @@ namespace AdvancedDealing.NPCs.Behaviour
 
                     Utils.Logger.Debug($"Product pickup for {Dealer.Dealer.fullName} failed: Dead drop is empty");
                 }
-                else
-                {
-                    Dictionary<ProductItemInstance, ItemSlot> products = _deadDrop.GetAllProducts();
-
-                    foreach (KeyValuePair<ProductItemInstance, ItemSlot> product in products)
-                    {
-                        if (Dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1)
-                        {
-                            break;
-                        }
-
-                        Dealer.Dealer.Inventory.InsertItem(product.Key);
-                        product.Value.ChangeQuantity(0 - product.Key.Quantity);
-                    }
-
-                    Utils.Logger.Debug($"Product pickup for {Dealer.Dealer.fullName} was successfull");
-                }
 
                 yield return new WaitForSeconds(2f);
-
-                End();
-            }
-        }
-
-        private void BeginInstantPickup()
-        {
-            _instantPickupRoutine ??= MelonCoroutines.Start(InstantPickupRoutine());
-
-            IEnumerator InstantPickupRoutine()
-            {
-                if (_deadDrop.GetAllProducts().Count <= 0)
-                {
-                    Dealer.SendMessage($"Could not pickup products at dead drop {_deadDrop.DeadDrop.DeadDropName}. There are no products inside!", ModConfig.NotifyOnAction);
-                    _deadDropIsEmpty = true;
-
-                    Utils.Logger.Debug($"Product pickup for {Dealer.Dealer.fullName} failed: Dead drop is empty");
-                }
-                else
-                {
-                    Dictionary<ProductItemInstance, ItemSlot> products = _deadDrop.GetAllProducts();
-
-                    foreach (KeyValuePair<ProductItemInstance, ItemSlot> product in products)
-                    {
-                        if (Dealer.IsInventoryFull(out var freeSlots) || freeSlots <= 1)
-                        {
-                            break;
-                        }
-
-                        Dealer.Dealer.Inventory.InsertItem(product.Key);
-                        product.Value.ChangeQuantity(0 - product.Key.Quantity);
-                    }
-
-                    Utils.Logger.Debug($"Product pickup for {Dealer.Dealer.fullName} was successfull");
-                }
-
-                yield return new WaitForSecondsRealtime(2f);
 
                 End();
             }
