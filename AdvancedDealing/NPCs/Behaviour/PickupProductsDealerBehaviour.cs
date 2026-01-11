@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #if IL2CPP
-using Il2CppScheduleOne.GameTime;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Product;
 #elif MONO
-using ScheduleOne.GameTime;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.Product;
 #endif
@@ -68,7 +66,7 @@ namespace AdvancedDealing.NPCs.Behaviour
             }
             else
             {
-                if ((_deadDrop != null && _deadDrop.DeadDrop.GUID.ToString() != Dealer.DeadDrop) || !Dealer.PickupProducts || TimeManager.Instance.CurrentTime == 400)
+                if ((_deadDrop != null && _deadDrop.DeadDrop.GUID.ToString() != Dealer.DeadDrop) || !Dealer.PickupProducts)
                 {
                     End();
                 }

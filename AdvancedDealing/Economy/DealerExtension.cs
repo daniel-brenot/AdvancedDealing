@@ -450,11 +450,11 @@ namespace AdvancedDealing.Economy
 
                 if (_activeBehaviour == null)
                 {
-                    if (_pickupProductsBehaviour.IsEnabled && DeadDrop != null)
+                    if (_pickupProductsBehaviour.IsEnabled && DeadDrop != null && TimeManager.Instance.CurrentTime != 400)
                     {
                         _pickupProductsBehaviour.Start();
                     }
-                    else if (_deliverCashBehaviour.IsEnabled && Dealer.ActiveContracts.Count <= 0)
+                    else if (_deliverCashBehaviour.IsEnabled && Dealer.ActiveContracts.Count <= 0 && TimeManager.Instance.CurrentTime != 400)
                     {
                         _deliverCashBehaviour.Start();
                     }

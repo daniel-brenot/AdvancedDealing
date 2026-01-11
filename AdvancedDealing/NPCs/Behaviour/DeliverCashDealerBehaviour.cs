@@ -6,14 +6,10 @@ using UnityEngine;
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
-using Il2CppScheduleOne.GameTime;
 using Il2CppScheduleOne.Money;
-using Il2CppScheduleOne.Quests;
 #elif MONO
 using ScheduleOne.DevUtilities;
-using ScheduleOne.GameTime;
 using ScheduleOne.Money;
-using ScheduleOne.Quests;
 #endif
 
 namespace AdvancedDealing.NPCs.Behaviour
@@ -71,7 +67,7 @@ namespace AdvancedDealing.NPCs.Behaviour
             }
             else
             {
-                if (Dealer.Dealer.Cash < Dealer.CashThreshold || (_deadDrop != null && _deadDrop.DeadDrop.GUID.ToString() != Dealer.DeadDrop) || !Dealer.DeliverCash || TimeManager.Instance.CurrentTime == 400)
+                if (Dealer.Dealer.Cash < Dealer.CashThreshold || (_deadDrop != null && _deadDrop.DeadDrop.GUID.ToString() != Dealer.DeadDrop) || !Dealer.DeliverCash)
                 {
                     End();
                 }
@@ -117,24 +113,17 @@ namespace AdvancedDealing.NPCs.Behaviour
                 }
                 else
                 {
-                    try
+                    _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
+                    Dealer.SendMessage($"I've put ${cash:F0} inside the dead drop {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
+
+                    if (ModConfig.NotifyOnAction)
                     {
-                        _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
-                        Dealer.SendMessage($"I've put ${cash:F0} inside the dead drop {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
-
-                        if (ModConfig.NotifyOnAction)
-                        {
-                            // TODO: Create quest
-                        }
-
-                        Dealer.Dealer.ChangeCash(0f - cash);
-
-                        Utils.Logger.Debug($"Cash from {Dealer.Dealer.fullName} delivered successfully");
+                        // TODO: Create quest
                     }
-                    catch (Exception ex)
-                    {
-                        Utils.Logger.Error("Something went wrong while delivering cash.", ex);
-                    }
+
+                    Dealer.Dealer.ChangeCash(0f - cash);
+
+                    Utils.Logger.Debug($"Cash from {Dealer.Dealer.fullName} delivered successfully");
 
                     yield return new WaitUntil((Func<bool>)(() => Dealer.Dealer.Cash < Dealer.CashThreshold));
                 }
