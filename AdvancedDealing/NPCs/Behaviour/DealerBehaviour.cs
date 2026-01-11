@@ -99,7 +99,7 @@ namespace AdvancedDealing.NPCs.Behaviour
             Disable();
             Dealer.SetActiveBehaviour(null);
 
-            if (_enableScheduleOnEnd && schedule != null && !schedule.ScheduleEnabled)
+            if (_enableScheduleOnEnd && schedule != null)
             {
                 schedule.EnableSchedule();
             }
@@ -111,7 +111,7 @@ namespace AdvancedDealing.NPCs.Behaviour
         {
             IsActive = false;
 
-            if (_enableScheduleOnEnd && schedule != null && !schedule.ScheduleEnabled)
+            if (_enableScheduleOnEnd && schedule != null)
             {
                 schedule.EnableSchedule();
             }

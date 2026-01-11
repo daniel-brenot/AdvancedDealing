@@ -1,5 +1,6 @@
 ﻿using AdvancedDealing;
 using AdvancedDealing.Persistence;
+using AdvancedDealing.Utils;
 using MelonLoader;
 
 [assembly: MelonInfo(typeof(AdvancedDealing.AdvancedDealing), $"{ModInfo.NAME}", ModInfo.VERSION, ModInfo.AUTHOR, ModInfo.DOWNLOAD_LINK)]
@@ -28,6 +29,7 @@ namespace AdvancedDealing
                 if (!IsInitialized)
                 {
                     ModConfig.Initialize();
+                    ConflictChecker.CheckForConflicts();
 
                     SaveModifier = new();
                     NetworkSynchronizer = new();

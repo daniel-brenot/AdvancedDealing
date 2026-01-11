@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AdvancedDealing.NPCs.Behaviour;
+using AdvancedDealing.Utils;
 
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
@@ -88,7 +89,7 @@ namespace AdvancedDealing.Economy
                 dealerData.LoadDefaults();
                 dealerData.Merge(oldDealerData);
 
-                Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} merged to newer Version");
+                Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} merged to newer Version");
             }
 
             PatchData(dealerData);
@@ -127,7 +128,7 @@ namespace AdvancedDealing.Economy
                 if (!DealerExists(dealer))
                 {
                     cache.Add(new(dealer));
-                    Utils.Logger.Debug("DealerExtension", $"Extension for dealer created: {dealer.fullName}");
+                    Logger.Debug("DealerExtension", $"Extension for dealer created: {dealer.fullName}");
                 }
                 else
                 {
@@ -136,7 +137,7 @@ namespace AdvancedDealing.Economy
                     {
                         dealer2.IsFired = false;
                         dealer2.Awake();
-                        Utils.Logger.Debug("DealerExtension", $"Extension for dealer resumed: {dealer.fullName}");
+                        Logger.Debug("DealerExtension", $"Extension for dealer resumed: {dealer.fullName}");
                     }
                 }
             }
@@ -217,7 +218,7 @@ namespace AdvancedDealing.Economy
                     localField?.SetValue(this, fields[i].GetValue(data));
                 }
 
-                Utils.Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} patched");
+                Logger.Debug("DealerExtension", $"Data for {Dealer.fullName} patched");
             }
         }
 
@@ -311,7 +312,7 @@ namespace AdvancedDealing.Economy
 
             Destroy(false);
 
-            Utils.Logger.Debug("DealerExtension", $"Dealer fired: {Dealer.fullName}");
+            Logger.Debug("DealerExtension", $"Dealer fired: {Dealer.fullName}");
         }
 
         public Dictionary<ProductItemInstance, ItemSlot> GetAllProducts(out int totalAmount)
@@ -379,40 +380,43 @@ namespace AdvancedDealing.Economy
         {
             NPCInventory inventory = Dealer.Inventory;
 
-            if (inventory.ItemSlots.Count < ItemSlots)
+            if (!ConflictChecker.DisableMoreItemSlots)
             {
-                int slotsToAdd = ItemSlots - inventory.ItemSlots.Count;
-
-                for (int i = 0; i < slotsToAdd; i++)
+                if (inventory.ItemSlots.Count < ItemSlots)
                 {
-                    inventory.ItemSlots.Add(new());
-                    inventory.SlotCount = ItemSlots;
+                    int slotsToAdd = ItemSlots - inventory.ItemSlots.Count;
+
+                    for (int i = 0; i < slotsToAdd; i++)
+                    {
+                        inventory.ItemSlots.Add(new());
+                        inventory.SlotCount = ItemSlots;
+                    }
+
+                    Logger.Debug("DealerExtension", $"Added item slots to {Dealer.fullName}: {slotsToAdd} ");
                 }
+                else if (inventory.ItemSlots.Count > ItemSlots)
+                {
+                    int slotsToRemove = inventory.ItemSlots.Count - ItemSlots;
 
-                Utils.Logger.Debug("DealerExtension", $"Added item slots to {Dealer.fullName}: {slotsToAdd} ");
-            }
-            else if (inventory.ItemSlots.Count > ItemSlots)
-            {
-                int slotsToRemove = inventory.ItemSlots.Count - ItemSlots;
+                    inventory.ItemSlots.RemoveRange(inventory.ItemSlots.Count - slotsToRemove, slotsToRemove);
+                    inventory.SlotCount = ItemSlots;
 
-                inventory.ItemSlots.RemoveRange(inventory.ItemSlots.Count - slotsToRemove, slotsToRemove);
-                inventory.SlotCount = ItemSlots;
-
-                Utils.Logger.Debug("DealerExtension", $"Removed item slots from {Dealer.fullName}: {slotsToRemove} ");
-            }
+                    Logger.Debug("DealerExtension", $"Removed item slots from {Dealer.fullName}: {slotsToRemove} ");
+                }
+            }            
 
             if (Dealer.Cut != Cut)
             {
                 Dealer.Cut = Cut;
 
-                Utils.Logger.Debug("DealerExtension", $"Cut for {Dealer.fullName} set: {Cut}");
+                Logger.Debug("DealerExtension", $"Cut for {Dealer.fullName} set: {Cut}");
             }
 
             if (Dealer.Movement.SpeedController.SpeedMultiplier != SpeedMultiplier)
             {
                 Dealer.Movement.SpeedController.SpeedMultiplier = SpeedMultiplier;
 
-                Utils.Logger.Debug("DealerExtension", $"Speed multiplier for {Dealer.fullName} set: {SpeedMultiplier}");
+                Logger.Debug("DealerExtension", $"Speed multiplier for {Dealer.fullName} set: {SpeedMultiplier}");
             }
         }
 

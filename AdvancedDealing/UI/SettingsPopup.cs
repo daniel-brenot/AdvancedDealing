@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using AdvancedDealing.Persistence;
+using AdvancedDealing.Utils;
+
 
 #if IL2CPP
 using Il2CppScheduleOne;
@@ -163,9 +165,13 @@ namespace AdvancedDealing.UI
             Object.Destroy(buttons[1].gameObject);
 
             CreateInputField(InputField.ContentType.IntegerNumber, "MaxCustomers", "Max Customers", 0, 24);
-            CreateInputField(InputField.ContentType.IntegerNumber, "ItemSlots", "Item Slots", 0, 20);
             CreateInputField(InputField.ContentType.DecimalNumber, "Cut", "Cut %", 0, 1);
             CreateInputField(InputField.ContentType.DecimalNumber, "SpeedMultiplier", "Speed Multiplier", 0, 0);
+
+            if (!ConflictChecker.DisableMoreItemSlots)
+            {
+                CreateInputField(InputField.ContentType.IntegerNumber, "ItemSlots", "Item Slots", 0, 20);
+            }
 
             Utils.Logger.Debug("SettingsPopup", "Settings popup UI created");
 

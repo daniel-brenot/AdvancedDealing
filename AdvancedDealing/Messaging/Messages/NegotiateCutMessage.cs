@@ -87,8 +87,6 @@ namespace AdvancedDealing.Messaging.Messages
             float baseChance = ModConfig.NegotiationModifier;
             float chance = baseChance - (1f - (newCut * 100f / oldCut / 100f));
 
-            Utils.Logger.Debug(chance.ToString());
-
             return UnityEngine.Random.value <= chance;
         }
     }

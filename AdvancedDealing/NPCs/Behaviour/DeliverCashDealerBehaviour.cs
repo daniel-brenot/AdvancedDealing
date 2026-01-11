@@ -117,17 +117,24 @@ namespace AdvancedDealing.NPCs.Behaviour
                 }
                 else
                 {
-                    _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
-                    Dealer.SendMessage($"I've put ${cash:F0} inside the dead drop {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
-
-                    if (ModConfig.NotifyOnAction)
+                    try
                     {
-                        // TODO: Create quest
+                        _deadDrop.DeadDrop.Storage.InsertItem(MoneyManager.Instance.GetCashInstance(cash));
+                        Dealer.SendMessage($"I've put ${cash:F0} inside the dead drop {_deadDrop.DeadDrop.name}.", ModConfig.NotifyOnAction);
+
+                        if (ModConfig.NotifyOnAction)
+                        {
+                            // TODO: Create quest
+                        }
+
+                        Dealer.Dealer.ChangeCash(0f - cash);
+
+                        Utils.Logger.Debug($"Cash from {Dealer.Dealer.fullName} delivered successfully");
                     }
-
-                    Dealer.Dealer.ChangeCash(-cash);
-
-                    Utils.Logger.Debug($"Cash from {Dealer.Dealer.fullName} delivered successfully");
+                    catch (Exception ex)
+                    {
+                        Utils.Logger.Error("Something went wrong while delivering cash.", ex);
+                    }
 
                     yield return new WaitUntil((Func<bool>)(() => Dealer.Dealer.Cash < Dealer.CashThreshold));
                 }
@@ -144,9 +151,9 @@ namespace AdvancedDealing.NPCs.Behaviour
             {
                 float cash = Dealer.Dealer.Cash;
 
-                NetworkSingleton<MoneyManager>.Instance.ChangeCashBalance(+cash, true, true);
+                NetworkSingleton<MoneyManager>.Instance.ChangeCashBalance(cash, true, true);
                 Dealer.SendMessage($"Sent you ${cash:F0} from my earnings.", ModConfig.NotifyOnAction);
-                Dealer.Dealer.ChangeCash(-cash);
+                Dealer.Dealer.ChangeCash(0f - cash);
 
                 yield return new WaitUntil((Func<bool>)(() => Dealer.Dealer.Cash < Dealer.CashThreshold));
 

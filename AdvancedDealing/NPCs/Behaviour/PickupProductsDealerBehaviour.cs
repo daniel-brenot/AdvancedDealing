@@ -22,8 +22,6 @@ namespace AdvancedDealing.NPCs.Behaviour
 
         private object _pickupRoutine;
 
-        private object _instantPickupRoutine;
-
         private bool _deadDropIsEmpty = false;
 
         public override string Name => "Pickup products";
@@ -55,7 +53,7 @@ namespace AdvancedDealing.NPCs.Behaviour
 
         public override void OnActiveTick()
         {
-            if (!IsActive || _instantPickupRoutine != null) return;
+            if (!IsActive) return;
 
             base.OnActiveTick();
 
