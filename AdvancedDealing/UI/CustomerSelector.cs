@@ -58,7 +58,7 @@ namespace AdvancedDealing.UI
 
             GameObject textTemplate = Content.GetChild(0).Find("Name").gameObject;
 
-            foreach (EMapRegion mapRegion in Enum.GetValues<EMapRegion>())
+            foreach (EMapRegion mapRegion in Enum.GetValues(typeof(EMapRegion)))
             {
                 GameObject region = Object.Instantiate(textTemplate, Content);
                 region.name = "Region";
@@ -69,7 +69,7 @@ namespace AdvancedDealing.UI
                 transform3.sizeDelta = new Vector2(495f, 60f);
 
                 Text text = region.GetComponent<Text>();
-                text.text = Enum.GetName(mapRegion);
+                text.text = Enum.GetName(typeof(EMapRegion), mapRegion);
                 text.fontStyle = FontStyle.Bold;
                 text.alignment = TextAnchor.MiddleCenter;
 
@@ -81,10 +81,20 @@ namespace AdvancedDealing.UI
 
         public void SortCustomers()
         {
+#if IL2CPP
             for (int i = 0; i < PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector.customerEntries.Count; i++)
             {
                 RectTransform entry = PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector.customerEntries[i];
                 Customer customer = PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector.entryToCustomer[entry];
+#elif MONO
+            List<RectTransform> customerEntries = (List<RectTransform>)typeof(CustomerSelector).GetField("customerEntries", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
+            Dictionary<RectTransform, Customer> entryToCustomer = (Dictionary<RectTransform, Customer>)typeof(CustomerSelector).GetField("entryToCustomer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
+
+            for (int i = 0; i < customerEntries.Count; i++)
+            {
+                RectTransform entry = customerEntries[i];
+                Customer customer = entryToCustomer[entry];
+#endif
 
                 if (customer.AssignedDealer != null)
                 {
@@ -111,7 +121,7 @@ namespace AdvancedDealing.UI
                     RectTransform entry = category.Value.entries[i];
                     entry.SetAsLastSibling();
 
-                    if (entry.gameObject.active)
+                    if (entry.gameObject.activeSelf)
                     {
                         activeCount++;
                     }

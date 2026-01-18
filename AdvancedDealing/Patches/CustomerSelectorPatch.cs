@@ -1,6 +1,11 @@
 ﻿using AdvancedDealing.UI;
 using HarmonyLib;
+
+#if IL2CPP
 using S1CustomerSelector = Il2CppScheduleOne.UI.Phone.CustomerSelector;
+#elif MONO
+using S1CustomerSelector = ScheduleOne.UI.Phone.CustomerSelector;
+#endif
 
 namespace AdvancedDealing.Patches
 {
@@ -14,7 +19,7 @@ namespace AdvancedDealing.Patches
             if (UIBuilder.CustomerSelector.UICreated)
             {
                 UIBuilder.CustomerSelector.SortCustomers();
-                UIBuilder.CustomerSelector.Searchbar.SetText(string.Empty, false);
+                UIBuilder.CustomerSelector.Searchbar.text = string.Empty;
             }
         }
     }
