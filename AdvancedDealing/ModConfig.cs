@@ -30,6 +30,12 @@ namespace AdvancedDealing
             set => generalCategory.GetEntry<bool>("NotifyOnAction").Value = value;
         }
 
+        public static bool CustomersSearchAndSort
+        {
+            get => generalCategory.GetEntry<bool>("CustomersSearchAndSort").Value;
+            set => generalCategory.GetEntry<bool>("CustomersSearchAndSort").Value = value;
+        }
+
         public static bool AccessInventory
         {
             get
@@ -120,6 +126,14 @@ namespace AdvancedDealing
                 default_value: true,
                 display_name: "Notify On Actions",
                 description: "Sends notifications after some actions got triggered",
+                is_hidden: false
+            );
+            generalCategory.CreateEntry<bool>
+            (
+                identifier: "CustomersSearchAndSort",
+                default_value: true,
+                display_name: "Search And Sort Customers (Needs Reload)",
+                description: "Enable customers searching and sorting by region and alphabetical",
                 is_hidden: false
             );
             generalCategory.CreateEntry<bool>

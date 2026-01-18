@@ -44,7 +44,7 @@ namespace AdvancedDealing.UI
             transform.anchorMax = new Vector2(1f, 0f);
             transform.pivot = new Vector2(0.5f, 0f);
             transform.anchoredPosition = Vector2.zero;
-            transform.sizeDelta = new Vector2(0, height);
+            transform.sizeDelta = new Vector2(0f, height);
 
             Viewport = new("Viewport");
             RectTransform transform2 = Viewport.AddComponent<RectTransform>();

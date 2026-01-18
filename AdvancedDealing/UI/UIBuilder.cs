@@ -25,6 +25,8 @@ namespace AdvancedDealing.UI
 
         public static CustomersScrollView CustomersScrollView { get; private set; }
 
+        public static CustomerSelector CustomerSelector { get; private set; }
+
         public static void Build()
         {
             if (!HasBuild)
@@ -34,6 +36,7 @@ namespace AdvancedDealing.UI
                 SliderPopup ??= new();
                 DeadDropSelector ??= new();
                 CustomersScrollView ??= new();
+                CustomerSelector ??= new();
 
                 MelonCoroutines.Start(CreateUI());
 
@@ -45,6 +48,11 @@ namespace AdvancedDealing.UI
                     SliderPopup.BuildUI();
                     DeadDropSelector.BuildUI();
                     CustomersScrollView.BuildUI();
+
+                    if (ModConfig.CustomersSearchAndSort)
+                    {
+                        CustomerSelector.BuildUI();
+                    }
 
                     Utils.Logger.Msg("UI elements created");
 
@@ -59,6 +67,7 @@ namespace AdvancedDealing.UI
             SliderPopup = null;
             DeadDropSelector = null;
             CustomersScrollView = null;
+            CustomerSelector = null;
 
             HasBuild = false;
         }

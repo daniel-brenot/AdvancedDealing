@@ -443,7 +443,7 @@ namespace AdvancedDealing.Economy
                     _pickupProductsBehaviour.Enable();
                 }
 
-                if (!_deliverCashBehaviour.IsEnabled && DeliverCash && Dealer.Cash >= CashThreshold)
+                if (!_deliverCashBehaviour.IsEnabled && DeliverCash && Dealer.Cash >= CashThreshold && Dealer.Cash > 0f)
                 {
                     _deliverCashBehaviour.Enable();
                 }

@@ -28,7 +28,7 @@ namespace AdvancedDealing.Messaging.Messages
 
         public override void OnSelected()
         {
-            UIBuilder.SliderPopup.Open($"Cash Threshold ({_dealer.Dealer.name})", null, _dealer.CashThreshold, 0f, 9999f, 50f, 0, OnSend, null, "${0:0}");
+            UIBuilder.SliderPopup.Open($"Cash Threshold ({_dealer.Dealer.name})", null, _dealer.CashThreshold, 100f, 10000f, 50f, 0, OnSend, null, "${0:0}");
         }
 
         private void OnSend(float value)
@@ -36,7 +36,7 @@ namespace AdvancedDealing.Messaging.Messages
             _dealer.DeliverCash = true;
             _dealer.CashThreshold = value;
 
-            _dealer.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Keep ${value} at max.");
+            _dealer.SendPlayerMessage($"Yoo, could you deliver your cash to the dead drop? Deliver after collecting ${value}.");
             _dealer.SendMessage($"Sure thing boss!", false, true, 2f);
         }
     }
