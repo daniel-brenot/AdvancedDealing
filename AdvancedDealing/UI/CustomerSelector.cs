@@ -77,6 +77,8 @@ namespace AdvancedDealing.UI
                 _categories.Add(mapRegion, (region, new List<RectTransform>()));
             }
 
+            Utils.Logger.Debug("CustomerSelector", "Customer selector UI created");
+
             UICreated = true;
         }
 
