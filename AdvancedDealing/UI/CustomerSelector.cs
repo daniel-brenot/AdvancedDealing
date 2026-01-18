@@ -6,6 +6,7 @@ using System;
 using Object = UnityEngine.Object;
 using System.Linq;
 
+
 #if IL2CPP
 using Il2CppScheduleOne.DevUtilities;
 using Il2CppScheduleOne.Economy;
@@ -87,8 +88,8 @@ namespace AdvancedDealing.UI
                 RectTransform entry = PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector.customerEntries[i];
                 Customer customer = PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector.entryToCustomer[entry];
 #elif MONO
-            List<RectTransform> customerEntries = (List<RectTransform>)typeof(CustomerSelector).GetField("customerEntries", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
-            Dictionary<RectTransform, Customer> entryToCustomer = (Dictionary<RectTransform, Customer>)typeof(CustomerSelector).GetField("entryToCustomer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
+            List<RectTransform> customerEntries = (List<RectTransform>)typeof(ScheduleOne.UI.Phone.CustomerSelector).GetField("customerEntries", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
+            Dictionary<RectTransform, Customer> entryToCustomer = (Dictionary<RectTransform, Customer>)typeof(ScheduleOne.UI.Phone.CustomerSelector).GetField("entryToCustomer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(PlayerSingleton<DealerManagementApp>.Instance.CustomerSelector);
 
             for (int i = 0; i < customerEntries.Count; i++)
             {
