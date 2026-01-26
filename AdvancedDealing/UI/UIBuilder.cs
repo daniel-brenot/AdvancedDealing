@@ -34,8 +34,8 @@ namespace AdvancedDealing.UI
 
                 SettingsPopup ??= new();
                 SliderPopup ??= new();
-                DeadDropSelector ??= new();
                 CustomersScrollView ??= new();
+                DeadDropSelector ??= new();
                 CustomerSelector ??= new();
 
                 MelonCoroutines.Start(CreateUI());
@@ -46,8 +46,8 @@ namespace AdvancedDealing.UI
 
                     SettingsPopup.BuildUI();
                     SliderPopup.BuildUI();
-                    DeadDropSelector.BuildUI();
                     CustomersScrollView.BuildUI();
+                    DeadDropSelector.BuildUI();
 
                     if (ModConfig.CustomersSearchAndSort)
                     {
@@ -65,8 +65,8 @@ namespace AdvancedDealing.UI
         {
             SettingsPopup = null;
             SliderPopup = null;
-            DeadDropSelector = null;
             CustomersScrollView = null;
+            DeadDropSelector = null;
             CustomerSelector = null;
 
             HasBuild = false;

@@ -24,8 +24,6 @@ namespace AdvancedDealing.UI
 
         public GameObject AssignButton;
 
-        public RectTransform CustomerTitle;
-
         public List<GameObject> CustomerEntries = [];
 
         public Text TitleLabel;
@@ -34,39 +32,39 @@ namespace AdvancedDealing.UI
 
         public void BuildUI()
         {
-            Container = PlayerSingleton<DealerManagementApp>.Instance.transform.Find("Container/Background/Content").gameObject;
-            float height = 620f;
+            Container = PlayerSingleton<DealerManagementApp>.Instance.transform.Find("Container/Background/Content/Container").gameObject;
 
             GameObject scroll = new("Scroll");
             RectTransform transform = scroll.AddComponent<RectTransform>();
-            transform.SetParent(Container.transform, false);
+            transform.SetParent(Container.transform.parent, false);
             transform.anchorMin = new Vector2(0f, 0f);
-            transform.anchorMax = new Vector2(1f, 0f);
-            transform.pivot = new Vector2(0.5f, 0f);
+            transform.anchorMax = new Vector2(1f, 1f);
+            transform.pivot = new Vector2(0.5f, 0.5f);
             transform.anchoredPosition = Vector2.zero;
-            transform.sizeDelta = new Vector2(0f, height);
+            transform.sizeDelta = new Vector2(0f, 0f);
 
             Viewport = new("Viewport");
             RectTransform transform2 = Viewport.AddComponent<RectTransform>();
             transform2.SetParent(transform, false);
             transform2.anchorMin = new Vector2(0f, 0f);
-            transform2.anchorMax = new Vector2(1f, 0f);
-            transform2.pivot = new Vector2(0.5f, 0f);
+            transform2.anchorMax = new Vector2(1f, 1f);
+            transform2.pivot = new Vector2(0.5f, 0.5f);
             transform2.anchoredPosition = Vector2.zero;
-            transform2.sizeDelta = new Vector2(0, height);
+            transform2.sizeDelta = new Vector2(0f, 0f);
+            transform2.offsetMax = new Vector2(0f, -90f);
             Viewport.AddComponent<Mask>().showMaskGraphic = false;
             Viewport.AddComponent<Image>();
 
-            GameObject customers = PlayerSingleton<DealerManagementApp>.Instance.CustomerEntries.Last().parent.gameObject;
-            RectTransform transform3 = customers.GetComponent<RectTransform>();
+            RectTransform transform3 = Container.GetComponent<RectTransform>();
             transform3.SetParent(transform2, true);
             transform3.pivot = new Vector2(0.5f, 1f);
 
-            ContentSizeFitter contentSizeFitter = customers.AddComponent<ContentSizeFitter>();
+            VerticalLayoutGroup verticalLayoutGroup = Container.GetComponent<VerticalLayoutGroup>();
+            verticalLayoutGroup.padding = new RectOffset(40, 40, 0, 20);
+
+            ContentSizeFitter contentSizeFitter = Container.AddComponent<ContentSizeFitter>();
             contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            customers.GetComponent<VerticalLayoutGroup>().padding = new RectOffset(0, 0, 20, 20);
 
             ScrollRect scrollRect = scroll.AddComponent<ScrollRect>();
             scrollRect.viewport = transform2;
@@ -79,12 +77,7 @@ namespace AdvancedDealing.UI
             scrollRect.verticalNormalizedPosition = 1f;
             scrollRect.scrollSensitivity = 8f;
 
-            // Move customer title down for more space
-            CustomerTitle = Container.transform.Find("CustomerTitle").GetComponent<RectTransform>();
-            CustomerTitle.sizeDelta = new Vector2(CustomerTitle.sizeDelta.x, CustomerTitle.sizeDelta.y - 15);
-            CustomerTitle.offsetMax = new Vector2(CustomerTitle.offsetMax.x, CustomerTitle.offsetMax.y - 15);
-
-            TitleLabel = CustomerTitle.GetComponent<Text>();
+            TitleLabel = Container.transform.Find("CustomerTitle").GetComponent<Text>();
             AssignButton = PlayerSingleton<DealerManagementApp>.Instance.AssignCustomerButton.gameObject;
 
             CreateCustomerEntries();
@@ -128,7 +121,6 @@ namespace AdvancedDealing.UI
             }
 
             PlayerSingleton<DealerManagementApp>.Instance.CustomerEntries = entries;
-            PlayerSingleton<DealerManagementApp>.Instance.AssignCustomerButton.transform.SetAsLastSibling();
         }
     }
 }

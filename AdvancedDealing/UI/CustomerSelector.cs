@@ -27,7 +27,7 @@ namespace AdvancedDealing.UI
 
         public InputField Searchbar;
 
-        private Dictionary<EMapRegion, (GameObject gameObject, List<RectTransform> entries)> _categories = [];
+        private readonly List<RectTransform> _entries = [];
 
         public bool UICreated { get; private set; }
 
@@ -57,26 +57,6 @@ namespace AdvancedDealing.UI
             Text placeholder = transform2.Find("Text Area/Placeholder").GetComponent<Text>();
             placeholder.text = "Search customers...";
 
-            GameObject textTemplate = Content.GetChild(0).Find("Name").gameObject;
-
-            foreach (EMapRegion mapRegion in Enum.GetValues(typeof(EMapRegion)))
-            {
-                GameObject region = Object.Instantiate(textTemplate, Content);
-                region.name = "Region";
-
-                RectTransform transform3 = region.GetComponent<RectTransform>();
-                transform3.offsetMax = new Vector2(0f, 0f);
-                transform3.offsetMin = new Vector2(0f, 0f);
-                transform3.sizeDelta = new Vector2(495f, 60f);
-
-                Text text = region.GetComponent<Text>();
-                text.text = Enum.GetName(typeof(EMapRegion), mapRegion);
-                text.fontStyle = FontStyle.Bold;
-                text.alignment = TextAnchor.MiddleCenter;
-
-                _categories.Add(mapRegion, (region, new List<RectTransform>()));
-            }
-
             Utils.Logger.Debug("CustomerSelector", "Customer selector UI created");
 
             UICreated = true;
@@ -101,75 +81,39 @@ namespace AdvancedDealing.UI
 
                 if (customer.AssignedDealer != null)
                 {
-                    _categories[customer.NPC.Region].entries.Remove(entry);
+                    _entries.Remove(entry);
                 }
                 else
                 {
-                    _categories[customer.NPC.Region].entries.Add(entry);
+                    _entries.Add(entry);
                 }
             }
+            
+            List<RectTransform> sortedList = _entries.OrderBy(e => e.Find("Name").GetComponent<Text>().text).ToList();
+            _entries.Clear();
+            _entries.AddRange(sortedList);
 
-            foreach (KeyValuePair<EMapRegion, (GameObject gameObject, List<RectTransform> entries)> category in _categories)
+            for (int i = 0; i < _entries.Count; i++)
             {
-                category.Value.gameObject.transform.SetAsLastSibling();
-
-                List<RectTransform> sortedList = category.Value.entries.OrderBy(e => e.Find("Name").GetComponent<Text>().text).ToList();
-                category.Value.entries.Clear();
-                category.Value.entries.AddRange(sortedList);
-
-                int activeCount = 0;
-
-                for (int i = 0; i < category.Value.entries.Count; i++)
-                {
-                    RectTransform entry = category.Value.entries[i];
-                    entry.SetAsLastSibling();
-
-                    if (entry.gameObject.activeSelf)
-                    {
-                        activeCount++;
-                    }
-                }
-
-                if (activeCount == 0)
-                {
-                    category.Value.gameObject.SetActive(false);
-                }
-                else
-                {
-                    category.Value.gameObject.SetActive(true);
-                }
+                RectTransform entry = _entries[i];
+                entry.SetAsLastSibling();
             }
         }
 
         private void OnSearchValueChanged(string value)
         {
-            foreach (KeyValuePair<EMapRegion, (GameObject gameObject, List<RectTransform> entries)> category in _categories)
+            for (int i = 0; i < _entries.Count; i++)
             {
-                int activeCount = 0;
+                RectTransform entry = _entries[i];
+                Text name = entry.Find("Name").GetComponent<Text>();
 
-                for (int i = 0; i < category.Value.entries.Count; i++)
+                if (name.text.Contains(value, StringComparison.OrdinalIgnoreCase) || value == null || value == string.Empty)
                 {
-                    RectTransform entry = category.Value.entries[i];
-                    Text name = entry.Find("Name").GetComponent<Text>();
-
-                    if (name.text.Contains(value, StringComparison.OrdinalIgnoreCase) || value == null || value == string.Empty)
-                    {
-                        entry.gameObject.SetActive(true);
-                        activeCount++;
-                    }
-                    else
-                    {
-                        entry.gameObject.SetActive(false);
-                    }
-                }
-
-                if (activeCount == 0)
-                {
-                    category.Value.gameObject.SetActive(false);
+                    entry.gameObject.SetActive(true);
                 }
                 else
                 {
-                    category.Value.gameObject.SetActive(true);
+                    entry.gameObject.SetActive(false);
                 }
             }
         }

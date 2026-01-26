@@ -4,7 +4,7 @@
     {
         public const string NAME = "AdvancedDealing";
 
-        public const string VERSION = "1.3.0";
+        public const string VERSION = "1.4.0";
 
         public const string AUTHOR = "ManZune";
 

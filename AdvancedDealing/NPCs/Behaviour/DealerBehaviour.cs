@@ -75,6 +75,11 @@ namespace AdvancedDealing.NPCs.Behaviour
 
         public virtual void Start()
         {
+            if (Movement.IsMoving)
+            {
+                Movement.Stop();
+            }
+
             HasStarted = true;
             IsActive = true;
 

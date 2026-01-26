@@ -27,7 +27,9 @@ namespace AdvancedDealing.UI
 
         public Transform Content;
 
-        public GameObject Button;
+        public GameObject Details;
+
+        public GameObject DeadDropButton;
 
         public Text ButtonLabel;
 
@@ -127,32 +129,43 @@ namespace AdvancedDealing.UI
                 CreateSelectable(DeadDrop.DeadDrops[i].GUID.ToString(), DeadDrop.DeadDrops[i].DeadDropName);
             }
 
-            CreateButton();
+            CreateButtons();
 
             Utils.Logger.Debug("DeadDropSelector", "Dead drop selector UI created");
 
             UICreated = true;
         }
 
-        private void CreateButton()
+        private void CreateButtons()
         {
-            GameObject target = PlayerSingleton<DealerManagementApp>.Instance.transform.Find("Container/Background/Content/Home").gameObject;
+            GameObject target = PlayerSingleton<DealerManagementApp>.Instance.transform.Find("Container/Background/Content/Scroll/Viewport/Container/Details").gameObject;
 
-            Button = Object.Instantiate(target, target.transform.parent);
-            Button.SetActive(true);
-            Button.name = "DeadDropSelectorButton";
-            Button.transform.Find("Title").GetComponent<Text>().text = "Dead Drop";
+            Details = Object.Instantiate(target, target.transform.parent);
+            Details.SetActive(true);
+            Details.name = "Details (Advanced Dealing)";
+            Details.transform.SetSiblingIndex(5);
 
-            RectTransform transform = Button.transform.Find("Value").GetComponent<RectTransform>();
-            transform.offsetMax = new Vector2(transform.offsetMax.x, 60f);
-            transform.offsetMin = new Vector2(transform.offsetMin.x, 15f);
-            transform.sizeDelta = new Vector2(transform.sizeDelta.x, 40f);
+            GameObject container = Details.transform.Find("Container").gameObject;
+
+            for (int i = container.transform.GetChildCount() - 1; i > 0; i --)
+            {
+                Object.Destroy(container.transform.GetChild(i).gameObject);
+            }
+
+            DeadDropButton = container.transform.GetChild(0).gameObject;
+            DeadDropButton.name = "Dead Drop";
+            DeadDropButton.transform.Find("Title").GetComponent<Text>().text = "Dead Drop";
+
+            RectTransform transform = DeadDropButton.transform.Find("Value").GetComponent<RectTransform>();
+            transform.offsetMax = new Vector2(-30f, -45f);
 
             ButtonLabel = transform.GetComponent<Text>();
             ButtonLabel.text = "None";
             ButtonLabel.color = new Color(0.6f, 1f, 1f, 1f);
+            ButtonLabel.resizeTextForBestFit = true;
+            ButtonLabel.resizeTextMaxSize = 28;
 
-            Button.AddComponent<Button>().onClick.AddListener((UnityAction)OpenSelector);
+            Details.AddComponent<Button>().onClick.AddListener((UnityAction)OpenSelector);
             
             void OpenSelector()
             {
