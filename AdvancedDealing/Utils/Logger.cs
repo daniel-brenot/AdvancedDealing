@@ -12,7 +12,11 @@ namespace AdvancedDealing.Utils
 
         public static void Msg(string prefix, string msg)
         {
-            if (prefix != null) { msg = $"[{prefix}] {msg}"; }
+            if (prefix != null) 
+            { 
+                msg = $"[{prefix}] {msg}"; 
+            }
+
             MelonLogger.Msg(msg);
         }
 
@@ -51,6 +55,18 @@ namespace AdvancedDealing.Utils
             }
 
             MelonLogger.Msg(ConsoleColor.Cyan, msg);
+        }
+
+        public static void Warning(string msg) => Warning(null, msg);
+
+        public static void Warning(string prefix, string msg)
+        {
+            if (prefix != null)
+            {
+                msg = $"[{prefix}] {msg}";
+            }
+
+            MelonLogger.Warning(msg);
         }
     }
 }

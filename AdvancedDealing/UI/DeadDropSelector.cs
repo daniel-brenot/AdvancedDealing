@@ -88,8 +88,6 @@ namespace AdvancedDealing.UI
             Container.name = "DeadDropSelector";
             Container.SetActive(true);
 
-            CreateSelectableTemplate();
-
             RectTransform oldContent = Container.transform.Find("Shade/Content/Scroll View/Viewport/Content").gameObject.GetComponent<RectTransform>();
 
             GameObject content = new("Content");
@@ -147,7 +145,7 @@ namespace AdvancedDealing.UI
 
             GameObject container = Details.transform.Find("Container").gameObject;
 
-            for (int i = container.transform.GetChildCount() - 1; i > 0; i --)
+            for (int i = container.transform.childCount - 1; i > 0; i --)
             {
                 Object.Destroy(container.transform.GetChild(i).gameObject);
             }
@@ -175,22 +173,66 @@ namespace AdvancedDealing.UI
 
         private void CreateSelectableTemplate()
         {
-            GameObject template = Object.Instantiate(Container.transform.Find("Shade/Content/Scroll View/Viewport/Content").GetChild(0).gameObject);
-            template.SetActive(false);
-            template.name = "SelectableTemplate";
+            _selectableTemplate = new("DeadDropEntry");
+            _selectableTemplate.SetActive(false);
 
-            Object.Destroy(template.transform.Find("Mugshot").gameObject);
+            RectTransform transform = _selectableTemplate.AddComponent<RectTransform>();
+            transform.anchorMin = new Vector2(0f, 1f);
+            transform.anchorMax = new Vector2(0f, 1f);
+            transform.pivot = new Vector2(0.5f, 0.5f);
+            transform.anchoredPosition = new Vector2(243f, -40f);
+            transform.sizeDelta = new Vector2(486f, 80f);
 
-            template.transform.Find("Name").GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 0f);
+            Image image = _selectableTemplate.AddComponent<Image>();
 
-            _selectableTemplate = template;
+            Button button = _selectableTemplate.AddComponent<Button>();
+            button.colors = new ColorBlock()
+            {
+                normalColor = new Color(0f, 0f, 0f, 0f),
+                highlightedColor = new Color(0f, 0f, 0f, 0.2353f),
+                pressedColor = new Color(0f, 0f, 0f, 0.3922f),
+                selectedColor = new Color(0.9608f, 0.9608f, 0.9608f, 1f),
+                disabledColor = new Color(0.7843f, 0.7843f, 0.7843f, 0.502f),
+                colorMultiplier = 1f,
+                fadeDuration = 0.1f
+            };
+            button.image = image;
+            button.targetGraphic = image;
+            button.transition = Selectable.Transition.ColorTint;
+
+            GameObject name = new("Name");
+
+            RectTransform transform2 = name.AddComponent<RectTransform>();
+            transform2.SetParent(transform, false);
+            transform2.anchorMin = new Vector2(0f, 0f);
+            transform2.anchorMax = new Vector2(1f, 1f);
+            transform2.pivot = new Vector2(0.5f, 0.5f);
+            transform2.anchoredPosition = new Vector2(0f, 0f);
+            transform2.sizeDelta = new Vector2(0f, 0f);
+            transform2.offsetMax = new Vector2(-20f, 0f);
+            transform2.offsetMin = new Vector2(20f, 0f);
+
+            Text text = name.AddComponent<Text>();
+            text.alignment = TextAnchor.MiddleLeft;
+            text.font = TitleLabel.font;
+            text.fontSize = 28;
+            text.fontStyle = FontStyle.Normal;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.lineSpacing = 1f;
+            text.resizeTextMaxSize = 76;
+            text.resizeTextMinSize = 1;
+            text.text = "Name";
         }
 
         private void CreateSelectable(string deadDropGuid, string name)
         {
+            if (_selectableTemplate == null)
+            {
+                CreateSelectableTemplate();
+            }
+
             GameObject selectable = Object.Instantiate(_selectableTemplate, Content);
             selectable.SetActive(true);
-            selectable.name = "Selectable";
 
             selectable.transform.Find("Name").GetComponent<Text>().text = name;
             selectable.GetComponent<Button>().onClick.AddListener((UnityAction)Selected);

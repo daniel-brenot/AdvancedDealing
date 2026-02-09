@@ -34,7 +34,7 @@ namespace AdvancedDealing
                     SaveModifier = new();
                     NetworkSynchronizer = new();
 
-                    Utils.Logger.Msg($"{ModInfo.NAME} v{ModInfo.VERSION} initialized");
+                    Logger.Msg($"{ModInfo.NAME} v{ModInfo.VERSION} initialized");
 
                     IsInitialized = true;
                 }
